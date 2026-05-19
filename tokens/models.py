@@ -7,16 +7,16 @@ from tqdm.auto import tqdm
 from ..token import Token
 
 
-# ── Kernel helpers ──────────────────────────────────────────────
+# -- Kernel helpers --
 
-def squared_distance_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+def squared_distance_matrix(a, b):
     """Pairwise squared L2 distances between rows of a and b."""
     a2 = np.sum(a ** 2, axis=1, keepdims=True)
     b2 = np.sum(b ** 2, axis=1, keepdims=True).T
     return np.maximum(a2 + b2 - 2.0 * (a @ b.T), 0.0)
 
 
-def median_heuristic_lengthscale(X: np.ndarray, max_pts: int = 24) -> float:
+def median_heuristic_lengthscale(X, max_pts=24):
     """Estimate RBF lengthscale via median heuristic."""
     rng = np.random.default_rng(0)
     n = min(max_pts, X.shape[0])
@@ -27,10 +27,9 @@ def median_heuristic_lengthscale(X: np.ndarray, max_pts: int = 24) -> float:
     return float(np.median(tri[tri > 0])) if np.any(tri > 0) else 1.0
 
 
-# ── Evaluation metric ──────────────────────────────────────────
+# -- Evaluation metric --
 
-def compute_mase(actual: np.ndarray, forecast: np.ndarray,
-                 history: np.ndarray) -> float:
+def compute_mase(actual, forecast, history):
     """MASE: per-sample MAE / naive-baseline scale, then averaged."""
     mae = np.mean(np.abs(actual - forecast), axis=1)
     scale = np.mean(np.abs(np.diff(history, axis=1)), axis=1)
@@ -38,14 +37,14 @@ def compute_mase(actual: np.ndarray, forecast: np.ndarray,
     return float(np.mean(mae / scale))
 
 
-# ── Model tokens ───────────────────────────────────────────────
+# -- Model tokens --
 
 class ModelKernelRBF(Token):
     name = "kernel_rbf"
     token_class = "model"
     reads = ["model_input"]
     writes = []
-    description = "RBF kernel regression — analytic LOO"
+    description = "RBF kernel regression - analytic LOO with cross-validated gamma"
 
     def apply(self, state):
         X = state.features["model_input"].astype(np.float32)
@@ -54,13 +53,34 @@ class ModelKernelRBF(Token):
 
         ls = median_heuristic_lengthscale(X)
         G = np.exp(-squared_distance_matrix(X, X) / (2.0 * ls ** 2))
-        A = G + 1e-2 * np.eye(n, dtype=np.float32)
+
+        # Cross-validate gamma (regularization) - key for small n
+        best_gamma, best_loo_mse = 1e-2, float("inf")
+        for gamma in [1e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]:
+            A = G + gamma * np.eye(n, dtype=np.float32)
+            try:
+                A_inv = np.linalg.inv(A)
+            except np.linalg.LinAlgError:
+                continue
+            alpha = A_inv @ Y
+            diag = np.diag(A_inv).reshape(-1, 1)
+            diag = np.where(np.abs(diag) < 1e-12, 1e-12, diag)
+            loo = Y - alpha / diag
+            loo_mse = float(np.mean((loo - Y) ** 2))
+            if loo_mse < best_loo_mse:
+                best_loo_mse = loo_mse
+                best_gamma = gamma
+
+        # Final solve with best gamma
+        A = G + best_gamma * np.eye(n, dtype=np.float32)
         A_inv = np.linalg.inv(A)
         alpha = A_inv @ Y
         diag = np.diag(A_inv).reshape(-1, 1)
+        diag = np.where(np.abs(diag) < 1e-12, 1e-12, diag)
         Y_loo = Y - alpha / diag
 
         state.push_prediction(Y_loo, self.name)
+        state.metadata["kernel_gamma"] = best_gamma
         state.log_step(self.name,
                        {"model_input": X.shape, "current_target": Y.shape},
                        {"prediction_stack[-1]": Y_loo.shape,
@@ -76,7 +96,7 @@ class ModelRandomForest(Token):
     token_class = "model"
     reads = ["model_input"]
     writes = []
-    description = "Random forest — explicit LOO"
+    description = "Random forest - explicit LOO (tuned for small n)"
 
     def apply(self, state):
         from sklearn.ensemble import RandomForestRegressor
@@ -89,8 +109,14 @@ class ModelRandomForest(Token):
         for i in tqdm(range(n), desc="  RF LOO", leave=False):
             mask = np.ones(n, dtype=bool)
             mask[i] = False
-            rf = RandomForestRegressor(n_estimators=30, max_depth=6,
-                                       random_state=0, n_jobs=1)
+            rf = RandomForestRegressor(
+                n_estimators=100,
+                max_depth=min(4, max(2, n // 6)),
+                min_samples_leaf=max(1, (n - 1) // 8),
+                max_features="sqrt",
+                random_state=0,
+                n_jobs=-1,
+            )
             rf.fit(X[mask], Y[mask])
             Y_loo[i] = rf.predict(X[i:i + 1])[0]
             del rf
@@ -110,7 +136,7 @@ class ModelXGBoost(Token):
     token_class = "model"
     reads = ["model_input"]
     writes = []
-    description = "XGBoost — explicit LOO"
+    description = "XGBoost - explicit LOO (regularized for small n)"
 
     def apply(self, state):
         import xgboost as xgb
@@ -124,8 +150,18 @@ class ModelXGBoost(Token):
             mask = np.ones(n, dtype=bool)
             mask[i] = False
             m = xgb.XGBRegressor(
-                n_estimators=50, max_depth=4, learning_rate=0.1,
-                tree_method="hist", verbosity=0, random_state=0)
+                n_estimators=80,
+                max_depth=min(3, max(2, n // 8)),
+                learning_rate=0.05,
+                subsample=0.8,
+                colsample_bytree=0.8,
+                reg_alpha=0.1,
+                reg_lambda=1.0,
+                min_child_weight=max(1, (n - 1) // 8),
+                tree_method="hist",
+                verbosity=0,
+                random_state=0,
+            )
             m.fit(X[mask], Y[mask])
             Y_loo[i] = m.predict(X[i:i + 1])[0]
             del m
@@ -140,7 +176,7 @@ class ModelXGBoost(Token):
         return state
 
 
-# ── STOP token ──────────────────────────────────────────────────
+# -- STOP token --
 
 class StopToken(Token):
     name = "STOP"
@@ -151,6 +187,12 @@ class StopToken(Token):
 
     def apply(self, state):
         forecast = state.cumulative_prediction()
+
+        # Un-normalize if a normalization token was applied
+        if state.metadata.get("normalized"):
+            mu = state.features.get("norm_mu", 0.0)
+            sigma = state.features.get("norm_sigma", 1.0)
+            forecast = forecast * sigma + mu
 
         # Clip extremes
         h = state.original_history
