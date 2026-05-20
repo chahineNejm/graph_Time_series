@@ -19,8 +19,12 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# --- Ensure the package is importable ---
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/..')
+# --- Ensure the package is importable when this script is run from examples/ ---
+REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PACKAGE_PARENT = os.path.dirname(REPO_DIR)
+for path in [REPO_DIR, PACKAGE_PARENT]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
 from graph_Time_series import State, Grammar, plot_grammar, mcts_search, print_mcts_tree
 from graph_Time_series.tokens import register_all

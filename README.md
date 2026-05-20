@@ -319,17 +319,39 @@ print(results["best_chain"], results["best_mase"])
 
 ```
 graph_Time_series/
-├── __init__.py          # package exports
-├── state.py             # State (RL state)
-├── token.py             # Token ABC
-├── grammar.py           # Grammar graph + visualisation
-├── heuristics.py        # MI-based PUCT priors
-├── mcts.py              # MCTS search with tqdm progress bars
-├── README.md            # this file
-├── run_colab.ipynb      # ready-to-run Colab notebook
-└── tokens/
-    ├── __init__.py      # register_all(grammar)
-    ├── cleaning.py      # identity, detrend, moving_avg
-    ├── features.py      # feat_raw, fft_encode, fft_decode (stub)
-    └── models.py        # kernel_rbf, random_forest, xgboost, STOP
+|-- README.md
+|-- .gitignore
+|-- graph_Time_series/
+|   |-- __init__.py          # package exports
+|   |-- state.py             # State (RL state)
+|   |-- token.py             # Token ABC
+|   |-- grammar.py           # Grammar graph + visualisation
+|   |-- heuristics.py        # MI-based PUCT priors
+|   |-- mcts.py              # MCTS search
+|   |-- data.py              # dataset loading/preparation helpers
+|   |-- augmentation.py      # time-series augmentation helpers
+|   |-- preprocessing.py     # slicing/pretraining/domain utilities
+|   |-- pipeline.py          # train/eval orchestration helpers
+|   |-- kernels.py           # reusable kernel models and metrics
+|   |-- decomposition.py     # decomposition feature utilities
+|   |-- viz.py               # plotting/report helpers
+|   |-- config.py            # experiment/config helpers
+|   `-- tokens/
+|       |-- __init__.py      # register_all(grammar)
+|       |-- cleaning.py      # identity, normalize, detrend, moving_avg
+|       |-- features.py      # feat_raw, fft_encode, lag features
+|       `-- models.py        # kernel_rbf, random_forest, xgboost, STOP
+|-- notebooks/
+|   |-- energy_h_long_clp_mcts_experiments.ipynb
+|   |-- clp_step_by_step_anatomy.ipynb
+|   |-- run_colab.ipynb
+|   `-- clp_framework_fixed.ipynb
+`-- examples/
+    `-- clp_framework_fixed.py
 ```
+
+The repository root now only contains project-level files and folders. The importable
+Python package lives in `graph_Time_series/`, so imports such as
+`from graph_Time_series import State` continue to work after adding the repository
+root to `sys.path`. Experiment notebooks live under `notebooks/`, and standalone
+runnable scripts live under `examples/`.
