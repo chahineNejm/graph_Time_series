@@ -386,9 +386,24 @@ def cwt_decompose(
     # --- compute CWT ------------------------------------------
     coeffs = np.zeros((n_scales, N), dtype=complex if not use_pywt else float)
 
+    def _center_to_length(x: np.ndarray, target_len: int) -> np.ndarray:
+        """Return a centered 1-D view/copy with exactly target_len points."""
+        x = np.asarray(x)
+        if x.shape[0] == target_len:
+            return x
+        if x.shape[0] > target_len:
+            start = (x.shape[0] - target_len) // 2
+            return x[start:start + target_len]
+        pad_total = target_len - x.shape[0]
+        pad_left = pad_total // 2
+        pad_right = pad_total - pad_left
+        return np.pad(x, (pad_left, pad_right), mode="edge")
+
     if use_pywt:
         import pywt
         coeffs, _ = pywt.cwt(signal, scales, wavelet)
+        if coeffs.shape[1] != N:
+            coeffs = np.vstack([_center_to_length(row, N) for row in coeffs])
     else:
         iterator = range(n_scales)
         if quiet and _tqdm is not None:
@@ -400,7 +415,8 @@ def cwt_decompose(
             t_wav = np.arange(-width, width + 1) / s
             wav = wavelet_fn(t_wav)
             wav = wav / np.sqrt(s)
-            coeffs[i] = np.convolve(signal, wav, mode="same")
+            conv = np.convolve(signal, wav, mode="same")
+            coeffs[i] = _center_to_length(conv, N)
 
     # --- energies and pseudo-frequencies ----------------------
     coeffs_real = np.real(coeffs)
