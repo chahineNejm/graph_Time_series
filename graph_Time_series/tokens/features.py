@@ -3,6 +3,9 @@
 import numpy as np
 from ..token import Token, _shapes
 
+# Feature tokens convert the latest cleaned representation into model_input.
+# They may be used again after a model token to refresh model_input before the
+# next residual model in a chain.
 
 class FeatRaw(Token):
     name = "feat_raw"

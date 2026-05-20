@@ -4,6 +4,12 @@ import numpy as np
 from ..token import Token, _shapes
 
 
+def _cleaning_input(state):
+    """Use the latest cleaned layer when present, otherwise raw history."""
+    key = "cleaned" if "cleaned" in state.features else "raw_history"
+    return key, state.features[key]
+
+
 class CleanIdentity(Token):
     name = "identity"
     token_class = "cleaning"
@@ -12,9 +18,10 @@ class CleanIdentity(Token):
     description = "Pass-through"
 
     def apply(self, state):
-        state.features["cleaned"] = state.features["raw_history"].copy()
+        source_key, X = _cleaning_input(state)
+        state.features["cleaned"] = X.copy()
         state.log_step(self.name,
-                       _shapes(state, ["raw_history"]),
+                       _shapes(state, [source_key]),
                        {"cleaned": state.features["cleaned"].shape})
         state.token_sequence.append(self.name)
         return state
@@ -28,7 +35,7 @@ class CleanDetrend(Token):
     description = "Remove per-sample linear trend"
 
     def apply(self, state):
-        X = state.features["raw_history"]
+        source_key, X = _cleaning_input(state)
         n, d = X.shape
         t = np.arange(d, dtype=np.float32)
         t_mean = t.mean()
@@ -49,7 +56,7 @@ class CleanDetrend(Token):
         state.features["trend_slope"] = slopes
         state.features["trend_intercept"] = intercepts
         state.log_step(self.name,
-                       _shapes(state, ["raw_history"]),
+                       _shapes(state, [source_key]),
                        {k: state.features[k].shape for k in self.writes})
         state.token_sequence.append(self.name)
         return state
@@ -63,14 +70,14 @@ class CleanMovingAvg(Token):
     description = "Centred moving average (window=5)"
 
     def apply(self, state):
-        X = state.features["raw_history"]
+        source_key, X = _cleaning_input(state)
         kernel = np.ones(5) / 5.0
         smoothed = np.zeros_like(X)
         for i in range(X.shape[0]):
             smoothed[i] = np.convolve(X[i], kernel, mode="same")
         state.features["cleaned"] = smoothed
         state.log_step(self.name,
-                       _shapes(state, ["raw_history"]),
+                       _shapes(state, [source_key]),
                        {"cleaned": smoothed.shape})
         state.token_sequence.append(self.name)
         return state
@@ -85,7 +92,7 @@ class CleanNormalize(Token):
     description = "Per-sample z-score normalization (zero mean, unit variance)"
 
     def apply(self, state):
-        X = state.features["raw_history"]
+        source_key, X = _cleaning_input(state)
         mu = X.mean(axis=1, keepdims=True)
         sigma = X.std(axis=1, keepdims=True)
         sigma = np.where(sigma < 1e-8, 1.0, sigma)
@@ -100,7 +107,7 @@ class CleanNormalize(Token):
         state.metadata["normalized"] = True
 
         state.log_step(self.name,
-                       _shapes(state, ["raw_history"]),
+                       _shapes(state, [source_key]),
                        {k: state.features[k].shape for k in
                         ["cleaned", "norm_mu", "norm_sigma"]})
         state.token_sequence.append(self.name)
@@ -116,7 +123,7 @@ class CleanDetrendNorm(Token):
     description = "Remove linear trend then z-score normalize"
 
     def apply(self, state):
-        X = state.features["raw_history"]
+        source_key, X = _cleaning_input(state)
         n, d = X.shape
         t = np.arange(d, dtype=np.float32)
         t_mean = t.mean()
@@ -149,7 +156,7 @@ class CleanDetrendNorm(Token):
         state.metadata["normalized"] = True
 
         state.log_step(self.name,
-                       _shapes(state, ["raw_history"]),
+                       _shapes(state, [source_key]),
                        {k: state.features[k].shape for k in self.writes})
         state.token_sequence.append(self.name)
         return state

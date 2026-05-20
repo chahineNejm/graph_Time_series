@@ -6,6 +6,10 @@ from tqdm.auto import tqdm
 
 from ..token import Token
 
+# Model tokens output predictions through State.push_prediction().
+# push_prediction stores last_prediction/cumulative_prediction/current_residual
+# in state.features and updates current_target, so the next model fits the
+# residual left by earlier models.
 
 # -- Kernel helpers --
 

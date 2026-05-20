@@ -69,6 +69,14 @@ class State:
             return np.zeros_like(self.original_future)
         return sum(self.prediction_stack)
 
+    def target_base(self) -> np.ndarray:
+        """Current target scale used by model tokens."""
+        if self.metadata.get("normalized"):
+            mu = self.features.get("norm_mu", 0.0)
+            sigma = self.features.get("norm_sigma", 1.0)
+            return (self.original_future - mu) / sigma
+        return self.original_future
+
     def last_prediction(self) -> np.ndarray:
         """Most recent model output (for decoders / inspectors)."""
         if not self.prediction_stack:
@@ -76,10 +84,13 @@ class State:
         return self.prediction_stack[-1]
 
     def push_prediction(self, pred: np.ndarray, token_name: str):
-        """Add model output to stack and auto-update residual."""
+        """Add model output and update the residual in the active target scale."""
         self.prediction_stack.append(pred)
         self.prediction_names.append(token_name)
-        self.current_target = self.original_future - self.cumulative_prediction()
+        self.current_target = self.target_base() - self.cumulative_prediction()
+        self.features["last_prediction"] = pred
+        self.features["cumulative_prediction"] = self.cumulative_prediction()
+        self.features["current_residual"] = self.current_target
 
     # ── logging ─────────────────────────────────────────────────
 
