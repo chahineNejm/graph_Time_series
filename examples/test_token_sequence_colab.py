@@ -13,7 +13,19 @@ import types
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parents[1]
+def find_repo_root():
+    candidates = [Path.cwd(), Path(__file__).resolve().parents[1]]
+    candidates.extend(Path.cwd().glob("*"))
+    for path in candidates:
+        if (path / "graph_Time_series" / "state.py").exists():
+            return path
+    raise FileNotFoundError(
+        "Could not find repo root. Expected graph_Time_series/state.py under "
+        "the current folder or one of its direct children."
+    )
+
+
+ROOT = find_repo_root()
 PACKAGE_DIR = ROOT / "graph_Time_series"
 
 
