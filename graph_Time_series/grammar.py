@@ -12,6 +12,7 @@ from .token import Token
 TOKEN_COLOURS = {
     "cleaning":  "#8ecae6",
     "feature":   "#219ebc",
+    "binding":   "#6d597a",
     "transform": "#ffb703",  
     "model":     "#fb8500",
     "control":   "#e63946",

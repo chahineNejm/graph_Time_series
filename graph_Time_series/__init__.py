@@ -6,6 +6,7 @@ Grammar-guided search over cleaning -> feature -> model token chains.
 
 from .state import State
 from .grammar import Grammar, plot_grammar
+from .artifacts import ArtifactSpec, InputBundle
 from .pipeline_ast import (
     PipelineAST,
     PipelineSyntaxError,
@@ -32,6 +33,8 @@ except ModuleNotFoundError as exc:
 __all__ = [
     "State",
     "Grammar",
+    "ArtifactSpec",
+    "InputBundle",
     "plot_grammar",
     "mcts_search",
     "print_mcts_tree",
