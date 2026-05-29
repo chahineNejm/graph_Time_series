@@ -24,6 +24,8 @@ from typing import Any, Callable
 
 import numpy as np
 
+from .artifacts import ArtifactSpec, InputBundle
+
 
 Array = np.ndarray
 InverseFn = Callable[[Array], Array]
@@ -78,6 +80,19 @@ class State:
         self.metadata: dict[str, Any] = {}
         self.flags: dict[str, Any] = {}
 
+        # Visible artifact/bundle registry. Feature tokens may create many
+        # named artifacts; binder tokens choose one approved active model input.
+        self.artifacts: dict[str, ArtifactSpec] = {}
+        self.input_bundles: dict[str, InputBundle] = {}
+        self.active_input_bundle_name: str | None = None
+        self.register_artifact(
+            "raw_history",
+            store="features",
+            kind="sequence",
+            role="raw_input",
+            source_token="State.__init__",
+        )
+
         self.token_sequence: list[str] = []
         self.class_counts: dict[str, int] = {}
 
@@ -131,6 +146,7 @@ class State:
         """Validate and store a feature aligned to the input series."""
         feature = self._validate_feature(name, value, require_finite=require_finite)
         self.historical_features[name] = feature
+        self.register_artifact(name, store="historical_features")
         return feature
 
     def add_future_feature(
@@ -139,7 +155,92 @@ class State:
         """Validate and store a feature aligned to the forecast horizon."""
         feature = self._validate_feature(name, value, require_finite=require_finite)
         self.future_features[name] = feature
+        self.register_artifact(name, store="future_features")
         return feature
+
+    def register_artifact(
+        self,
+        name: str,
+        *,
+        store: str,
+        kind: str = "array",
+        role: str = "feature",
+        target_space: str = "active_target",
+        source_token: str | None = None,
+        tags: tuple[str, ...] = (),
+    ) -> ArtifactSpec:
+        """Register inspectable metadata for a named value in State."""
+        value = self._store_by_name(store).get(name)
+        shape = tuple(value.shape) if hasattr(value, "shape") else None
+        spec = ArtifactSpec(
+            name=name,
+            store=store,
+            kind=kind,
+            shape=shape,
+            role=role,
+            target_space=target_space,
+            source_token=source_token,
+            tags=tuple(tags),
+        )
+        self.artifacts[name] = spec
+        self.metadata.setdefault("artifacts", {})[name] = spec.to_dict()
+        return spec
+
+    def set_model_input(
+        self,
+        name: str,
+        value: Array,
+        *,
+        artifact_names: tuple[str, ...],
+        kind: str,
+        target_space: str = "active_target",
+        source_token: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> InputBundle:
+        """Set the active model input while preserving broad named artifacts."""
+        model_input = self._validate_feature(
+            "model_input", value, require_finite=True
+        )
+        self.historical_features["model_input"] = model_input
+        self.features["model_input"] = model_input
+
+        bundle = InputBundle(
+            name=name,
+            kind=kind,
+            artifact_names=tuple(artifact_names),
+            shape=tuple(model_input.shape),
+            target_space=target_space,
+            source_token=source_token,
+            metadata=metadata or {},
+        )
+        self.input_bundles[name] = bundle
+        self.active_input_bundle_name = name
+        self.metadata["active_input_bundle"] = bundle.to_dict()
+        self.metadata.setdefault("input_bundles", {})[name] = bundle.to_dict()
+        self.register_artifact(
+            "model_input",
+            store="historical_features",
+            kind=kind,
+            role="active_model_input",
+            target_space=target_space,
+            source_token=source_token,
+            tags=("bundle",),
+        )
+        return bundle
+
+    def active_input_bundle(self) -> InputBundle | None:
+        """Return metadata for the currently bound model input."""
+        if self.active_input_bundle_name is None:
+            return None
+        return self.input_bundles.get(self.active_input_bundle_name)
+
+    def describe_artifacts(self) -> list[dict[str, Any]]:
+        """Return artifact metadata in a notebook-friendly format."""
+        return [spec.to_dict() for spec in self.artifacts.values()]
+
+    def describe_input_bundles(self) -> list[dict[str, Any]]:
+        """Return model-input bundle metadata in a notebook-friendly format."""
+        return [bundle.to_dict() for bundle in self.input_bundles.values()]
 
     def _validate_feature(
         self, name: str, value: Array, *, require_finite: bool = True
@@ -338,6 +439,9 @@ class State:
 
         s.metadata = deepcopy(self.metadata)
         s.flags = deepcopy(self.flags)
+        s.artifacts = deepcopy(self.artifacts)
+        s.input_bundles = deepcopy(self.input_bundles)
+        s.active_input_bundle_name = self.active_input_bundle_name
 
         s.token_sequence = list(self.token_sequence)
         s.class_counts = dict(self.class_counts)
@@ -377,6 +481,18 @@ class State:
             copied[key] = value.copy() if hasattr(value, "copy") else deepcopy(value)
         return copied
 
+    def _store_by_name(self, store: str) -> dict[str, Any]:
+        stores = {
+            "historical_features": self.historical_features,
+            "future_features": self.future_features,
+            "features": self.features,
+            "metadata": self.metadata,
+            "flags": self.flags,
+        }
+        if store not in stores:
+            raise ValueError(f"Unknown state store {store!r}.")
+        return stores[store]
+
     @staticmethod
     def _as_2d_numeric_array(value: Array, name: str) -> Array:
         arr = np.asarray(value)
@@ -406,6 +522,7 @@ class State:
             f"State(tokens={self.token_sequence}, "
             f"hist_feats={list(self.historical_features.keys())}, "
             f"future_feats={list(self.future_features.keys())}, "
+            f"active_bundle={self.active_input_bundle_name!r}, "
             f"preds={len(self.prediction_stack)}, "
             f"transforms={[t.name for t in self.transform_stack]}, "
             f"term={self.terminated})"

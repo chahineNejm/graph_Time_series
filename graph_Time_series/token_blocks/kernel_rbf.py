@@ -12,8 +12,9 @@ if TYPE_CHECKING:
 
 class KernelRBFToken(ModelToken):
     name = "kernel_rbf"
-    reads = ("scaled_history",)
+    reads = ()
     writes = ("prediction_stack",)
+    accepted_input_kinds = {"sequence_flat", "tabular"}
     description = "RBF KernelRidge with median-heuristic lengthscale and leave-one-out predictions."
 
     def __init__(self, alpha: float = 1e-2, median_subset: int = 24, seed: int = 0):
@@ -32,7 +33,7 @@ class KernelRBFToken(ModelToken):
         }
 
     def apply(self, state: 'State') -> 'State':
-        X = np.asarray(state.historical_features["scaled_history"], dtype=np.float32)
+        X, input_name, bundle = self._resolve_model_input(state)
         X = self._flatten_samples(X)
         Y = np.asarray(state.current_target, dtype=np.float32)
 
@@ -53,10 +54,12 @@ class KernelRBFToken(ModelToken):
             predictions[i] = model.predict(X[i:i + 1])[0]
 
         state.push_prediction(predictions, self.name)
+        bundle_info = bundle.to_dict() if bundle is not None else None
         self._log_execution(
             state,
             reads={
-                "scaled_history": X.shape,
+                input_name: X.shape,
+                "active_input_bundle": bundle_info,
                 "current_target": Y.shape,
             },
             writes={
@@ -66,6 +69,41 @@ class KernelRBFToken(ModelToken):
             },
         )
         return state
+
+    def check_specific_conditions(self, state: 'State') -> bool:
+        if not super().check_specific_conditions(state):
+            return False
+        try:
+            _, _, bundle = self._resolve_model_input(state)
+        except KeyError:
+            return False
+        if bundle is None:
+            return True
+        return bundle.kind in self.accepted_input_kinds
+
+    def _resolve_model_input(self, state: 'State'):
+        if "model_input" in state.historical_features:
+            bundle = state.active_input_bundle()
+            if bundle is not None and bundle.kind not in self.accepted_input_kinds:
+                raise ValueError(
+                    f"{self.name} accepts {sorted(self.accepted_input_kinds)}, "
+                    f"got bundle kind {bundle.kind!r}."
+                )
+            return (
+                np.asarray(state.historical_features["model_input"], dtype=np.float32),
+                "model_input",
+                bundle,
+            )
+
+        # Backward-compatible path for existing notebooks and direct token use.
+        if "scaled_history" in state.historical_features:
+            return (
+                np.asarray(state.historical_features["scaled_history"], dtype=np.float32),
+                "scaled_history",
+                None,
+            )
+
+        raise KeyError("kernel_rbf requires model_input or scaled_history.")
 
     def _median_lengthscale(self, X: np.ndarray) -> float:
         if X.shape[0] <= 1:

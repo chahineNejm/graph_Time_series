@@ -240,6 +240,33 @@ The grammar enforces two constraints simultaneously:
 
 STOP is a special control token: it only becomes valid when at least one model has been applied (`state.n_models_applied > 0`).
 
+## Optional Lark AST layer
+
+The current token blocks can also be addressed through a small pipeline DSL:
+
+```python
+from graph_Time_series import Grammar, State, apply_pipeline, parse_pipeline
+from graph_Time_series.token_blocks import register_default_tokens
+
+grammar = register_default_tokens(Grammar())
+ast = parse_pipeline("ZNormalization -> kernel_rbf -> STOP")
+
+state = State(H, F)
+state = apply_pipeline(ast, grammar, state)
+print(state.token_sequence)
+print(state.features["final_forecast"].shape)
+```
+
+This layer is intentionally non-invasive: Lark parses text into a `PipelineAST`,
+validation checks the existing graph transitions and token `can_apply()` rules,
+and execution still delegates to the same token `.apply(state)` methods.
+
+Install the optional parser dependency with:
+
+```bash
+pip install lark
+```
+
 ## Residual chaining
 
 When a model calls `state.push_prediction(Y_loo, name)`, the State automatically updates `current_target`:
