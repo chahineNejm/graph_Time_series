@@ -186,8 +186,8 @@
       "description": "Package RBF KernelRidge model with leave-one-out predictions inside the current state.",
       "reads": ["historical_features.model_input or scaled_history", "current_target"],
       "writes": ["prediction_stack", "features.current_residual"],
-      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext"],
-      "next": ["BindScaledHistory", "BindAllSafeTabular", "kernel_rbf", "STOP"]
+      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo"],
+      "next": ["BindScaledHistory", "BindAllSafeTabular", "kernel_rbf", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo", "STOP"]
     },
     {
       "id": "kernel_rbf_fast",
@@ -197,8 +197,8 @@
       "description": "Notebook fast RBF diagnostic token; direct use is in-sample.",
       "reads": ["historical_features.model_input or scaled_history", "current_target"],
       "writes": ["prediction_stack", "features.current_residual"],
-      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext"],
-      "next": ["STOP"]
+      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo"],
+      "next": ["kernel_rbf", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo", "STOP"]
     },
     {
       "id": "kernel_rbf_loo",
@@ -208,8 +208,8 @@
       "description": "Notebook registry alias for the package KernelRBFToken.",
       "reads": ["historical_features.model_input or scaled_history", "current_target"],
       "writes": ["prediction_stack", "features.current_residual"],
-      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "StackFeatureBundleToken", "StackScaledContext"],
-      "next": ["STOP"]
+      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf"],
+      "next": ["kernel_rbf", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf", "STOP"]
     },
     {
       "id": "shape_naive",
@@ -219,8 +219,8 @@
       "description": "Repeat last level through the shape vector.",
       "reads": ["historical_features.shape_vector", "historical_features.level_series"],
       "writes": ["prediction_stack", "features.current_residual"],
-      "parents": ["ShapeLevel"],
-      "next": ["STOP"]
+      "parents": ["ShapeLevel", "kernel_rbf", "kernel_rbf_fast", "level_kernel_rbf", "kernel_rbf_loo"],
+      "next": ["kernel_rbf", "kernel_rbf_fast", "level_kernel_rbf", "kernel_rbf_loo", "STOP"]
     },
     {
       "id": "level_kernel_rbf",
@@ -230,13 +230,13 @@
       "description": "Fit an RBF model on level_series and expand through shape_vector.",
       "reads": ["historical_features.level_series", "historical_features.shape_vector", "current_target"],
       "writes": ["prediction_stack", "features.current_residual"],
-      "parents": ["ShapeLevel"],
-      "next": ["STOP"]
+      "parents": ["ShapeLevel", "kernel_rbf", "kernel_rbf_fast", "shape_naive", "kernel_rbf_loo"],
+      "next": ["kernel_rbf", "kernel_rbf_fast", "shape_naive", "kernel_rbf_loo", "STOP"]
     },
     {
       "id": "STOP",
       "status": "synthetic",
-      "class": "control",
+      "class": "terminal",
       "core": true,
       "description": "Synthetic stop node for graph visualization.",
       "reads": ["prediction_stack"],

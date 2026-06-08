@@ -27,6 +27,7 @@ CLASS_ORDER = {
     "binding": 4,
     "model": 5,
     "planned": 6,
+    "terminal": 7,
 }
 
 CLASS_COLORS = {
@@ -37,6 +38,7 @@ CLASS_COLORS = {
     "binding": {"fill": "#efe3ff", "stroke": "#7c3aed"},
     "model": {"fill": "#ffe6cf", "stroke": "#ea580c"},
     "planned": {"fill": "#f4f4f5", "stroke": "#71717a"},
+    "terminal": {"fill": "#f0fdf4", "stroke": "#166534"},
 }
 
 

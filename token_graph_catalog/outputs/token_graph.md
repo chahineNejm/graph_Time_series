@@ -11,7 +11,6 @@ Core view hides generic binders, aliases, and broad experimental adapters.
 ```mermaid
 flowchart LR
   n_START["START<br/>synthetic / control"]:::control
-  n_STOP["STOP<br/>synthetic / control"]:::control
   n_ContextWindow["ContextWindow<br/>notebook / cleaning"]:::cleaning
   n_DataAugmentation["DataAugmentation<br/>notebook / cleaning"]:::cleaning
   n_ZNormalization["ZNormalization<br/>package / transform"]:::transform
@@ -24,6 +23,7 @@ flowchart LR
   n_kernel_rbf_fast["kernel_rbf_fast<br/>notebook / model"]:::model
   n_level_kernel_rbf["level_kernel_rbf<br/>notebook / model"]:::model
   n_shape_naive["shape_naive<br/>notebook / model"]:::model
+  n_STOP["STOP<br/>synthetic / terminal"]:::terminal
   n_BindScaledHistory --> n_kernel_rbf
   n_BindScaledHistory --> n_kernel_rbf_fast
   n_ContextWindow --> n_PeriodSelection
@@ -46,9 +46,21 @@ flowchart LR
   n_kernel_rbf --> n_BindScaledHistory
   n_kernel_rbf --> n_STOP
   n_kernel_rbf --> n_kernel_rbf
+  n_kernel_rbf --> n_kernel_rbf_fast
+  n_kernel_rbf --> n_level_kernel_rbf
+  n_kernel_rbf --> n_shape_naive
   n_kernel_rbf_fast --> n_STOP
+  n_kernel_rbf_fast --> n_kernel_rbf
+  n_kernel_rbf_fast --> n_level_kernel_rbf
+  n_kernel_rbf_fast --> n_shape_naive
   n_level_kernel_rbf --> n_STOP
+  n_level_kernel_rbf --> n_kernel_rbf
+  n_level_kernel_rbf --> n_kernel_rbf_fast
+  n_level_kernel_rbf --> n_shape_naive
   n_shape_naive --> n_STOP
+  n_shape_naive --> n_kernel_rbf
+  n_shape_naive --> n_kernel_rbf_fast
+  n_shape_naive --> n_level_kernel_rbf
   classDef control fill:#ffe2e2,stroke:#b91c1c,stroke-width:1px,color:#111827
   classDef cleaning fill:#dff0ff,stroke:#2563eb,stroke-width:1px,color:#111827
   classDef transform fill:#fff1c2,stroke:#b45309,stroke-width:1px,color:#111827
@@ -56,6 +68,7 @@ flowchart LR
   classDef binding fill:#efe3ff,stroke:#7c3aed,stroke-width:1px,color:#111827
   classDef model fill:#ffe6cf,stroke:#ea580c,stroke-width:1px,color:#111827
   classDef planned fill:#f4f4f5,stroke:#71717a,stroke-width:1px,color:#111827
+  classDef terminal fill:#f0fdf4,stroke:#166534,stroke-width:1px,color:#111827
 ```
 
 ## Full Graph
@@ -65,7 +78,6 @@ Full view includes adapter/factory tokens and aliases.
 ```mermaid
 flowchart LR
   n_START["START<br/>synthetic / control"]:::control
-  n_STOP["STOP<br/>synthetic / control"]:::control
   n_ContextWindow["ContextWindow<br/>notebook / cleaning"]:::cleaning
   n_DataAugmentation["DataAugmentation<br/>notebook / cleaning"]:::cleaning
   n_ZNormalization["ZNormalization<br/>package / transform"]:::transform
@@ -84,6 +96,7 @@ flowchart LR
   n_kernel_rbf_loo["kernel_rbf_loo<br/>notebook / model"]:::model
   n_level_kernel_rbf["level_kernel_rbf<br/>notebook / model"]:::model
   n_shape_naive["shape_naive<br/>notebook / model"]:::model
+  n_STOP["STOP<br/>synthetic / terminal"]:::terminal
   n_BindAllSafeTabular --> n_kernel_rbf
   n_BindAllSafeTabular --> n_kernel_rbf_fast
   n_BindAllSafeTabular --> n_kernel_rbf_loo
@@ -131,10 +144,30 @@ flowchart LR
   n_kernel_rbf --> n_BindScaledHistory
   n_kernel_rbf --> n_STOP
   n_kernel_rbf --> n_kernel_rbf
+  n_kernel_rbf --> n_kernel_rbf_fast
+  n_kernel_rbf --> n_kernel_rbf_loo
+  n_kernel_rbf --> n_level_kernel_rbf
+  n_kernel_rbf --> n_shape_naive
   n_kernel_rbf_fast --> n_STOP
+  n_kernel_rbf_fast --> n_kernel_rbf
+  n_kernel_rbf_fast --> n_kernel_rbf_loo
+  n_kernel_rbf_fast --> n_level_kernel_rbf
+  n_kernel_rbf_fast --> n_shape_naive
   n_kernel_rbf_loo --> n_STOP
+  n_kernel_rbf_loo --> n_kernel_rbf
+  n_kernel_rbf_loo --> n_kernel_rbf_fast
+  n_kernel_rbf_loo --> n_level_kernel_rbf
+  n_kernel_rbf_loo --> n_shape_naive
   n_level_kernel_rbf --> n_STOP
+  n_level_kernel_rbf --> n_kernel_rbf
+  n_level_kernel_rbf --> n_kernel_rbf_fast
+  n_level_kernel_rbf --> n_kernel_rbf_loo
+  n_level_kernel_rbf --> n_shape_naive
   n_shape_naive --> n_STOP
+  n_shape_naive --> n_kernel_rbf
+  n_shape_naive --> n_kernel_rbf_fast
+  n_shape_naive --> n_kernel_rbf_loo
+  n_shape_naive --> n_level_kernel_rbf
   classDef control fill:#ffe2e2,stroke:#b91c1c,stroke-width:1px,color:#111827
   classDef cleaning fill:#dff0ff,stroke:#2563eb,stroke-width:1px,color:#111827
   classDef transform fill:#fff1c2,stroke:#b45309,stroke-width:1px,color:#111827
@@ -142,6 +175,7 @@ flowchart LR
   classDef binding fill:#efe3ff,stroke:#7c3aed,stroke-width:1px,color:#111827
   classDef model fill:#ffe6cf,stroke:#ea580c,stroke-width:1px,color:#111827
   classDef planned fill:#f4f4f5,stroke:#71717a,stroke-width:1px,color:#111827
+  classDef terminal fill:#f0fdf4,stroke:#166534,stroke-width:1px,color:#111827
 ```
 
 ## Token Matrix
@@ -149,7 +183,6 @@ flowchart LR
 | Token | Status | Class | Core | Parents | Next |
 | --- | --- | --- | --- | --- | --- |
 | `START` | synthetic | control | yes |  | `BindRawHistory`, `ContextWindow`, `DataAugmentation`, `PeriodSelection`, `ZNormalization` |
-| `STOP` | synthetic | control | yes | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |  |
 | `ContextWindow` | notebook | cleaning | yes | `DataAugmentation`, `START` | `BindRawHistory`, `PeriodSelection`, `ZNormalization` |
 | `DataAugmentation` | notebook | cleaning | yes | `START` | `ContextWindow`, `ZNormalization` |
 | `ZNormalization` | package | transform | yes | `ContextWindow`, `DataAugmentation`, `START` | `BindAllSafeTabular`, `BindScaledHistory`, `StackScaledContext`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
@@ -163,8 +196,9 @@ flowchart LR
 | `BindScaledHistory` | package | binding | yes | `ZNormalization`, `kernel_rbf` | `BindAllSafeTabular`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
 | `StackFeatureBundleToken` | package | binding | no | `PeriodFold`, `PeriodPhaseOneHot`, `ShapeLevel` | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
 | `StackScaledContext` | notebook | binding | no | `ZNormalization` | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
-| `kernel_rbf` | package | model | yes | `BindAllSafeTabular`, `BindRawHistory`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf` | `BindAllSafeTabular`, `BindScaledHistory`, `STOP`, `kernel_rbf` |
-| `kernel_rbf_fast` | notebook | model | yes | `BindAllSafeTabular`, `BindRawHistory`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization` | `STOP` |
-| `kernel_rbf_loo` | notebook | model | no | `BindAllSafeTabular`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization` | `STOP` |
-| `level_kernel_rbf` | notebook | model | yes | `ShapeLevel` | `STOP` |
-| `shape_naive` | notebook | model | yes | `ShapeLevel` | `STOP` |
+| `kernel_rbf` | package | model | yes | `BindAllSafeTabular`, `BindRawHistory`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` | `BindAllSafeTabular`, `BindScaledHistory`, `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |
+| `kernel_rbf_fast` | notebook | model | yes | `BindAllSafeTabular`, `BindRawHistory`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` | `STOP`, `kernel_rbf`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |
+| `kernel_rbf_loo` | notebook | model | no | `BindAllSafeTabular`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_fast`, `level_kernel_rbf`, `shape_naive` | `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `level_kernel_rbf`, `shape_naive` |
+| `level_kernel_rbf` | notebook | model | yes | `ShapeLevel`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `shape_naive` | `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `shape_naive` |
+| `shape_naive` | notebook | model | yes | `ShapeLevel`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf` | `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf` |
+| `STOP` | synthetic | terminal | yes | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |  |
