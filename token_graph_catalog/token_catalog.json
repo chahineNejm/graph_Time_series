@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "project": "graph_Time_series",
+  "notes": [
+    "Edit this file when tokens or valid transitions change.",
+    "Use core=false for generic binders, aliases, and noisy experimental adapters."
+  ],
+  "tokens": [
+    {
+      "id": "START",
+      "status": "synthetic",
+      "class": "control",
+      "core": true,
+      "description": "Synthetic start node for graph visualization.",
+      "reads": [],
+      "writes": [],
+      "parents": [],
+      "next": [
+        "DataAugmentation",
+        "ContextWindow",
+        "PeriodSelection",
+        "ZNormalization",
+        "BindRawHistory"
+      ]
+    },
+    {
+      "id": "DataAugmentation",
+      "status": "notebook",
+      "class": "cleaning",
+      "core": true,
+      "description": "Notebook prototype that jitters and smooths history for train-side experiments.",
+      "reads": ["features.raw_history"],
+      "writes": ["features.raw_history", "historical_features.augmented_history"],
+      "parents": ["START"],
+      "next": ["ContextWindow", "ZNormalization"]
+    },
+    {
+      "id": "ContextWindow",
+      "status": "notebook",
+      "class": "cleaning",
+      "core": true,
+      "description": "Keep the latest context window and write context_history.",
+      "reads": ["features.raw_history"],
+      "writes": ["features.raw_history", "historical_features.context_history"],
+      "parents": ["START", "DataAugmentation"],
+      "next": ["ZNormalization", "PeriodSelection"]
+    },
+    {
+      "id": "ZNormalization",
+      "status": "package",
+      "class": "transform",
+      "core": true,
+      "description": "Normalize each series by its history and transform the active target space.",
+      "reads": ["features.raw_history"],
+      "writes": ["historical_features.scaled_history", "active_target_base", "transform_stack"],
+      "parents": ["START", "ContextWindow", "DataAugmentation"],
+      "next": [
+        "BindScaledHistory",
+        "BindAllSafeTabular",
+        "StackScaledContext",
+        "kernel_rbf",
+        "kernel_rbf_fast",
+        "kernel_rbf_loo"
+      ]
+    },
+    {
+      "id": "PeriodSelection",
+      "status": "notebook",
+      "class": "feature",
+      "core": true,
+      "description": "Select a period from frequency candidates and store it in metadata.period.",
+      "reads": ["features.raw_history"],
+      "writes": ["metadata.period", "metadata.period_scores", "flags.period_selected"],
+      "parents": ["START", "ContextWindow"],
+      "next": ["PeriodPhaseOneHot", "PeriodFold"]
+    },
+    {
+      "id": "PeriodPhaseOneHot",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "Encode phase IDs and one-hot positions inside the selected period.",
+      "reads": ["features.raw_history", "metadata.period"],
+      "writes": [
+        "historical_features.history_period_phase_id",
+        "historical_features.history_period_phase_onehot",
+        "future_features.future_period_phase_id",
+        "future_features.future_period_phase_onehot"
+      ],
+      "parents": ["PeriodSelection"],
+      "next": ["PeriodFold", "BindAllSafeTabular", "StackFeatureBundleToken"]
+    },
+    {
+      "id": "PeriodFold",
+      "status": "notebook",
+      "class": "feature",
+      "core": true,
+      "description": "Fold history into period phases and compute level_series.",
+      "reads": ["features.raw_history", "metadata.period"],
+      "writes": ["historical_features.period_matrix", "historical_features.level_series"],
+      "parents": ["PeriodSelection", "PeriodPhaseOneHot"],
+      "next": ["ShapeLevel", "BindAllSafeTabular", "StackFeatureBundleToken"]
+    },
+    {
+      "id": "ShapeLevel",
+      "status": "notebook",
+      "class": "feature",
+      "core": true,
+      "description": "Estimate a within-period shape vector from recent folded periods.",
+      "reads": ["historical_features.period_matrix", "historical_features.level_series"],
+      "writes": ["historical_features.shape_vector"],
+      "parents": ["PeriodFold"],
+      "next": ["shape_naive", "level_kernel_rbf", "BindAllSafeTabular", "StackFeatureBundleToken"]
+    },
+    {
+      "id": "BindScaledHistory",
+      "status": "package",
+      "class": "binding",
+      "core": true,
+      "description": "Bind scaled_history as the active sequence_flat model_input.",
+      "reads": ["historical_features.scaled_history"],
+      "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
+      "parents": ["ZNormalization", "kernel_rbf"],
+      "next": ["kernel_rbf", "kernel_rbf_fast", "kernel_rbf_loo"]
+    },
+    {
+      "id": "BindAllSafeTabular",
+      "status": "package",
+      "class": "binding",
+      "core": false,
+      "description": "Broad binder that flattens all finite historical artifacts into one tabular model_input.",
+      "reads": ["historical_features.*"],
+      "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
+      "parents": ["ZNormalization", "PeriodPhaseOneHot", "PeriodFold", "ShapeLevel", "BindScaledHistory", "kernel_rbf"],
+      "next": ["kernel_rbf", "kernel_rbf_fast", "kernel_rbf_loo"]
+    },
+    {
+      "id": "BindFeatureToken",
+      "status": "package",
+      "class": "binding",
+      "core": false,
+      "description": "Generic single-artifact binder factory used to create named binders.",
+      "reads": ["configured artifact"],
+      "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
+      "parents": [],
+      "next": []
+    },
+    {
+      "id": "StackFeatureBundleToken",
+      "status": "package",
+      "class": "binding",
+      "core": false,
+      "description": "Generic factory that flattens and concatenates configured artifacts into one tabular bundle.",
+      "reads": ["configured artifacts"],
+      "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
+      "parents": ["PeriodPhaseOneHot", "PeriodFold", "ShapeLevel"],
+      "next": ["kernel_rbf", "kernel_rbf_fast", "kernel_rbf_loo"]
+    },
+    {
+      "id": "BindRawHistory",
+      "status": "notebook",
+      "class": "binding",
+      "core": false,
+      "description": "Notebook-configured BindFeatureToken for raw_history.",
+      "reads": ["features.raw_history"],
+      "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
+      "parents": ["START", "ContextWindow"],
+      "next": ["kernel_rbf_fast", "kernel_rbf"]
+    },
+    {
+      "id": "StackScaledContext",
+      "status": "notebook",
+      "class": "binding",
+      "core": false,
+      "description": "Notebook-configured StackFeatureBundleToken for scaled_history plus context_history.",
+      "reads": ["historical_features.scaled_history", "historical_features.context_history"],
+      "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
+      "parents": ["ZNormalization"],
+      "next": ["kernel_rbf_fast", "kernel_rbf", "kernel_rbf_loo"]
+    },
+    {
+      "id": "kernel_rbf",
+      "status": "package",
+      "class": "model",
+      "core": true,
+      "description": "Package RBF KernelRidge model with leave-one-out predictions inside the current state.",
+      "reads": ["historical_features.model_input or scaled_history", "current_target"],
+      "writes": ["prediction_stack", "features.current_residual"],
+      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext"],
+      "next": ["BindScaledHistory", "BindAllSafeTabular", "kernel_rbf", "STOP"]
+    },
+    {
+      "id": "kernel_rbf_fast",
+      "status": "notebook",
+      "class": "model",
+      "core": true,
+      "description": "Notebook fast RBF diagnostic token; direct use is in-sample.",
+      "reads": ["historical_features.model_input or scaled_history", "current_target"],
+      "writes": ["prediction_stack", "features.current_residual"],
+      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext"],
+      "next": ["STOP"]
+    },
+    {
+      "id": "kernel_rbf_loo",
+      "status": "notebook",
+      "class": "model",
+      "core": false,
+      "description": "Notebook registry alias for the package KernelRBFToken.",
+      "reads": ["historical_features.model_input or scaled_history", "current_target"],
+      "writes": ["prediction_stack", "features.current_residual"],
+      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "StackFeatureBundleToken", "StackScaledContext"],
+      "next": ["STOP"]
+    },
+    {
+      "id": "shape_naive",
+      "status": "notebook",
+      "class": "model",
+      "core": true,
+      "description": "Repeat last level through the shape vector.",
+      "reads": ["historical_features.shape_vector", "historical_features.level_series"],
+      "writes": ["prediction_stack", "features.current_residual"],
+      "parents": ["ShapeLevel"],
+      "next": ["STOP"]
+    },
+    {
+      "id": "level_kernel_rbf",
+      "status": "notebook",
+      "class": "model",
+      "core": true,
+      "description": "Fit an RBF model on level_series and expand through shape_vector.",
+      "reads": ["historical_features.level_series", "historical_features.shape_vector", "current_target"],
+      "writes": ["prediction_stack", "features.current_residual"],
+      "parents": ["ShapeLevel"],
+      "next": ["STOP"]
+    },
+    {
+      "id": "STOP",
+      "status": "synthetic",
+      "class": "control",
+      "core": true,
+      "description": "Synthetic stop node for graph visualization.",
+      "reads": ["prediction_stack"],
+      "writes": ["features.final_forecast"],
+      "parents": ["kernel_rbf", "kernel_rbf_fast", "kernel_rbf_loo", "shape_naive", "level_kernel_rbf"],
+      "next": []
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Token Graph Catalog</title>
+  <style>
+body {
+  margin: 0;
+  color: #111827;
+  background: #f8fafc;
+  font-family: Arial, sans-serif;
+}
+main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px;
+}
+section, header {
+  margin-bottom: 28px;
+}
+h1, h2 {
+  margin: 0 0 10px;
+}
+p {
+  margin: 6px 0;
+  color: #475569;
+}
+code {
+  background: #e5e7eb;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+.graph {
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  overflow: visible;
+}
+.edge {
+  fill: none;
+  stroke: #64748b;
+  stroke-width: 1.5;
+  marker-end: url(#arrow);
+  opacity: 0.8;
+}
+.node-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+.node-meta {
+  font-size: 11px;
+  fill: #475569;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid #cbd5e1;
+}
+th, td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+  font-size: 13px;
+}
+th {
+  background: #f1f5f9;
+}
+</style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Token Graph Catalog</h1>
+      <p>Project: <code>graph_Time_series</code></p>
+      <p>Edit <code>token_catalog.json</code>, then rerun <code>python render_token_graph.py</code>.</p>
+    </header>
+    <section>
+      <h2>Core Graph</h2>
+      <p>Compact view. Generic binders, broad adapters, and aliases are hidden.</p>
+      <svg class="graph" viewBox="0 0 1540 425" role="img" aria-label="Core Token Graph">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+</marker>
+</defs>
+<path class="edge" d="M 1220 65 C 1265 65, 1235 65, 1280 65" />
+<path class="edge" d="M 1220 65 C 1265 65, 1235 155, 1280 155" />
+<path class="edge" d="M 470 65 C 515 65, 735 245, 780 245" />
+<path class="edge" d="M 470 65 C 515 65, 485 65, 530 65" />
+<path class="edge" d="M 470 155 C 515 155, 235 65, 280 65" />
+<path class="edge" d="M 470 155 C 515 155, 485 65, 530 65" />
+<path class="edge" d="M 970 65 C 1015 65, 735 335, 780 335" />
+<path class="edge" d="M 970 155 C 1015 155, 735 65, 780 65" />
+<path class="edge" d="M 970 245 C 1015 245, 735 65, 780 65" />
+<path class="edge" d="M 970 245 C 1015 245, 735 155, 780 155" />
+<path class="edge" d="M 220 65 C 265 65, 235 65, 280 65" />
+<path class="edge" d="M 220 65 C 265 65, 235 155, 280 155" />
+<path class="edge" d="M 220 65 C 265 65, 735 245, 780 245" />
+<path class="edge" d="M 220 65 C 265 65, 485 65, 530 65" />
+<path class="edge" d="M 970 335 C 1015 335, 1235 245, 1280 245" />
+<path class="edge" d="M 970 335 C 1015 335, 1235 335, 1280 335" />
+<path class="edge" d="M 720 65 C 765 65, 985 65, 1030 65" />
+<path class="edge" d="M 720 65 C 765 65, 1235 65, 1280 65" />
+<path class="edge" d="M 720 65 C 765 65, 1235 155, 1280 155" />
+<path class="edge" d="M 1470 65 C 1515 65, 985 65, 1030 65" />
+<path class="edge" d="M 1470 65 C 1515 65, -15 155, 30 155" />
+<path class="edge" d="M 1470 65 C 1515 65, 1235 65, 1280 65" />
+<path class="edge" d="M 1470 155 C 1515 155, -15 155, 30 155" />
+<path class="edge" d="M 1470 245 C 1515 245, -15 155, 30 155" />
+<path class="edge" d="M 1470 335 C 1515 335, -15 155, 30 155" />
+<g class="node" transform="translate(30,35)"><title>Synthetic start node for graph visualization.</title><rect width="190" height="60" rx="8" fill="#ffe2e2" stroke="#b91c1c"/><text x="12" y="24" class="node-title">START</text><text x="12" y="45" class="node-meta">synthetic / control</text></g>
+<g class="node" transform="translate(30,125)"><title>Synthetic stop node for graph visualization.</title><rect width="190" height="60" rx="8" fill="#ffe2e2" stroke="#b91c1c"/><text x="12" y="24" class="node-title">STOP</text><text x="12" y="45" class="node-meta">synthetic / control</text></g>
+<g class="node" transform="translate(280,35)"><title>Keep the latest context window and write context_history.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">ContextWindow</text><text x="12" y="45" class="node-meta">notebook / cleaning</text></g>
+<g class="node" transform="translate(280,125)"><title>Notebook prototype that jitters and smooths history for train-side experiments.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">DataAugmentation</text><text x="12" y="45" class="node-meta">notebook / cleaning</text></g>
+<g class="node" transform="translate(530,35)"><title>Normalize each series by its history and transform the active target space.</title><rect width="190" height="60" rx="8" fill="#fff1c2" stroke="#b45309"/><text x="12" y="24" class="node-title">ZNormalization</text><text x="12" y="45" class="node-meta">package / transform</text></g>
+<g class="node" transform="translate(780,35)"><title>Fold history into period phases and compute level_series.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodFold</text><text x="12" y="45" class="node-meta">notebook / feature</text></g>
+<g class="node" transform="translate(780,125)"><title>Encode phase IDs and one-hot positions inside the selected period.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodPhaseOneHot</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,215)"><title>Select a period from frequency candidates and store it in metadata.period.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodSelection</text><text x="12" y="45" class="node-meta">notebook / feature</text></g>
+<g class="node" transform="translate(780,305)"><title>Estimate a within-period shape vector from recent folded periods.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">ShapeLevel</text><text x="12" y="45" class="node-meta">notebook / feature</text></g>
+<g class="node" transform="translate(1030,35)"><title>Bind scaled_history as the active sequence_flat model_input.</title><rect width="190" height="60" rx="8" fill="#efe3ff" stroke="#7c3aed"/><text x="12" y="24" class="node-title">BindScaledHistory</text><text x="12" y="45" class="node-meta">package / binding</text></g>
+<g class="node" transform="translate(1280,35)"><title>Package RBF KernelRidge model with leave-one-out predictions inside the current state.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">kernel_rbf</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,125)"><title>Notebook fast RBF diagnostic token; direct use is in-sample.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">kernel_rbf_fast</text><text x="12" y="45" class="node-meta">notebook / model</text></g>
+<g class="node" transform="translate(1280,215)"><title>Fit an RBF model on level_series and expand through shape_vector.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">level_kernel_rbf</text><text x="12" y="45" class="node-meta">notebook / model</text></g>
+<g class="node" transform="translate(1280,305)"><title>Repeat last level through the shape vector.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">shape_naive</text><text x="12" y="45" class="node-meta">notebook / model</text></g>
+</svg>
+    </section>
+    <section>
+      <h2>Full Graph</h2>
+      <p>Complete view with all cataloged tokens.</p>
+      <svg class="graph" viewBox="0 0 1540 605" role="img" aria-label="Full Token Graph">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+</marker>
+</defs>
+<path class="edge" d="M 1220 65 C 1265 65, 1235 65, 1280 65" />
+<path class="edge" d="M 1220 65 C 1265 65, 1235 155, 1280 155" />
+<path class="edge" d="M 1220 65 C 1265 65, 1235 245, 1280 245" />
+<path class="edge" d="M 1220 245 C 1265 245, 1235 65, 1280 65" />
+<path class="edge" d="M 1220 245 C 1265 245, 1235 155, 1280 155" />
+<path class="edge" d="M 1220 335 C 1265 335, 985 65, 1030 65" />
+<path class="edge" d="M 1220 335 C 1265 335, 1235 65, 1280 65" />
+<path class="edge" d="M 1220 335 C 1265 335, 1235 155, 1280 155" />
+<path class="edge" d="M 1220 335 C 1265 335, 1235 245, 1280 245" />
+<path class="edge" d="M 470 65 C 515 65, 985 245, 1030 245" />
+<path class="edge" d="M 470 65 C 515 65, 735 245, 780 245" />
+<path class="edge" d="M 470 65 C 515 65, 485 65, 530 65" />
+<path class="edge" d="M 470 155 C 515 155, 235 65, 280 65" />
+<path class="edge" d="M 470 155 C 515 155, 485 65, 530 65" />
+<path class="edge" d="M 970 65 C 1015 65, 985 65, 1030 65" />
+<path class="edge" d="M 970 65 C 1015 65, 735 335, 780 335" />
+<path class="edge" d="M 970 65 C 1015 65, 985 425, 1030 425" />
+<path class="edge" d="M 970 155 C 1015 155, 985 65, 1030 65" />
+<path class="edge" d="M 970 155 C 1015 155, 735 65, 780 65" />
+<path class="edge" d="M 970 155 C 1015 155, 985 425, 1030 425" />
+<path class="edge" d="M 970 245 C 1015 245, 735 65, 780 65" />
+<path class="edge" d="M 970 245 C 1015 245, 735 155, 780 155" />
+<path class="edge" d="M 220 65 C 265 65, 985 245, 1030 245" />
+<path class="edge" d="M 220 65 C 265 65, 235 65, 280 65" />
+<path class="edge" d="M 220 65 C 265 65, 235 155, 280 155" />
+<path class="edge" d="M 220 65 C 265 65, 735 245, 780 245" />
+<path class="edge" d="M 220 65 C 265 65, 485 65, 530 65" />
+<path class="edge" d="M 970 335 C 1015 335, 985 65, 1030 65" />
+<path class="edge" d="M 970 335 C 1015 335, 985 425, 1030 425" />
+<path class="edge" d="M 970 335 C 1015 335, 1235 335, 1280 335" />
+<path class="edge" d="M 970 335 C 1015 335, 1235 425, 1280 425" />
+<path class="edge" d="M 1220 425 C 1265 425, 1235 65, 1280 65" />
+<path class="edge" d="M 1220 425 C 1265 425, 1235 155, 1280 155" />
+<path class="edge" d="M 1220 425 C 1265 425, 1235 245, 1280 245" />
+<path class="edge" d="M 1220 515 C 1265 515, 1235 65, 1280 65" />
+<path class="edge" d="M 1220 515 C 1265 515, 1235 155, 1280 155" />
+<path class="edge" d="M 1220 515 C 1265 515, 1235 245, 1280 245" />
+<path class="edge" d="M 720 65 C 765 65, 985 65, 1030 65" />
+<path class="edge" d="M 720 65 C 765 65, 985 335, 1030 335" />
+<path class="edge" d="M 720 65 C 765 65, 985 515, 1030 515" />
+<path class="edge" d="M 720 65 C 765 65, 1235 65, 1280 65" />
+<path class="edge" d="M 720 65 C 765 65, 1235 155, 1280 155" />
+<path class="edge" d="M 720 65 C 765 65, 1235 245, 1280 245" />
+<path class="edge" d="M 1470 65 C 1515 65, 985 65, 1030 65" />
+<path class="edge" d="M 1470 65 C 1515 65, 985 335, 1030 335" />
+<path class="edge" d="M 1470 65 C 1515 65, -15 155, 30 155" />
+<path class="edge" d="M 1470 65 C 1515 65, 1235 65, 1280 65" />
+<path class="edge" d="M 1470 155 C 1515 155, -15 155, 30 155" />
+<path class="edge" d="M 1470 245 C 1515 245, -15 155, 30 155" />
+<path class="edge" d="M 1470 335 C 1515 335, -15 155, 30 155" />
+<path class="edge" d="M 1470 425 C 1515 425, -15 155, 30 155" />
+<g class="node" transform="translate(30,35)"><title>Synthetic start node for graph visualization.</title><rect width="190" height="60" rx="8" fill="#ffe2e2" stroke="#b91c1c"/><text x="12" y="24" class="node-title">START</text><text x="12" y="45" class="node-meta">synthetic / control</text></g>
+<g class="node" transform="translate(30,125)"><title>Synthetic stop node for graph visualization.</title><rect width="190" height="60" rx="8" fill="#ffe2e2" stroke="#b91c1c"/><text x="12" y="24" class="node-title">STOP</text><text x="12" y="45" class="node-meta">synthetic / control</text></g>
+<g class="node" transform="translate(280,35)"><title>Keep the latest context window and write context_history.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">ContextWindow</text><text x="12" y="45" class="node-meta">notebook / cleaning</text></g>
+<g class="node" transform="translate(280,125)"><title>Notebook prototype that jitters and smooths history for train-side experiments.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">DataAugmentation</text><text x="12" y="45" class="node-meta">notebook / cleaning</text></g>
+<g class="node" transform="translate(530,35)"><title>Normalize each series by its history and transform the active target space.</title><rect width="190" height="60" rx="8" fill="#fff1c2" stroke="#b45309"/><text x="12" y="24" class="node-title">ZNormalization</text><text x="12" y="45" class="node-meta">package / transform</text></g>
+<g class="node" transform="translate(780,35)"><title>Fold history into period phases and compute level_series.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodFold</text><text x="12" y="45" class="node-meta">notebook / feature</text></g>
+<g class="node" transform="translate(780,125)"><title>Encode phase IDs and one-hot positions inside the selected period.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodPhaseOneHot</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,215)"><title>Select a period from frequency candidates and store it in metadata.period.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodSelection</text><text x="12" y="45" class="node-meta">notebook / feature</text></g>
+<g class="node" transform="translate(780,305)"><title>Estimate a within-period shape vector from recent folded periods.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">ShapeLevel</text><text x="12" y="45" class="node-meta">notebook / feature</text></g>
+<g class="node" transform="translate(1030,35)"><title>Broad binder that flattens all finite historical artifacts into one tabular model_input.</title><rect width="190" height="60" rx="8" fill="#efe3ff" stroke="#7c3aed"/><text x="12" y="24" class="node-title">BindAllSafeTabular</text><text x="12" y="45" class="node-meta">package / binding</text></g>
+<g class="node" transform="translate(1030,125)"><title>Generic single-artifact binder factory used to create named binders.</title><rect width="190" height="60" rx="8" fill="#efe3ff" stroke="#7c3aed"/><text x="12" y="24" class="node-title">BindFeatureToken</text><text x="12" y="45" class="node-meta">package / binding</text></g>
+<g class="node" transform="translate(1030,215)"><title>Notebook-configured BindFeatureToken for raw_history.</title><rect width="190" height="60" rx="8" fill="#efe3ff" stroke="#7c3aed"/><text x="12" y="24" class="node-title">BindRawHistory</text><text x="12" y="45" class="node-meta">notebook / binding</text></g>
+<g class="node" transform="translate(1030,305)"><title>Bind scaled_history as the active sequence_flat model_input.</title><rect width="190" height="60" rx="8" fill="#efe3ff" stroke="#7c3aed"/><text x="12" y="24" class="node-title">BindScaledHistory</text><text x="12" y="45" class="node-meta">package / binding</text></g>
+<g class="node" transform="translate(1030,395)"><title>Generic factory that flattens and concatenates configured artifacts into one tabular bundle.</title><rect width="190" height="60" rx="8" fill="#efe3ff" stroke="#7c3aed"/><text x="12" y="24" class="node-title">StackFeatureBundleToken</text><text x="12" y="45" class="node-meta">package / binding</text></g>
+<g class="node" transform="translate(1030,485)"><title>Notebook-configured StackFeatureBundleToken for scaled_history plus context_history.</title><rect width="190" height="60" rx="8" fill="#efe3ff" stroke="#7c3aed"/><text x="12" y="24" class="node-title">StackScaledContext</text><text x="12" y="45" class="node-meta">notebook / binding</text></g>
+<g class="node" transform="translate(1280,35)"><title>Package RBF KernelRidge model with leave-one-out predictions inside the current state.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">kernel_rbf</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,125)"><title>Notebook fast RBF diagnostic token; direct use is in-sample.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">kernel_rbf_fast</text><text x="12" y="45" class="node-meta">notebook / model</text></g>
+<g class="node" transform="translate(1280,215)"><title>Notebook registry alias for the package KernelRBFToken.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">kernel_rbf_loo</text><text x="12" y="45" class="node-meta">notebook / model</text></g>
+<g class="node" transform="translate(1280,305)"><title>Fit an RBF model on level_series and expand through shape_vector.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">level_kernel_rbf</text><text x="12" y="45" class="node-meta">notebook / model</text></g>
+<g class="node" transform="translate(1280,395)"><title>Repeat last level through the shape vector.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">shape_naive</text><text x="12" y="45" class="node-meta">notebook / model</text></g>
+</svg>
+    </section>
+    <section>
+      <h2>Token Matrix</h2>
+      <table><thead><tr><th>Token</th><th>Status</th><th>Class</th><th>Core</th><th>Parents</th><th>Next</th><th>Description</th></tr></thead><tbody><tr><td><code>START</code></td><td>synthetic</td><td>control</td><td>yes</td><td></td><td>BindRawHistory, ContextWindow, DataAugmentation, PeriodSelection, ZNormalization</td><td>Synthetic start node for graph visualization.</td></tr>
+<tr><td><code>STOP</code></td><td>synthetic</td><td>control</td><td>yes</td><td>kernel_rbf, kernel_rbf_fast, kernel_rbf_loo, level_kernel_rbf, shape_naive</td><td></td><td>Synthetic stop node for graph visualization.</td></tr>
+<tr><td><code>ContextWindow</code></td><td>notebook</td><td>cleaning</td><td>yes</td><td>DataAugmentation, START</td><td>BindRawHistory, PeriodSelection, ZNormalization</td><td>Keep the latest context window and write context_history.</td></tr>
+<tr><td><code>DataAugmentation</code></td><td>notebook</td><td>cleaning</td><td>yes</td><td>START</td><td>ContextWindow, ZNormalization</td><td>Notebook prototype that jitters and smooths history for train-side experiments.</td></tr>
+<tr><td><code>ZNormalization</code></td><td>package</td><td>transform</td><td>yes</td><td>ContextWindow, DataAugmentation, START</td><td>BindAllSafeTabular, BindScaledHistory, StackScaledContext, kernel_rbf, kernel_rbf_fast, kernel_rbf_loo</td><td>Normalize each series by its history and transform the active target space.</td></tr>
+<tr><td><code>PeriodFold</code></td><td>notebook</td><td>feature</td><td>yes</td><td>PeriodPhaseOneHot, PeriodSelection</td><td>BindAllSafeTabular, ShapeLevel, StackFeatureBundleToken</td><td>Fold history into period phases and compute level_series.</td></tr>
+<tr><td><code>PeriodPhaseOneHot</code></td><td>package</td><td>feature</td><td>yes</td><td>PeriodSelection</td><td>BindAllSafeTabular, PeriodFold, StackFeatureBundleToken</td><td>Encode phase IDs and one-hot positions inside the selected period.</td></tr>
+<tr><td><code>PeriodSelection</code></td><td>notebook</td><td>feature</td><td>yes</td><td>ContextWindow, START</td><td>PeriodFold, PeriodPhaseOneHot</td><td>Select a period from frequency candidates and store it in metadata.period.</td></tr>
+<tr><td><code>ShapeLevel</code></td><td>notebook</td><td>feature</td><td>yes</td><td>PeriodFold</td><td>BindAllSafeTabular, StackFeatureBundleToken, level_kernel_rbf, shape_naive</td><td>Estimate a within-period shape vector from recent folded periods.</td></tr>
+<tr><td><code>BindAllSafeTabular</code></td><td>package</td><td>binding</td><td>no</td><td>BindScaledHistory, PeriodFold, PeriodPhaseOneHot, ShapeLevel, ZNormalization, kernel_rbf</td><td>kernel_rbf, kernel_rbf_fast, kernel_rbf_loo</td><td>Broad binder that flattens all finite historical artifacts into one tabular model_input.</td></tr>
+<tr><td><code>BindFeatureToken</code></td><td>package</td><td>binding</td><td>no</td><td></td><td></td><td>Generic single-artifact binder factory used to create named binders.</td></tr>
+<tr><td><code>BindRawHistory</code></td><td>notebook</td><td>binding</td><td>no</td><td>ContextWindow, START</td><td>kernel_rbf, kernel_rbf_fast</td><td>Notebook-configured BindFeatureToken for raw_history.</td></tr>
+<tr><td><code>BindScaledHistory</code></td><td>package</td><td>binding</td><td>yes</td><td>ZNormalization, kernel_rbf</td><td>BindAllSafeTabular, kernel_rbf, kernel_rbf_fast, kernel_rbf_loo</td><td>Bind scaled_history as the active sequence_flat model_input.</td></tr>
+<tr><td><code>StackFeatureBundleToken</code></td><td>package</td><td>binding</td><td>no</td><td>PeriodFold, PeriodPhaseOneHot, ShapeLevel</td><td>kernel_rbf, kernel_rbf_fast, kernel_rbf_loo</td><td>Generic factory that flattens and concatenates configured artifacts into one tabular bundle.</td></tr>
+<tr><td><code>StackScaledContext</code></td><td>notebook</td><td>binding</td><td>no</td><td>ZNormalization</td><td>kernel_rbf, kernel_rbf_fast, kernel_rbf_loo</td><td>Notebook-configured StackFeatureBundleToken for scaled_history plus context_history.</td></tr>
+<tr><td><code>kernel_rbf</code></td><td>package</td><td>model</td><td>yes</td><td>BindAllSafeTabular, BindRawHistory, BindScaledHistory, StackFeatureBundleToken, StackScaledContext, ZNormalization, kernel_rbf</td><td>BindAllSafeTabular, BindScaledHistory, STOP, kernel_rbf</td><td>Package RBF KernelRidge model with leave-one-out predictions inside the current state.</td></tr>
+<tr><td><code>kernel_rbf_fast</code></td><td>notebook</td><td>model</td><td>yes</td><td>BindAllSafeTabular, BindRawHistory, BindScaledHistory, StackFeatureBundleToken, StackScaledContext, ZNormalization</td><td>STOP</td><td>Notebook fast RBF diagnostic token; direct use is in-sample.</td></tr>
+<tr><td><code>kernel_rbf_loo</code></td><td>notebook</td><td>model</td><td>no</td><td>BindAllSafeTabular, BindScaledHistory, StackFeatureBundleToken, StackScaledContext, ZNormalization</td><td>STOP</td><td>Notebook registry alias for the package KernelRBFToken.</td></tr>
+<tr><td><code>level_kernel_rbf</code></td><td>notebook</td><td>model</td><td>yes</td><td>ShapeLevel</td><td>STOP</td><td>Fit an RBF model on level_series and expand through shape_vector.</td></tr>
+<tr><td><code>shape_naive</code></td><td>notebook</td><td>model</td><td>yes</td><td>ShapeLevel</td><td>STOP</td><td>Repeat last level through the shape vector.</td></tr></tbody></table>
+    </section>
+  </main>
+</body>
+</html>

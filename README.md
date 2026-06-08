@@ -1,384 +1,455 @@
-# Graph Time Series — CLP Framework for Forecasting Pipeline Discovery
+# Graph Time Series
 
-A framework for **automated time-series forecasting pipeline construction** using Monte Carlo Tree Search (MCTS). Based on the Computational Language Processing (CLP) paradigm: define small computational tokens, wire them into a grammar graph, then let MCTS find the best compositions.
+Small experimental framework for composing time-series forecasting pipelines from
+inspectable tokens.
 
-## Architecture
+The current checkout is focused on a compact core:
 
+- a shared `State` object that owns features, transforms, residuals, artifacts,
+  and model-input bundles;
+- token classes for transforms, feature/binding steps, models, and controls;
+- a graph `Grammar` for valid token transitions;
+- an optional Lark pipeline DSL for writing linear token chains;
+- a Colab notebook used as the main playground for dataset loading,
+  exploration, leakage-safe holdout scoring, and prototype tokens.
+
+This README describes the code that is present in this repository now. Older
+ideas such as large MCTS search, random forests, XGBoost, FFT encoders, and
+other model families are kept as open extension directions rather than listed as
+implemented blocks.
+
+For a growing token-by-token index, see `TOKENS.md`.
+For graph views of token parents and possible next tokens, see
+`token_graph_catalog/`.
+
+## Repository Layout
+
+```text
+graph_Time_series/
+|-- README.md
+|-- TOKENS.md
+|-- check_list
+|-- token_graph_catalog/
+|   |-- README.md
+|   |-- token_catalog.json
+|   |-- render_token_graph.py
+|   `-- outputs/
+|-- graph_Time_series/
+|   |-- __init__.py
+|   |-- artifacts.py
+|   |-- grammar.py
+|   |-- pipeline_ast.py
+|   |-- state.py
+|   |-- token.py
+|   `-- token_blocks/
+|       |-- __init__.py
+|       |-- bindings.py
+|       |-- kernel_rbf.py
+|       `-- normalization.py
+`-- examples/
+    `-- test_token_sequence_colab.ipynb
 ```
-State ──► Token ──► Token ──► ... ──► STOP
-  │         │         │                 │
-  │     (transforms   (transforms   (evaluates,
-  │      features)     residuals)    sets MASE)
-  │
-  └── features dict, prediction_stack, current_target (auto-updated residual)
+
+## Core Concepts
+
+### State
+
+`State` is the runtime contract between tokens. It stores:
+
+- immutable input references: `original_history`, `original_future`;
+- historical and future feature stores;
+- legacy/general `features` for compatibility and notebook inspection;
+- metadata and flags;
+- an artifact registry describing values created by tokens;
+- model-input bundles describing which artifacts a model is allowed to consume;
+- target transforms and inverse transforms;
+- a prediction stack and current residual target.
+
+The important invariant is:
+
+```text
+current_target = active_target_base - sum(prediction_stack)
 ```
 
-The framework has four core abstractions:
+This means models can be chained: the first model predicts the transformed
+target, the second model fits the residual, the third model fits the next
+residual, and so on. `get_final_prediction()` decodes the cumulative prediction
+back to the original data scale using registered inverse transforms.
 
-| Concept | File | Role |
-|---------|------|------|
-| **State** | `state.py` | RL state: holds history, future, features, prediction stack, transformation log |
-| **Token** | `token.py` | Abstract base class — a single computational step |
-| **Grammar** | `grammar.py` | Directed graph of valid token transitions |
-| **MCTS** | `mcts.py` | AlphaZero-style tree search with PUCT over the grammar |
+### Artifacts And Bundles
 
-## Token classes
+Feature tokens are allowed to create broad state. They can leave many named
+artifacts in `historical_features`, `future_features`, or `features`.
 
-Every token belongs to a class that determines where it fits in a pipeline:
+Binder tokens then decide what becomes the active model input:
 
-| Class | Purpose | Reads | Writes |
-|-------|---------|-------|--------|
-| `cleaning` | Preprocess raw history | `raw_history` | `cleaned` |
-| `feature` | Extract features for models | `cleaned` | `model_input` |
-| `encoder` | Transform to a different domain | `cleaned` | `model_input` + domain state |
-| `model` | Fit and predict (LOO) | `model_input` | pushes to `prediction_stack` |
-| `decoder` | Inverse-transform predictions | domain state | modifies `prediction_stack` |
-| `control` | Sequence control (STOP) | `prediction_stack` | `final_forecast` + `mase` |
-
-A valid pipeline always follows this pattern:
-
-```
-START → cleaning → feature/encoder → model [→ model → ...] → [decoder →] STOP
+```text
+many artifacts in State -> one active InputBundle -> model_input
 ```
 
-## How to create a new token
+This keeps search/control manageable. Models do not need to guess from every
+possible feature in the state; they read one explicit `model_input` bundle, plus
+bundle metadata such as kind, shape, source token, and component artifacts.
 
-### 1. Write the token class
+### Tokens
 
-Create a new class that inherits from `Token`. You must define five attributes and implement `apply()`:
+The token base classes live in `token.py`:
+
+| Class | Purpose |
+| --- | --- |
+| `CleaningToken` | Pre-model data cleanup or context selection |
+| `FeatureToken` | Creates reusable features or binding decisions |
+| `TransformToken` | Changes target/feature scale and registers inverses |
+| `ModelToken` | Fits on `state.current_target` and pushes predictions |
+| `ControlToken` | Sequence controls such as `STOP` |
+
+Each token exposes:
+
+- `name`
+- `token_class`
+- `reads`
+- `writes`
+- `can_apply(state)`
+- `apply(state)`
+
+`can_apply()` checks class/token usage caps, declared dependencies, and
+token-specific conditions. `apply()` mutates or copies the state and records the
+execution log.
+
+## Implemented Package Tokens
+
+### `ZNormalization`
+
+File: `graph_Time_series/token_blocks/normalization.py`
+
+Per-series z-normalization based on the history. It writes
+`scaled_history`, transforms the active target into normalized space, and
+registers an inverse transform so final predictions are decoded correctly.
+
+Typical use:
+
+```text
+ZNormalization -> BindScaledHistory -> kernel_rbf
+```
+
+### `BindScaledHistory`
+
+File: `graph_Time_series/token_blocks/bindings.py`
+
+Binds `scaled_history` as the active `model_input`.
+
+Bundle metadata:
+
+```text
+name = "scaled_history"
+kind = "sequence_flat"
+artifact_names = ("scaled_history",)
+```
+
+### `BindAllSafeTabular`
+
+File: `graph_Time_series/token_blocks/bindings.py`
+
+Flattens all finite historical artifacts, except an existing `model_input`, into
+one tabular bundle. This is useful for quick experiments, but it can make the
+feature space large, so more targeted binders are often preferable.
+
+### `BindFeatureToken`
+
+File: `graph_Time_series/token_blocks/bindings.py`
+
+Generic binder for one named artifact. It is intended for creating configured
+tokens such as `BindRawHistory`, `BindLevelSeries`, or `BindCalendarFeatures`.
+
+### `StackFeatureBundleToken`
+
+File: `graph_Time_series/token_blocks/bindings.py`
+
+Generic binder that flattens and concatenates selected artifacts into one
+tabular bundle. This supports controlled multi-input experiments without making
+every model inspect the entire state.
+
+### `PeriodPhaseOneHot`
+
+File: `graph_Time_series/token_blocks/periodic.py`
+
+Encodes positions inside a selected period. It expects `metadata["period"]` to
+already exist, so in the current notebook it is used after `PeriodSelection`.
+It writes compact history/future phase IDs, a future one-hot feature, and a
+history one-hot feature when the tensor is small enough.
+
+This token is exported from the package, but it is not part of the default
+package grammar yet because the period-selection token still lives in the
+notebook.
+
+### `kernel_rbf`
+
+File: `graph_Time_series/token_blocks/kernel_rbf.py`
+
+RBF KernelRidge model token. It reads the active `model_input` if one exists,
+otherwise falls back to `scaled_history`. It accepts bundle kinds:
+
+```text
+sequence_flat
+tabular
+```
+
+It fits leave-one-out predictions inside a single state and pushes those
+predictions onto the residual stack.
+
+## Default Grammar
+
+The current built-in grammar is registered by:
 
 ```python
-# tokens/my_new_tokens.py
-import numpy as np
-from ..token import Token, _shapes
-
-
-class CleanZScore(Token):
-    name = "zscore"                      # unique identifier
-    token_class = "cleaning"             # determines grammar position
-    reads = ["raw_history"]              # required keys in state.features
-    writes = ["cleaned"]                 # keys this token creates
-    description = "Per-sample z-score normalisation"
-
-    def apply(self, state):
-        X = state.features["raw_history"]
-        mu = X.mean(axis=1, keepdims=True)
-        sigma = X.std(axis=1, keepdims=True) + 1e-8
-        state.features["cleaned"] = (X - mu) / sigma
-
-        # Always log what happened
-        state.log_step(self.name,
-                       _shapes(state, self.reads),
-                       {k: state.features[k].shape for k in self.writes})
-        state.token_sequence.append(self.name)
-        return state
-```
-
-### 2. Register it in the grammar
-
-In `tokens/__init__.py`, import your token and add it to `register_all()`:
-
-```python
-from .my_new_tokens import CleanZScore
-
-def register_all(grammar):
-    # ... existing registrations ...
-
-    # New cleaning token: follows START (like all cleaning tokens)
-    grammar.register(CleanZScore(), follows=["START"])
-```
-
-That's it. MCTS will now explore pipelines that use your token.
-
-## Token templates by class
-
-### Cleaning token
-
-Reads `raw_history`, writes `cleaned`. Follows `START`.
-
-```python
-class CleanExample(Token):
-    name = "my_cleaner"
-    token_class = "cleaning"
-    reads = ["raw_history"]
-    writes = ["cleaned"]
-    description = "What this cleaner does"
-
-    def apply(self, state):
-        X = state.features["raw_history"]
-        # ... transform X ...
-        state.features["cleaned"] = result
-        state.log_step(self.name, _shapes(state, self.reads),
-                       {"cleaned": result.shape})
-        state.token_sequence.append(self.name)
-        return state
-```
-
-Register: `grammar.register(CleanExample(), follows=["START"])`
-
-### Feature token
-
-Reads `cleaned`, writes `model_input`. Follows cleaning tokens.
-
-```python
-class FeatExample(Token):
-    name = "my_features"
-    token_class = "feature"
-    reads = ["cleaned"]
-    writes = ["model_input"]
-    description = "What features this extracts"
-
-    def apply(self, state):
-        X = state.features["cleaned"]
-        # ... extract features ...
-        state.features["model_input"] = features
-        state.log_step(self.name, _shapes(state, self.reads),
-                       {"model_input": features.shape})
-        state.token_sequence.append(self.name)
-        return state
-```
-
-Register: `grammar.register(FeatExample(), follows=["identity", "detrend", "moving_avg"])`
-
-### Model token
-
-Reads `model_input`, uses `state.current_target` as the Y to fit. Must call `state.push_prediction()` which auto-updates the residual for chaining.
-
-```python
-class ModelExample(Token):
-    name = "my_model"
-    token_class = "model"
-    reads = ["model_input"]
-    writes = []
-    description = "What this model does"
-
-    def apply(self, state):
-        X = state.features["model_input"].astype(np.float32)
-        Y = state.current_target.astype(np.float32)  # residual if chained
-        n = X.shape[0]
-        Y_loo = np.zeros_like(Y)
-
-        # Leave-one-out evaluation
-        for i in range(n):
-            mask = np.ones(n, dtype=bool)
-            mask[i] = False
-            # ... fit on X[mask], Y[mask] ...
-            # ... predict X[i:i+1] ...
-            Y_loo[i] = prediction
-
-        # This auto-updates state.current_target for the next model
-        state.push_prediction(Y_loo, self.name)
-        state.log_step(self.name,
-                       {"model_input": X.shape, "current_target": Y.shape},
-                       {"prediction_stack[-1]": Y_loo.shape})
-        state.token_sequence.append(self.name)
-        return state
-```
-
-Register (with residual chaining):
-```python
-model_follows = ["feat_raw", "fft_encode", "kernel_rbf", "random_forest", "xgboost", "my_model"]
-model_leads = ["kernel_rbf", "random_forest", "xgboost", "my_model", "fft_decode", "STOP"]
-grammar.register(ModelExample(), follows=model_follows, leads_to=model_leads)
-```
-
-### Encoder / Decoder pair
-
-Encoders transform to a different domain (e.g. FFT). Decoders transform back. The encoder stores state that the decoder needs.
-
-```python
-class EncodeExample(Token):
-    name = "my_encode"
-    token_class = "encoder"
-    reads = ["cleaned"]
-    writes = ["model_input", "encode_state"]  # store whatever the decoder needs
-    description = "Encode to some domain"
-
-    def apply(self, state):
-        X = state.features["cleaned"]
-        # ... transform ...
-        state.features["model_input"] = transformed
-        state.features["encode_state"] = side_info  # for the decoder
-        state.log_step(self.name, _shapes(state, self.reads),
-                       {k: state.features[k].shape for k in self.writes})
-        state.token_sequence.append(self.name)
-        return state
-
-class DecodeExample(Token):
-    name = "my_decode"
-    token_class = "decoder"
-    reads = ["encode_state"]
-    writes = []
-    description = "Decode back from that domain"
-
-    def apply(self, state):
-        side_info = state.features["encode_state"]
-        pred = state.last_prediction()
-        # ... inverse transform pred using side_info ...
-        state.prediction_stack[-1] = reconstructed
-        state.log_step(self.name, _shapes(state, self.reads), {})
-        state.token_sequence.append(self.name)
-        return state
-```
-
-## Grammar wiring
-
-The grammar is a directed graph. `register()` takes:
-- `follows`: list of token names that can appear **before** this token
-- `leads_to`: list of token names that can appear **after** this token
-
-```python
-grammar = Grammar()
-
-# A follows B means: after B runs, A becomes a valid action
-grammar.register(my_token, follows=["identity", "detrend"], leads_to=["STOP"])
-```
-
-The grammar enforces two constraints simultaneously:
-1. **Graph edges** — the token must be reachable from the current position
-2. **Feature availability** — `token.reads` must all exist in `state.features`
-
-STOP is a special control token: it only becomes valid when at least one model has been applied (`state.n_models_applied > 0`).
-
-## Optional Lark AST layer
-
-The current token blocks can also be addressed through a small pipeline DSL:
-
-```python
-from graph_Time_series import Grammar, State, apply_pipeline, parse_pipeline
+from graph_Time_series import Grammar
 from graph_Time_series.token_blocks import register_default_tokens
 
 grammar = register_default_tokens(Grammar())
-ast = parse_pipeline("ZNormalization -> kernel_rbf -> STOP")
-
-state = State(H, F)
-state = apply_pipeline(ast, grammar, state)
-print(state.token_sequence)
-print(state.features["final_forecast"].shape)
 ```
 
-This layer is intentionally non-invasive: Lark parses text into a `PipelineAST`,
-validation checks the existing graph transitions and token `can_apply()` rules,
-and execution still delegates to the same token `.apply(state)` methods.
+The default token vocabulary is:
 
-Install the optional parser dependency with:
+```text
+ZNormalization
+BindScaledHistory
+BindAllSafeTabular
+kernel_rbf
+STOP
+```
+
+Example:
+
+```python
+from graph_Time_series import State, Grammar, apply_pipeline
+from graph_Time_series.token_blocks import register_default_tokens
+
+grammar = register_default_tokens(Grammar())
+state = State(H, F)
+state = apply_pipeline(
+    "ZNormalization -> BindScaledHistory -> kernel_rbf -> STOP",
+    grammar,
+    state,
+)
+
+forecast = state.features["final_forecast"]
+```
+
+## Optional Lark Pipeline DSL
+
+`pipeline_ast.py` adds a lightweight parser for linear token chains:
+
+```python
+from graph_Time_series import parse_pipeline, pipeline_to_sequence
+
+ast = parse_pipeline("ZNormalization -> BindScaledHistory -> kernel_rbf -> STOP")
+print(ast.names)
+print(ast.to_source())
+```
+
+Install the optional parser dependency when needed:
 
 ```bash
 pip install lark
 ```
 
-## Residual chaining
+The parser is deliberately non-invasive. It validates token names and graph
+transitions, then delegates execution to the existing token instances.
 
-When a model calls `state.push_prediction(Y_loo, name)`, the State automatically updates `current_target`:
+Token keyword arguments are parsed into the AST, but not applied dynamically yet.
+For now, configured variants should be registered as explicit token instances in
+the grammar.
 
+## Notebook Playground
+
+The main working notebook is:
+
+```text
+examples/test_token_sequence_colab.ipynb
 ```
-current_target = original_future - sum(prediction_stack)
+
+It currently includes:
+
+- dataset loading through the companion exploratory repo;
+- full state inspection and token-by-token diffs;
+- notebook-local prototype tokens;
+- artifact and bundle tables;
+- leakage-safe holdout comparison;
+- optional cross-validation;
+- plots for manual and holdout forecasts.
+
+Notebook-local prototype tokens include:
+
+| Token | Status | Purpose |
+| --- | --- | --- |
+| `DataAugmentation` | notebook prototype | Jitter/smooth history for training experiments |
+| `ContextWindow` | notebook prototype | Keep a fixed recent context window |
+| `PeriodSelection` | notebook prototype | Pick a simple candidate period |
+| `PeriodPhaseOneHot` | package token used in notebook | Encode phase inside selected period |
+| `PeriodFold` | notebook prototype | Fold history into period phases |
+| `ShapeLevel` | notebook prototype | Estimate a within-period shape vector |
+| `shape_naive` | notebook prototype | Predict last level distributed through shape |
+| `kernel_rbf_fast` | notebook prototype | Faster in-sample RBF diagnostic token |
+| `level_kernel_rbf` | notebook prototype | RBF on level features, expanded through shape |
+
+The notebook distinguishes manual in-sample diagnostics from leakage-safe
+holdout scoring. Use the leakage-safe section for model comparison.
+
+## State Evolution Example
+
+For this sequence:
+
+```text
+ContextWindow -> ZNormalization -> BindScaledHistory -> kernel_rbf_fast
 ```
 
-So the second model in a chain fits the **residual** of the first, the third fits the residual of the first two, etc. The final forecast is the sum of all predictions.
+the state evolves as:
 
-## MCTS search
+```text
+State(H, F)
+  raw_history registered as an artifact
+  active_target_base = F
+  current_target = F
+
+ContextWindow
+  original_history becomes the last context window
+  features["raw_history"] is updated
+  historical_features["context_history"] is added
+
+ZNormalization
+  historical_features["scaled_history"] is added
+  active_target_base becomes normalized future
+  current_target becomes normalized residual target
+  inverse transform is registered
+
+BindScaledHistory
+  historical_features["model_input"] is set
+  active InputBundle is set to "scaled_history"
+
+kernel_rbf_fast
+  reads model_input and current_target
+  pushes one prediction
+  current_target becomes the remaining residual
+```
+
+Package `kernel_rbf` follows the same state contract, with explicit leave-one-out
+prediction inside the current state.
+
+## Leakage-Safe Evaluation
+
+For learned models, comparison should fit on training futures only and predict
+separate holdout histories. The notebook's leakage-safe section does this by:
+
+1. applying feature/binder tokens separately to train and query states;
+2. fitting learned model wrappers on train features and train targets;
+3. pushing predictions only into the query state;
+4. ranking candidates by holdout metrics.
+
+This avoids the older pattern where a model could accidentally fit on the same
+future values used for evaluation.
+
+## Adding New Tokens
+
+New tokens should keep the broad-state plus explicit-binder pattern:
+
+1. Feature tokens can create named artifacts.
+2. Binder tokens decide which artifacts become `model_input`.
+3. Model tokens consume declared bundle kinds.
+4. Models call `state.push_prediction(...)` so residual chaining stays correct.
+5. Transforms call `state.register_transform(...)` so final predictions decode
+   correctly.
+
+Minimal feature token sketch:
 
 ```python
-from graph_Time_series import State, Grammar, mcts_search
-from graph_Time_series.tokens import register_all
+from graph_Time_series.token import FeatureToken
 
-grammar = Grammar()
-register_all(grammar)
 
-state = State(history_array, future_array)  # both (n_samples, length)
-results = mcts_search(grammar, state, n_iterations=40, puct_c=1.5)
+class MyFeatureToken(FeatureToken):
+    name = "MyFeature"
+    reads = ("raw_history",)
+    writes = ("my_feature",)
 
-print(results["best_chain"])   # e.g. "identity -> feat_raw -> kernel_rbf -> STOP"
-print(results["best_mase"])    # e.g. 2.34
+    def apply(self, state):
+        value = ...  # shape must start with state.n_samples
+        state.add_historical_feature("my_feature", value)
+        self._log_execution(
+            state,
+            reads={"raw_history": state.features["raw_history"].shape},
+            writes={"my_feature": value.shape},
+        )
+        return state
 ```
 
-The search uses the PUCT formula (AlphaZero-style) with MI-based priors from `heuristics.py`:
+Minimal model token sketch:
 
+```python
+from graph_Time_series.token import ModelToken
+
+
+class MyModelToken(ModelToken):
+    name = "my_model"
+    accepted_input_kinds = {"tabular"}
+
+    def get_model(self):
+        return {"model": "my_model"}
+
+    def apply(self, state):
+        X = state.historical_features["model_input"]
+        Y = state.current_target
+        pred = ...  # same shape as Y
+        state.push_prediction(pred, self.name)
+        self._log_execution(
+            state,
+            reads={"model_input": X.shape, "current_target": Y.shape},
+            writes={"prediction_stack[-1]": pred.shape},
+        )
+        return state
 ```
-score(a) = Q(a) + c * prior(a) * sqrt(N_parent) / (1 + N(a))
-```
 
-## Existing tokens
+## Open Extension Directions
 
-| Name | Class | Description |
-|------|-------|-------------|
-| `identity` | cleaning | Pass-through |
-| `detrend` | cleaning | Remove per-sample linear trend |
-| `moving_avg` | cleaning | Centred moving average (window=5) |
-| `feat_raw` | feature | Use cleaned histories directly |
-| `fft_encode` | encoder | FFT magnitudes as features, store phase |
-| `fft_decode` | decoder | Inverse FFT (stub — to implement) |
-| `kernel_rbf` | model | RBF kernel regression, analytic LOO |
-| `random_forest` | model | Random forest, explicit LOO |
-| `xgboost` | model | XGBoost, explicit LOO |
-| `STOP` | control | Compute final forecast and MASE |
+These are intentionally left open-ended. They reflect directions explored in
+discussion or the notebook, but are not fully promoted to package tokens yet.
 
-## Quick start
+| Direction | Possible token family |
+| --- | --- |
+| Context selection | `ContextWindow`, adaptive windows, multi-resolution windows |
+| Period/seasonality features | `PeriodSelection`, `PeriodFold`, phase embeddings |
+| Shape/level decomposition | `ShapeLevel`, level models, residual shape correction |
+| Rich tabular models | linear/ridge, random forest, gradient boosting, XGBoost |
+| Multi-channel sequence models | binders with `sequence_multi` or `tensor` bundle kinds |
+| Residual ensembles | multiple model tokens chained through `current_target` |
+| Calendar/known-future covariates | future feature artifacts and horizon-aware binders |
+| Kernel variants | DTW kernels, shape kernels, level kernels, hybrid kernels |
+| Search | grammar-guided candidate enumeration or MCTS over registered tokens |
+| Configurable AST tokens | parsed keyword arguments mapped to configured token instances |
 
-```bash
-pip install numpy scikit-learn xgboost networkx matplotlib tqdm datasets
-```
+The most important rule for all of these is to keep token interfaces explicit:
+create artifacts broadly, bind inputs deliberately, and let the state manage
+transforms and residuals.
+
+## Quick Smoke Test
 
 ```python
 import numpy as np
-from graph_Time_series import State, Grammar, mcts_search, plot_grammar
-from graph_Time_series.tokens import register_all
 
-# Build grammar
-grammar = Grammar()
-register_all(grammar)
-plot_grammar(grammar)
+from graph_Time_series import State, Grammar, apply_pipeline
+from graph_Time_series.token_blocks import register_default_tokens
 
-# Load your data as (n_samples, history_length) and (n_samples, horizon)
-H = np.random.randn(25, 48).astype(np.float32)
-F = np.random.randn(25, 12).astype(np.float32)
+H = np.random.randn(16, 48).astype("float32")
+F = np.random.randn(16, 12).astype("float32")
 
-# Run search
+grammar = register_default_tokens(Grammar())
 state = State(H, F)
-results = mcts_search(grammar, state, n_iterations=40)
+state = apply_pipeline(
+    "ZNormalization -> BindScaledHistory -> kernel_rbf -> STOP",
+    grammar,
+    state,
+)
 
-# Inspect
-print(results["best_chain"], results["best_mase"])
+print(state.token_sequence)
+print(state.features["final_forecast"].shape)
+print(state.describe_artifacts())
+print(state.describe_input_bundles())
 ```
-
-## File structure
-
-```
-graph_Time_series/
-|-- README.md
-|-- .gitignore
-|-- graph_Time_series/
-|   |-- __init__.py          # package exports
-|   |-- state.py             # State (RL state)
-|   |-- token.py             # Token ABC
-|   |-- grammar.py           # Grammar graph + visualisation
-|   |-- heuristics.py        # MI-based PUCT priors
-|   |-- mcts.py              # MCTS search
-|   |-- data.py              # dataset loading/preparation helpers
-|   |-- augmentation.py      # time-series augmentation helpers
-|   |-- preprocessing.py     # slicing/pretraining/domain utilities
-|   |-- pipeline.py          # train/eval orchestration helpers
-|   |-- kernels.py           # reusable kernel models and metrics
-|   |-- decomposition.py     # decomposition feature utilities
-|   |-- viz.py               # plotting/report helpers
-|   |-- config.py            # experiment/config helpers
-|   `-- tokens/
-|       |-- __init__.py      # register_all(grammar)
-|       |-- cleaning.py      # identity, normalize, detrend, moving_avg
-|       |-- features.py      # feat_raw, fft_encode, lag features
-|       `-- models.py        # kernel_rbf, random_forest, xgboost, STOP
-|-- notebooks/
-|   |-- energy_h_long_clp_mcts_experiments.ipynb
-|   |-- clp_step_by_step_anatomy.ipynb
-|   |-- run_colab.ipynb
-|   `-- clp_framework_fixed.ipynb
-`-- examples/
-    `-- clp_framework_fixed.py
-```
-
-The repository root now only contains project-level files and folders. The importable
-Python package lives in `graph_Time_series/`, so imports such as
-`from graph_Time_series import State` continue to work after adding the repository
-root to `sys.path`. Experiment notebooks live under `notebooks/`, and standalone
-runnable scripts live under `examples/`.

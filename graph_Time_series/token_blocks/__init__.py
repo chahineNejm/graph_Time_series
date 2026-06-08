@@ -10,6 +10,7 @@ from .bindings import (
 )
 from .kernel_rbf import KernelRBFToken
 from .normalization import ZNormalizationToken
+from .periodic import PeriodPhaseOneHotToken
 
 
 def register_default_tokens(grammar):
@@ -43,6 +44,7 @@ __all__ = [
     "BindFeatureToken",
     "BindScaledHistoryToken",
     "KernelRBFToken",
+    "PeriodPhaseOneHotToken",
     "StackFeatureBundleToken",
     "ZNormalizationToken",
     "register_default_tokens",
