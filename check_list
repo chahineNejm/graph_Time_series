@@ -2,9 +2,44 @@ tokens to add:
 tabular models : Random forest , boosted models (maybe lightGBM)
 complete the flair: and have full description, one of the pipeline should be able to completly replicate the flair
 go over kaggle stuff and download notebooks I like?
+CWT features as tokens (MULTIPLE VARIANTS)
+DICTIONARY LEARNING TECHNIQUES: K-SVD and Online Dictionary Learning (MiniBatchDictionaryLearning in sklearn)
+  - learn prototype motifs (atoms) from history windows
+  - encode each window as sparse combination of atoms
+  - multiple variants: different vocab size K, atom length L, sparsity level
+  - two-phase design: DictionaryFit (train) + DictionaryEncode (inference)
+  - look at this later
 
+Fourier feature token: will work on this
+  - sin/cos projections at detected period + harmonics
+  - reads metadata.period (already computed by PeriodSelection)
+  - smooth alternative to PeriodPhaseOneHot, much lower dimensionality
 
-grammar to clean: 
+Rolling stats token: needs more engineering
+  - windowed mean, std, min, max, skewness at multiple scales
+  - idea: separate the rolling stats from the residual series and reconstruct them independently
+  - essential once tabular models (RF, LightGBM) are added — they need flat feature vectors
+
+STL decomposition token: explore
+  - decomposes into trend + seasonal + residual
+  - the graph will NOT stumble upon this automatically
+  - requires explicit BindTrend / BindSeasonal / BindResidual tokens to route components to different models
+  - this is the formal version of what shape_naive + level_kernel_rbf already do informally
+  - needs a stacking token at the end to aggregate the three model outputs
+
+Stacking / blending token: like the idea, need to figure out integration
+  - prediction_stack already accumulates outputs across the run — right foundation
+  - StackingToken sits just before STOP as a convergence point
+  - meta-learner reads full prediction_stack and blends (constrained linear combination to start)
+  - tree expansion explores branches independently but prediction_stack converges them
+  - open question: how to train the meta-learner online (held-out folds during the same run?)
+
+Calendar feature tokens: VERY IMPORTANT
+  - need TimestampExtractor first: reads series index, writes metadata.timestamps (right after START)
+  - then CalendarFeature token: day_of_week, is_weekend, month, week_of_year, is_holiday
+  - holidays library for country-specific calendars
+  - highest-signal feature for retail / energy / traffic series
+
+grammar to clean:
 bundling tokens for now I don t like them
 clean up the structure go over it properly
-
