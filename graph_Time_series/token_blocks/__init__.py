@@ -9,7 +9,7 @@ from .bindings import (
     StackFeatureBundleToken,
 )
 from .kernel_rbf import KernelRBFToken
-from .normalization import ZNormalizationToken
+from .normalization import MeanAbsScalingToken, ZNormalizationToken
 from .periodic import PeriodPhaseOneHotToken
 
 
@@ -22,18 +22,29 @@ def register_default_tokens(grammar):
         leads_to=["BindScaledHistory", "kernel_rbf"],
     )
     grammar.register(
+        MeanAbsScalingToken(),
+        follows=["START"],
+        leads_to=["BindScaledHistory", "kernel_rbf"],
+    )
+    grammar.register(
         BindScaledHistoryToken(),
-        follows=["ZNormalization", "kernel_rbf"],
+        follows=["ZNormalization", "MeanAbsScaling", "kernel_rbf"],
         leads_to=["kernel_rbf"],
     )
     grammar.register(
         BindAllSafeTabularToken(),
-        follows=["ZNormalization", "BindScaledHistory", "kernel_rbf"],
+        follows=["ZNormalization", "MeanAbsScaling", "BindScaledHistory", "kernel_rbf"],
         leads_to=["kernel_rbf"],
     )
     grammar.register(
         KernelRBFToken(),
-        follows=["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "kernel_rbf"],
+        follows=[
+            "ZNormalization",
+            "MeanAbsScaling",
+            "BindScaledHistory",
+            "BindAllSafeTabular",
+            "kernel_rbf",
+        ],
         leads_to=["BindScaledHistory", "BindAllSafeTabular", "kernel_rbf", "STOP"],
     )
     return grammar
@@ -44,6 +55,7 @@ __all__ = [
     "BindFeatureToken",
     "BindScaledHistoryToken",
     "KernelRBFToken",
+    "MeanAbsScalingToken",
     "PeriodPhaseOneHotToken",
     "StackFeatureBundleToken",
     "ZNormalizationToken",

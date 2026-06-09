@@ -11,8 +11,10 @@ Core view hides generic binders, aliases, and broad experimental adapters.
 ```mermaid
 flowchart LR
   n_START["START<br/>synthetic / control"]:::control
+  n_STOP["STOP<br/>synthetic / control"]:::control
   n_ContextWindow["ContextWindow<br/>notebook / cleaning"]:::cleaning
   n_DataAugmentation["DataAugmentation<br/>notebook / cleaning"]:::cleaning
+  n_MeanAbsScaling["MeanAbsScaling<br/>package / transform"]:::transform
   n_ZNormalization["ZNormalization<br/>package / transform"]:::transform
   n_PeriodFold["PeriodFold<br/>notebook / feature"]:::feature
   n_PeriodPhaseOneHot["PeriodPhaseOneHot<br/>package / feature"]:::feature
@@ -23,19 +25,24 @@ flowchart LR
   n_kernel_rbf_fast["kernel_rbf_fast<br/>notebook / model"]:::model
   n_level_kernel_rbf["level_kernel_rbf<br/>notebook / model"]:::model
   n_shape_naive["shape_naive<br/>notebook / model"]:::model
-  n_STOP["STOP<br/>synthetic / terminal"]:::terminal
   n_BindScaledHistory --> n_kernel_rbf
   n_BindScaledHistory --> n_kernel_rbf_fast
+  n_ContextWindow --> n_MeanAbsScaling
   n_ContextWindow --> n_PeriodSelection
   n_ContextWindow --> n_ZNormalization
   n_DataAugmentation --> n_ContextWindow
+  n_DataAugmentation --> n_MeanAbsScaling
   n_DataAugmentation --> n_ZNormalization
+  n_MeanAbsScaling --> n_BindScaledHistory
+  n_MeanAbsScaling --> n_kernel_rbf
+  n_MeanAbsScaling --> n_kernel_rbf_fast
   n_PeriodFold --> n_ShapeLevel
   n_PeriodPhaseOneHot --> n_PeriodFold
   n_PeriodSelection --> n_PeriodFold
   n_PeriodSelection --> n_PeriodPhaseOneHot
   n_START --> n_ContextWindow
   n_START --> n_DataAugmentation
+  n_START --> n_MeanAbsScaling
   n_START --> n_PeriodSelection
   n_START --> n_ZNormalization
   n_ShapeLevel --> n_level_kernel_rbf
@@ -78,8 +85,10 @@ Full view includes adapter/factory tokens and aliases.
 ```mermaid
 flowchart LR
   n_START["START<br/>synthetic / control"]:::control
+  n_STOP["STOP<br/>synthetic / control"]:::control
   n_ContextWindow["ContextWindow<br/>notebook / cleaning"]:::cleaning
   n_DataAugmentation["DataAugmentation<br/>notebook / cleaning"]:::cleaning
+  n_MeanAbsScaling["MeanAbsScaling<br/>package / transform"]:::transform
   n_ZNormalization["ZNormalization<br/>package / transform"]:::transform
   n_PeriodFold["PeriodFold<br/>notebook / feature"]:::feature
   n_PeriodPhaseOneHot["PeriodPhaseOneHot<br/>package / feature"]:::feature
@@ -96,7 +105,6 @@ flowchart LR
   n_kernel_rbf_loo["kernel_rbf_loo<br/>notebook / model"]:::model
   n_level_kernel_rbf["level_kernel_rbf<br/>notebook / model"]:::model
   n_shape_naive["shape_naive<br/>notebook / model"]:::model
-  n_STOP["STOP<br/>synthetic / terminal"]:::terminal
   n_BindAllSafeTabular --> n_kernel_rbf
   n_BindAllSafeTabular --> n_kernel_rbf_fast
   n_BindAllSafeTabular --> n_kernel_rbf_loo
@@ -107,10 +115,18 @@ flowchart LR
   n_BindScaledHistory --> n_kernel_rbf_fast
   n_BindScaledHistory --> n_kernel_rbf_loo
   n_ContextWindow --> n_BindRawHistory
+  n_ContextWindow --> n_MeanAbsScaling
   n_ContextWindow --> n_PeriodSelection
   n_ContextWindow --> n_ZNormalization
   n_DataAugmentation --> n_ContextWindow
+  n_DataAugmentation --> n_MeanAbsScaling
   n_DataAugmentation --> n_ZNormalization
+  n_MeanAbsScaling --> n_BindAllSafeTabular
+  n_MeanAbsScaling --> n_BindScaledHistory
+  n_MeanAbsScaling --> n_StackScaledContext
+  n_MeanAbsScaling --> n_kernel_rbf
+  n_MeanAbsScaling --> n_kernel_rbf_fast
+  n_MeanAbsScaling --> n_kernel_rbf_loo
   n_PeriodFold --> n_BindAllSafeTabular
   n_PeriodFold --> n_ShapeLevel
   n_PeriodFold --> n_StackFeatureBundleToken
@@ -122,6 +138,7 @@ flowchart LR
   n_START --> n_BindRawHistory
   n_START --> n_ContextWindow
   n_START --> n_DataAugmentation
+  n_START --> n_MeanAbsScaling
   n_START --> n_PeriodSelection
   n_START --> n_ZNormalization
   n_ShapeLevel --> n_BindAllSafeTabular
@@ -182,23 +199,24 @@ flowchart LR
 
 | Token | Status | Class | Core | Parents | Next |
 | --- | --- | --- | --- | --- | --- |
-| `START` | synthetic | control | yes |  | `BindRawHistory`, `ContextWindow`, `DataAugmentation`, `PeriodSelection`, `ZNormalization` |
-| `ContextWindow` | notebook | cleaning | yes | `DataAugmentation`, `START` | `BindRawHistory`, `PeriodSelection`, `ZNormalization` |
-| `DataAugmentation` | notebook | cleaning | yes | `START` | `ContextWindow`, `ZNormalization` |
+| `START` | synthetic | control | yes |  | `BindRawHistory`, `ContextWindow`, `DataAugmentation`, `MeanAbsScaling`, `PeriodSelection`, `ZNormalization` |
+| `STOP` | synthetic | control | yes | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |  |
+| `ContextWindow` | notebook | cleaning | yes | `DataAugmentation`, `START` | `BindRawHistory`, `MeanAbsScaling`, `PeriodSelection`, `ZNormalization` |
+| `DataAugmentation` | notebook | cleaning | yes | `START` | `ContextWindow`, `MeanAbsScaling`, `ZNormalization` |
+| `MeanAbsScaling` | package | transform | yes | `ContextWindow`, `DataAugmentation`, `START` | `BindAllSafeTabular`, `BindScaledHistory`, `StackScaledContext`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
 | `ZNormalization` | package | transform | yes | `ContextWindow`, `DataAugmentation`, `START` | `BindAllSafeTabular`, `BindScaledHistory`, `StackScaledContext`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
 | `PeriodFold` | notebook | feature | yes | `PeriodPhaseOneHot`, `PeriodSelection` | `BindAllSafeTabular`, `ShapeLevel`, `StackFeatureBundleToken` |
 | `PeriodPhaseOneHot` | package | feature | yes | `PeriodSelection` | `BindAllSafeTabular`, `PeriodFold`, `StackFeatureBundleToken` |
 | `PeriodSelection` | notebook | feature | yes | `ContextWindow`, `START` | `PeriodFold`, `PeriodPhaseOneHot` |
 | `ShapeLevel` | notebook | feature | yes | `PeriodFold` | `BindAllSafeTabular`, `StackFeatureBundleToken`, `level_kernel_rbf`, `shape_naive` |
-| `BindAllSafeTabular` | package | binding | no | `BindScaledHistory`, `PeriodFold`, `PeriodPhaseOneHot`, `ShapeLevel`, `ZNormalization`, `kernel_rbf` | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
+| `BindAllSafeTabular` | package | binding | no | `BindScaledHistory`, `MeanAbsScaling`, `PeriodFold`, `PeriodPhaseOneHot`, `ShapeLevel`, `ZNormalization`, `kernel_rbf` | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
 | `BindFeatureToken` | package | binding | no |  |  |
 | `BindRawHistory` | notebook | binding | no | `ContextWindow`, `START` | `kernel_rbf`, `kernel_rbf_fast` |
-| `BindScaledHistory` | package | binding | yes | `ZNormalization`, `kernel_rbf` | `BindAllSafeTabular`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
+| `BindScaledHistory` | package | binding | yes | `MeanAbsScaling`, `ZNormalization`, `kernel_rbf` | `BindAllSafeTabular`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
 | `StackFeatureBundleToken` | package | binding | no | `PeriodFold`, `PeriodPhaseOneHot`, `ShapeLevel` | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
-| `StackScaledContext` | notebook | binding | no | `ZNormalization` | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
-| `kernel_rbf` | package | model | yes | `BindAllSafeTabular`, `BindRawHistory`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` | `BindAllSafeTabular`, `BindScaledHistory`, `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |
-| `kernel_rbf_fast` | notebook | model | yes | `BindAllSafeTabular`, `BindRawHistory`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` | `STOP`, `kernel_rbf`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |
-| `kernel_rbf_loo` | notebook | model | no | `BindAllSafeTabular`, `BindScaledHistory`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_fast`, `level_kernel_rbf`, `shape_naive` | `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `level_kernel_rbf`, `shape_naive` |
+| `StackScaledContext` | notebook | binding | no | `MeanAbsScaling`, `ZNormalization` | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo` |
+| `kernel_rbf` | package | model | yes | `BindAllSafeTabular`, `BindRawHistory`, `BindScaledHistory`, `MeanAbsScaling`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` | `BindAllSafeTabular`, `BindScaledHistory`, `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |
+| `kernel_rbf_fast` | notebook | model | yes | `BindAllSafeTabular`, `BindRawHistory`, `BindScaledHistory`, `MeanAbsScaling`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` | `STOP`, `kernel_rbf`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |
+| `kernel_rbf_loo` | notebook | model | no | `BindAllSafeTabular`, `BindScaledHistory`, `MeanAbsScaling`, `StackFeatureBundleToken`, `StackScaledContext`, `ZNormalization`, `kernel_rbf`, `kernel_rbf_fast`, `level_kernel_rbf`, `shape_naive` | `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `level_kernel_rbf`, `shape_naive` |
 | `level_kernel_rbf` | notebook | model | yes | `ShapeLevel`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `shape_naive` | `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `shape_naive` |
 | `shape_naive` | notebook | model | yes | `ShapeLevel`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf` | `STOP`, `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf` |
-| `STOP` | synthetic | terminal | yes | `kernel_rbf`, `kernel_rbf_fast`, `kernel_rbf_loo`, `level_kernel_rbf`, `shape_naive` |  |

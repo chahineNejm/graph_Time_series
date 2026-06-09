@@ -20,6 +20,7 @@
         "ContextWindow",
         "PeriodSelection",
         "ZNormalization",
+        "MeanAbsScaling",
         "BindRawHistory"
       ]
     },
@@ -32,7 +33,7 @@
       "reads": ["features.raw_history"],
       "writes": ["features.raw_history", "historical_features.augmented_history"],
       "parents": ["START"],
-      "next": ["ContextWindow", "ZNormalization"]
+      "next": ["ContextWindow", "ZNormalization", "MeanAbsScaling"]
     },
     {
       "id": "ContextWindow",
@@ -43,7 +44,7 @@
       "reads": ["features.raw_history"],
       "writes": ["features.raw_history", "historical_features.context_history"],
       "parents": ["START", "DataAugmentation"],
-      "next": ["ZNormalization", "PeriodSelection"]
+      "next": ["ZNormalization", "MeanAbsScaling", "PeriodSelection"]
     },
     {
       "id": "ZNormalization",
@@ -51,6 +52,24 @@
       "class": "transform",
       "core": true,
       "description": "Normalize each series by its history and transform the active target space.",
+      "reads": ["features.raw_history"],
+      "writes": ["historical_features.scaled_history", "active_target_base", "transform_stack"],
+      "parents": ["START", "ContextWindow", "DataAugmentation"],
+      "next": [
+        "BindScaledHistory",
+        "BindAllSafeTabular",
+        "StackScaledContext",
+        "kernel_rbf",
+        "kernel_rbf_fast",
+        "kernel_rbf_loo"
+      ]
+    },
+    {
+      "id": "MeanAbsScaling",
+      "status": "package",
+      "class": "transform",
+      "core": true,
+      "description": "Scale each series by mean absolute history value without centering.",
       "reads": ["features.raw_history"],
       "writes": ["historical_features.scaled_history", "active_target_base", "transform_stack"],
       "parents": ["START", "ContextWindow", "DataAugmentation"],
@@ -120,7 +139,7 @@
       "description": "Bind scaled_history as the active sequence_flat model_input.",
       "reads": ["historical_features.scaled_history"],
       "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
-      "parents": ["ZNormalization", "kernel_rbf"],
+      "parents": ["ZNormalization", "MeanAbsScaling", "kernel_rbf"],
       "next": ["kernel_rbf", "kernel_rbf_fast", "kernel_rbf_loo"]
     },
     {
@@ -131,7 +150,7 @@
       "description": "Broad binder that flattens all finite historical artifacts into one tabular model_input.",
       "reads": ["historical_features.*"],
       "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
-      "parents": ["ZNormalization", "PeriodPhaseOneHot", "PeriodFold", "ShapeLevel", "BindScaledHistory", "kernel_rbf"],
+      "parents": ["ZNormalization", "MeanAbsScaling", "PeriodPhaseOneHot", "PeriodFold", "ShapeLevel", "BindScaledHistory", "kernel_rbf"],
       "next": ["kernel_rbf", "kernel_rbf_fast", "kernel_rbf_loo"]
     },
     {
@@ -175,7 +194,7 @@
       "description": "Notebook-configured StackFeatureBundleToken for scaled_history plus context_history.",
       "reads": ["historical_features.scaled_history", "historical_features.context_history"],
       "writes": ["historical_features.model_input", "metadata.active_input_bundle"],
-      "parents": ["ZNormalization"],
+      "parents": ["ZNormalization", "MeanAbsScaling"],
       "next": ["kernel_rbf_fast", "kernel_rbf", "kernel_rbf_loo"]
     },
     {
@@ -186,7 +205,7 @@
       "description": "Package RBF KernelRidge model with leave-one-out predictions inside the current state.",
       "reads": ["historical_features.model_input or scaled_history", "current_target"],
       "writes": ["prediction_stack", "features.current_residual"],
-      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo"],
+      "parents": ["ZNormalization", "MeanAbsScaling", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo"],
       "next": ["BindScaledHistory", "BindAllSafeTabular", "kernel_rbf", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo", "STOP"]
     },
     {
@@ -197,7 +216,7 @@
       "description": "Notebook fast RBF diagnostic token; direct use is in-sample.",
       "reads": ["historical_features.model_input or scaled_history", "current_target"],
       "writes": ["prediction_stack", "features.current_residual"],
-      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo"],
+      "parents": ["ZNormalization", "MeanAbsScaling", "BindScaledHistory", "BindAllSafeTabular", "BindRawHistory", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo"],
       "next": ["kernel_rbf", "shape_naive", "level_kernel_rbf", "kernel_rbf_loo", "STOP"]
     },
     {
@@ -208,7 +227,7 @@
       "description": "Notebook registry alias for the package KernelRBFToken.",
       "reads": ["historical_features.model_input or scaled_history", "current_target"],
       "writes": ["prediction_stack", "features.current_residual"],
-      "parents": ["ZNormalization", "BindScaledHistory", "BindAllSafeTabular", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf"],
+      "parents": ["ZNormalization", "MeanAbsScaling", "BindScaledHistory", "BindAllSafeTabular", "StackFeatureBundleToken", "StackScaledContext", "kernel_rbf", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf"],
       "next": ["kernel_rbf", "kernel_rbf_fast", "shape_naive", "level_kernel_rbf", "STOP"]
     },
     {
@@ -236,7 +255,7 @@
     {
       "id": "STOP",
       "status": "synthetic",
-      "class": "terminal",
+      "class": "control",
       "core": true,
       "description": "Synthetic stop node for graph visualization.",
       "reads": ["prediction_stack"],

@@ -132,6 +132,20 @@ Typical use:
 ZNormalization -> BindScaledHistory -> kernel_rbf
 ```
 
+### `MeanAbsScaling`
+
+File: `graph_Time_series/token_blocks/normalization.py`
+
+Per-series scaling by the mean absolute history value, without centering. It
+writes the same `scaled_history` contract as `ZNormalization`, registers an
+inverse transform, and can be followed by the same bind/model tokens.
+
+Typical use:
+
+```text
+MeanAbsScaling -> BindScaledHistory -> kernel_rbf
+```
+
 ### `BindScaledHistory`
 
 File: `graph_Time_series/token_blocks/bindings.py`

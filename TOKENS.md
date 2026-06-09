@@ -75,6 +75,46 @@ Common next tokens:
 - `BindAllSafeTabular`
 - `kernel_rbf`
 
+### `MeanAbsScaling`
+
+Status: `package`
+
+Class: `TransformToken`
+
+File: `graph_Time_series/token_blocks/normalization.py`
+
+Purpose:
+
+Scale each series by the mean absolute value of its history, without centering.
+This preserves the zero point while putting series on a comparable magnitude
+scale.
+
+Reads:
+
+- `raw_history`
+
+Writes:
+
+- `historical_features["scaled_history"]`
+- `active_target_base`
+- `transform_stack`
+- `flags["is_mean_abs_scaled"]`
+
+State effect:
+
+```text
+scale = mean(abs(history))
+history -> history / scale
+future target -> future target / scale
+current_target -> scaled residual target
+```
+
+Common next tokens:
+
+- `BindScaledHistory`
+- `BindAllSafeTabular`
+- `kernel_rbf`
+
 ### `BindScaledHistory`
 
 Status: `package`
