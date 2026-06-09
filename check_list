@@ -1,17 +1,10 @@
-cleaning_tokes
-feature_token
-model_tokens
-augmentation
-config
-data
-decomposition
-heuristics
-kernels
-mcts
-pipeline
-preprocessing
-token
-viz
+tokens to add:
+tabular models : Random forest , boosted models (maybe lightGBM)
+complete the flair: and have full description, one of the pipeline should be able to completly replicate the flair
+go over kaggle stuff and download notebooks I like?
 
-grammar: OK
-state : OK
+
+grammar to clean: 
+bundling tokens for now I don t like them
+clean up the structure go over it properly
+
