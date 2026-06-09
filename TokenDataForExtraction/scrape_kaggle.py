@@ -290,6 +290,9 @@ def main():
     )
     p.add_argument("--out", default="./kaggle_ts_notebooks",
                    help="Output directory (default: ./kaggle_ts_notebooks)")
+    p.add_argument("--keyword", "-k", default=None,
+                   help="Single search keyword/phrase. Overrides --queries and "
+                        "the default query list (e.g. -k \"fourier forecasting\").")
     p.add_argument("--queries", nargs="*", default=DEFAULT_QUERIES,
                    help="Search queries (defaults to a curated forecasting set)")
     p.add_argument("--competitions", nargs="*", default=[],
@@ -311,6 +314,10 @@ def main():
     p.add_argument("--dry-run", action="store_true",
                    help="List what would be pulled without downloading")
     args = p.parse_args()
+
+    # A single --keyword overrides the whole query list.
+    if args.keyword:
+        args.queries = [args.keyword]
 
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
