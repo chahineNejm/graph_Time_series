@@ -20,9 +20,14 @@ Prerequisites
     pip install kaggle
     # Put your kaggle.json at ~/.kaggle/kaggle.json  (chmod 600)
     # (Account -> Settings -> API -> Create New API Token)
+    #
+    # Or create ignored file TokenDataForExtraction/api_keys.py:
+    # KAGGLE_USERNAME = "your_username"
+    # KAGGLE_KEY = "your_api_key"
 
 Usage
 -----
+    python scrape_ts_notebooks.py --max-per-query 20
     python scrape_ts_notebooks.py --max-per-query 20 --out ./kaggle_ts_notebooks
     python scrape_ts_notebooks.py --competitions store-sales-time-series-forecasting
     python scrape_ts_notebooks.py --queries "fourier forecasting" "wavelet time series"
@@ -38,7 +43,9 @@ Notes
 from __future__ import annotations
 
 import argparse
+import ast
 import json
+import os
 import re
 import sys
 import time
@@ -86,6 +93,9 @@ RELEVANCE_HINTS = [
     "seasonal", "kalman", "demand", "sales", "traffic", "horizon", "lag",
 ]
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+DEFAULT_OUT_DIR = SCRIPT_DIR / "kaggle_ts_notebooks"
+
 
 # ---------------------------------------------------------------------------
 # Data structures
@@ -113,6 +123,7 @@ class KernelRecord:
 
 def get_api():
     """Import and authenticate the Kaggle API. Fails loudly with guidance."""
+    _load_local_api_keys()
     try:
         from kaggle.api.kaggle_api_extended import KaggleApi
     except ImportError:
@@ -129,9 +140,103 @@ def get_api():
         sys.exit(
             f"Kaggle authentication failed: {exc}\n"
             "Ensure ~/.kaggle/kaggle.json exists (chmod 600) or that "
-            "KAGGLE_USERNAME / KAGGLE_KEY env vars are set."
+            "KAGGLE_USERNAME / KAGGLE_KEY env vars are set. You can also set "
+            "them in the ignored TokenDataForExtraction/api_keys.py file."
         )
     return api
+
+
+def _load_local_api_keys() -> dict:
+    """Load Kaggle credentials from ignored local api_keys.py, if present.
+
+    The file is parsed as literal assignments instead of imported. That keeps
+    this helper from executing arbitrary code inside the secrets file.
+    Existing environment variables take precedence.
+    """
+    report = {
+        "path": str(Path(__file__).with_name("api_keys.py")),
+        "file_exists": False,
+        "loaded_username": False,
+        "loaded_key": False,
+        "env_username": bool(os.environ.get("KAGGLE_USERNAME")),
+        "env_key": bool(os.environ.get("KAGGLE_KEY")),
+        "username_length": len(os.environ.get("KAGGLE_USERNAME", "")),
+        "key_length": len(os.environ.get("KAGGLE_KEY", "")),
+    }
+    keys_path = Path(__file__).with_name("api_keys.py")
+    if not keys_path.exists():
+        return report
+    report["file_exists"] = True
+
+    try:
+        tree = ast.parse(keys_path.read_text(encoding="utf-8"), filename=str(keys_path))
+    except OSError:
+        return report
+
+    values = {}
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            targets = [target.id for target in node.targets if isinstance(target, ast.Name)]
+            value_node = node.value
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            targets = [node.target.id]
+            value_node = node.value
+        else:
+            continue
+
+        if value_node is None:
+            continue
+        try:
+            value = ast.literal_eval(value_node)
+        except (ValueError, SyntaxError):
+            continue
+        if isinstance(value, str):
+            for target in targets:
+                values[target] = value
+        elif isinstance(value, dict):
+            username = value.get("username") or value.get("KAGGLE_USERNAME")
+            key = value.get("key") or value.get("KAGGLE_KEY")
+            if isinstance(username, str):
+                values.setdefault("KAGGLE_USERNAME", username)
+            if isinstance(key, str):
+                values.setdefault("KAGGLE_KEY", key)
+
+    aliases = {
+        "KAGGLE_USERNAME": "KAGGLE_USERNAME",
+        "KAGGLE_USER": "KAGGLE_USERNAME",
+        "KAGGLE_KEY": "KAGGLE_KEY",
+        "KAGGLE_API_KEY": "KAGGLE_KEY",
+    }
+    for source_name, env_name in aliases.items():
+        value = values.get(source_name)
+        if value and not os.environ.get(env_name):
+            os.environ[env_name] = value
+
+    report.update(
+        {
+            "loaded_username": bool(values.get("KAGGLE_USERNAME") or values.get("KAGGLE_USER")),
+            "loaded_key": bool(values.get("KAGGLE_KEY") or values.get("KAGGLE_API_KEY")),
+            "env_username": bool(os.environ.get("KAGGLE_USERNAME")),
+            "env_key": bool(os.environ.get("KAGGLE_KEY")),
+            "username_length": len(os.environ.get("KAGGLE_USERNAME", "")),
+            "key_length": len(os.environ.get("KAGGLE_KEY", "")),
+        }
+    )
+    return report
+
+
+def print_auth_check() -> None:
+    """Print non-secret Kaggle auth diagnostics."""
+    report = _load_local_api_keys()
+    print("Kaggle auth check:")
+    print(f"  api_keys.py path: {report['path']}")
+    print(f"  api_keys.py found: {report['file_exists']}")
+    print(f"  username loaded from file: {report['loaded_username']}")
+    print(f"  key loaded from file: {report['loaded_key']}")
+    print(f"  KAGGLE_USERNAME present: {report['env_username']}")
+    print(f"  KAGGLE_KEY present: {report['env_key']}")
+    print(f"  username length: {report['username_length']}")
+    print(f"  key length: {report['key_length']}")
 
 
 def _attr(obj, *names, default=""):
@@ -171,6 +276,12 @@ def search_kernels_by_query(
             )
         except Exception as exc:  # noqa: BLE001
             print(f"  ! search failed for '{query}' (page {page}): {exc}")
+            if "401" in str(exc) or "Unauthorized" in str(exc):
+                print(
+                    "    Kaggle rejected the credentials. Run "
+                    "`python scrape_kaggle.py --auth-check` and, if credentials "
+                    "are present, create a fresh Kaggle API token."
+                )
             break
         if not batch:
             break
@@ -200,6 +311,14 @@ def search_kernels_for_competition(api, competition: str, max_results: int) -> I
 
 def slugify(ref: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]", "_", ref)
+
+
+def resolve_output_dir(out_value: str) -> Path:
+    """Resolve output paths relative to this scraper file, not the shell cwd."""
+    out_path = Path(out_value).expanduser()
+    if out_path.is_absolute():
+        return out_path
+    return SCRIPT_DIR / out_path
 
 
 def pull_kernel(api, rec: KernelRecord, out_dir: Path) -> bool:
@@ -288,8 +407,11 @@ def main():
     p = argparse.ArgumentParser(
         description="Scrape Kaggle time-series forecasting notebooks (.ipynb JSON)."
     )
-    p.add_argument("--out", default="./kaggle_ts_notebooks",
-                   help="Output directory (default: ./kaggle_ts_notebooks)")
+    p.add_argument("--out", default=str(DEFAULT_OUT_DIR),
+                   help=(
+                       "Output directory. Relative paths are resolved next to "
+                       "this script. Default: TokenDataForExtraction/kaggle_ts_notebooks"
+                   ))
     p.add_argument("--keyword", "-k", default=None,
                    help="Single search keyword/phrase. Overrides --queries and "
                         "the default query list (e.g. -k \"fourier forecasting\").")
@@ -313,13 +435,19 @@ def main():
                    help="Hard cap on total kernels actually downloaded (0 = no cap)")
     p.add_argument("--dry-run", action="store_true",
                    help="List what would be pulled without downloading")
+    p.add_argument("--auth-check", action="store_true",
+                   help="Print non-secret Kaggle auth diagnostics and exit")
     args = p.parse_args()
+
+    if args.auth_check:
+        print_auth_check()
+        return
 
     # A single --keyword overrides the whole query list.
     if args.keyword:
         args.queries = [args.keyword]
 
-    out_dir = Path(args.out)
+    out_dir = resolve_output_dir(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     notebooks_dir = out_dir / "notebooks"
     notebooks_dir.mkdir(exist_ok=True)
