@@ -42,7 +42,22 @@ Calendar feature tokens: VERY IMPORTANT
 
 
 QUANTIZATION , IN A WAY FITTING A STEP FUNCTION TO THE DATASET AND PREDICTING LESS OF THOSE, IN A WAY THIS IS REDUCING THE OVERALL NUMBER OF DATAPOINTS TO Handle.
+quntization has resolutioon issues in our case and for time series forecasting in general.
 
+chronos doea data augmentation via specific strategies of combining types of datastructures, and GP processes that gpes through different pipelines, can we do that with the data we have?
+does it make sence in terms of data augmetation at any point?
+
+proper reconstruction based on whatever the format of the input is? maybe needs an encoder decoder type of things?
+
+full on data augmentation for kernel methods would generalise the mimic system
+
+
+filters?
+
+
+
+
+data augmentation: chronos does TSmixup where they randomly mix time series (ok I guess)
 grammar to clean:
 bundling tokens for now I don t like them
 clean up the structure go over it properly

@@ -196,6 +196,25 @@ This token is exported from the package, but it is not part of the default
 package grammar yet because the period-selection token still lives in the
 notebook.
 
+### `FourierFeatures`
+
+File: `graph_Time_series/token_blocks/fourier.py`
+
+Creates fixed-width tabular FFT features from history. It prefers
+`scaled_history` when available and falls back to `raw_history`. The intended
+path is to feed these features into tabular models through an explicit binder.
+
+Typical use:
+
+```text
+MeanAbsScaling -> FourierFeatures -> BindFourierFeatures -> rf_tabular
+MeanAbsScaling -> FourierFeatures -> BindFourierFeatures -> lightgbm_tabular
+```
+
+`lightgbm_tabular` loads LightGBM lazily, so the package can import without the
+optional dependency. The Colab notebook installs `lightgbm` before running the
+LightGBM comparisons.
+
 ### `kernel_rbf`
 
 File: `graph_Time_series/token_blocks/kernel_rbf.py`
@@ -300,11 +319,14 @@ Notebook-local prototype tokens include:
 | `ContextWindow` | notebook prototype | Keep a fixed recent context window |
 | `PeriodSelection` | notebook prototype | Pick a simple candidate period |
 | `PeriodPhaseOneHot` | package token used in notebook | Encode phase inside selected period |
+| `FourierFeatures` | package token used in notebook | Fixed-width FFT tabular features |
 | `PeriodFold` | notebook prototype | Fold history into period phases |
 | `ShapeLevel` | notebook prototype | Estimate a within-period shape vector |
 | `shape_naive` | notebook prototype | Predict last level distributed through shape |
 | `kernel_rbf_fast` | notebook prototype | Faster in-sample RBF diagnostic token |
 | `level_kernel_rbf` | notebook prototype | RBF on level features, expanded through shape |
+| `rf_tabular` | package token used in notebook | Random forest on tabular model input |
+| `lightgbm_tabular` | package token used in notebook | LightGBM on tabular model input |
 
 The notebook distinguishes manual in-sample diagnostics from leakage-safe
 holdout scoring. Use the leakage-safe section for model comparison.
@@ -431,7 +453,7 @@ discussion or the notebook, but are not fully promoted to package tokens yet.
 | Context selection | `ContextWindow`, adaptive windows, multi-resolution windows |
 | Period/seasonality features | `PeriodSelection`, `PeriodFold`, phase embeddings |
 | Shape/level decomposition | `ShapeLevel`, level models, residual shape correction |
-| Rich tabular models | linear/ridge, random forest, gradient boosting, XGBoost |
+| Rich tabular models | linear/ridge, random forest, LightGBM, gradient boosting, XGBoost |
 | Multi-channel sequence models | binders with `sequence_multi` or `tensor` bundle kinds |
 | Residual ensembles | multiple model tokens chained through `current_target` |
 | Calendar/known-future covariates | future feature artifacts and horizon-aware binders |
