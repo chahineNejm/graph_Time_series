@@ -33,7 +33,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from graph_Time_series.state import State
 from graph_Time_series.token_blocks import (
-    DayOfWeekFeatureToken,
     FlairPreprocessToken,
     FlairRidgeLevelToken,
     FourierFeaturesToken,
@@ -49,7 +48,6 @@ from graph_Time_series.token_blocks import (
     SecondaryLevelSeasonalityToken,
     ShapeLevelToken,
     VersatileGradientBoostingToken,
-    VersatileRandomForestToken,
 )
 
 
@@ -146,17 +144,11 @@ def run_named(tokens, H, F):
             "FlairPreprocess", "PeriodSelection", "PeriodFold",
             "ShapeLevel", "gb_level_forecast",
         ],
-        "versatile_RF_no_binder": [
-            "ZNormalization", "FourierFeatures", "versatile_rf",
-        ],
         "versatile_GB_no_binder": [
             "MeanAbsScaling", "FourierFeatures", "versatile_gb",
         ],
         "rf_tabular_no_binder": [
             "MeanAbsScaling", "FourierFeatures", "rf_tabular",
-        ],
-        "add_dayofweek_midway_then_RF": [
-            "ZNormalization", "DayOfWeekFeature", "FourierFeatures", "versatile_rf",
         ],
         "kernel_rbf_no_binder": [
             "ZNormalization", "kernel_rbf",
@@ -184,10 +176,8 @@ def build_tokens(H):
         "MeanAbsScaling": MeanAbsScalingToken(),
         "ZNormalization": ZNormalizationToken(),
         "FourierFeatures": FourierFeaturesToken(n_harmonics=6),
-        "DayOfWeekFeature": DayOfWeekFeatureToken(period=24),
         "kernel_rbf": KernelRBFToken(),
         "rf_tabular": RandomForestTabularToken(n_estimators=40),
-        "versatile_rf": VersatileRandomForestToken(n_estimators=15),
         "versatile_gb": VersatileGradientBoostingToken(max_iter=40),
         # FLAIR family
         "FlairPreprocess": FlairPreprocessToken(),
@@ -224,8 +214,8 @@ def main():
     print("=== Exhaustive reachability enumeration ===")
     # Enumerate over a focused token set to keep the search finite but broad.
     enum_tokens = {k: tokens[k] for k in [
-        "MeanAbsScaling", "ZNormalization", "FourierFeatures", "DayOfWeekFeature",
-        "versatile_rf", "versatile_gb",
+        "MeanAbsScaling", "ZNormalization", "FourierFeatures",
+        "versatile_gb",
         "FlairPreprocess", "PeriodSelection", "PeriodFold", "LevelShrinkage",
         "ShapeLevel", "gb_level_forecast",
     ]}

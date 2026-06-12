@@ -61,6 +61,7 @@ eventually I want to add a folder that takes in a sequnce and plots all outputs 
 
 ###### very important
 check that each tranformation if done has a counter transformation applyed correctly to it.
+the fourier features are not good yet
 #### 
 
 data augmentation: chronos does TSmixup where they randomly mix time series (ok I guess)

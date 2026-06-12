@@ -29,15 +29,17 @@ except Exception:  # pragma: no cover
 from graph_Time_series.state import State
 from graph_Time_series.grammar import Grammar
 from graph_Time_series.token_blocks import (
-    DayOfWeekFeatureToken, FlairPreprocessToken, FlairRidgeLevelToken,
+    FlairPreprocessToken, FlairRidgeLevelToken,
     FlairSamplePathsToken, FourierFeaturesToken, GBLevelForecastToken,
     KernelRBFToken, LevelBoxCoxCenterToken, LevelShrinkageToken,
     LightGBMTabularToken, MeanAbsScalingToken, PeriodFoldToken,
     PeriodPhaseOneHotToken, PeriodSelectionToken, RandomForestTabularToken,
     SecondaryLevelSeasonalityToken, ShapeLevelToken,
-    VersatileGradientBoostingToken, VersatileRandomForestToken,
+    VersatileGradientBoostingToken,
     ZNormalizationToken, register_default_tokens, register_flair_gb_swap,
     register_flair_tokens, register_versatile_tokens,
+    PeriodDetectToken, SeasonalFeaturesToken, StepRegressionToken,
+    register_seasonal_tokens,
 )
 
 __all__ = [
@@ -54,7 +56,8 @@ __all__ = [
 # Grammar + tokens
 # --------------------------------------------------------------------------
 
-def build_grammar(include_flair=True, include_versatile=True, include_flair_gb=True):
+def build_grammar(include_flair=True, include_versatile=True, include_flair_gb=True,
+                  include_seasonal=True):
     grammar = register_default_tokens(Grammar())
     if include_flair:
         grammar = register_flair_tokens(grammar)
@@ -62,6 +65,8 @@ def build_grammar(include_flair=True, include_versatile=True, include_flair_gb=T
         grammar = register_versatile_tokens(grammar)
     if include_flair_gb:
         grammar = register_flair_gb_swap(grammar)
+    if include_seasonal:
+        grammar = register_seasonal_tokens(grammar)
     return grammar
 
 
@@ -84,8 +89,9 @@ def make_token_factory(seasonal_period=48):
         "LevelBoxCoxCenter": lambda: LevelBoxCoxCenterToken(),
         "FlairRidgeLevel": lambda: FlairRidgeLevelToken(show_progress=True, progress_min_samples=16),
         "FlairSamplePaths": lambda: FlairSamplePathsToken(n_paths=50, show_progress=True, progress_min_samples=8),
-        "DayOfWeekFeature": lambda: DayOfWeekFeatureToken(period=seasonal_period),
-        "versatile_rf": lambda: VersatileRandomForestToken(n_estimators=40, max_depth=10, seed=0),
+        "PeriodDetect": lambda: PeriodDetectToken(freq="H"),
+        "SeasonalFeatures": lambda: SeasonalFeaturesToken(n_harmonics=2),
+        "step_regression": lambda: StepRegressionToken(per_series=True, n_estimators=60),
         "versatile_gb": lambda: VersatileGradientBoostingToken(max_iter=80, learning_rate=0.06, seed=0),
         "gb_level_forecast": lambda: GBLevelForecastToken(n_lags=3, max_iter=80, learning_rate=0.08, seed=0),
     }
@@ -180,6 +186,16 @@ def describe_inputs(token, state):
             lines.append(tag + ("  (optional, none)" if getattr(p, "optional", False) else "  <- UNSATISFIED"))
     return lines
 
+def _short(v, maxlen=140):
+    if isinstance(v, np.ndarray):
+        return f"ndarray{tuple(v.shape)}"
+    if isinstance(v, dict):
+        v = {k: (f"ndarray{tuple(x.shape)}" if isinstance(x, np.ndarray) else x)
+             for k, x in v.items()}
+    text = repr(v)
+    return text if len(text) <= maxlen else text[:maxlen] + " ..."
+
+
 def print_step_report(step_idx, name, token, before, after, grammar=None):
     bs, as_ = snapshot(before), snapshot(after)
     print("\n" + "-" * 78)
@@ -202,8 +218,14 @@ def print_step_report(step_idx, name, token, before, after, grammar=None):
         for k in rem:
             print(f"      - {store}: {k}"); changed = True
     b_add, _, _ = _diff_keys(bs["board"], as_["board"])
+    after_sig = {sig.name: sig for sig in after.board}
     for k, v in b_add.items():
-        print(f"      + signal: {k}  [{v}]"); changed = True
+        sig = after_sig.get(k)
+        if sig is not None and sig.sem.startswith("param"):
+            print(f"      + signal: {k}  [{v}] = {_short(sig.value)}")
+        else:
+            print(f"      + signal: {k}  [{v}]")
+        changed = True
     if bs["space"] != as_["space"]:
         print(f"      space: {bs['space']} -> {as_['space']}"); changed = True
     if bs["transforms"] != as_["transforms"]:
@@ -213,8 +235,8 @@ def print_step_report(step_idx, name, token, before, after, grammar=None):
     if new_flags:
         print(f"      + flags: {new_flags}"); changed = True
     new_meta = [k for k in as_["metadata"] if k not in bs["metadata"]]
-    if new_meta:
-        print(f"      + metadata: {new_meta}"); changed = True
+    for k in new_meta:
+        print(f"      + metadata: {k} = {_short(after.metadata[k])}"); changed = True
     if as_["n_models"] != bs["n_models"]:
         last = np.asarray(after.last_prediction())
         print(f"      + prediction pushed: {last.shape}   n_models {bs['n_models']} -> {as_['n_models']}")

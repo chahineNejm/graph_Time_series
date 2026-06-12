@@ -17,12 +17,12 @@ from .fourier import FourierFeaturesToken
 from .kernel_rbf import KernelRBFToken
 from .normalization import MeanAbsScalingToken, ZNormalizationToken
 from .periodic import PeriodPhaseOneHotToken
+from .seasonal import PeriodDetectToken, SeasonalFeaturesToken
+from .step_regression import StepRegressionToken, collect_step_covariates
 from .tabular_models import LightGBMTabularToken, RandomForestTabularToken
 from .versatile import (
-    DayOfWeekFeatureToken,
     GBLevelForecastToken,
     VersatileGradientBoostingToken,
-    VersatileRandomForestToken,
     VersatileTabularToken,
 )
 
@@ -123,23 +123,12 @@ def register_versatile_tokens(grammar):
     and can follow any cleaning/scaling/feature chain.
     """
     feature_sources = [
-        "START", "ZNormalization", "MeanAbsScaling",
-        "FourierFeatures", "DayOfWeekFeature",
+        "START", "ZNormalization", "MeanAbsScaling", "FourierFeatures",
     ]
     grammar.register(
-        DayOfWeekFeatureToken(period=24),
-        follows=feature_sources,
-        leads_to=["FourierFeatures", "versatile_rf", "versatile_gb"],
-    )
-    grammar.register(
-        VersatileRandomForestToken(),
-        follows=feature_sources + ["versatile_rf", "versatile_gb"],
-        leads_to=["STOP", "versatile_rf", "versatile_gb"],
-    )
-    grammar.register(
         VersatileGradientBoostingToken(),
-        follows=feature_sources + ["versatile_rf", "versatile_gb"],
-        leads_to=["STOP", "versatile_rf", "versatile_gb"],
+        follows=feature_sources + ["versatile_gb"],
+        leads_to=["STOP", "versatile_gb"],
     )
     return grammar
 
@@ -159,11 +148,35 @@ def register_flair_gb_swap(grammar):
     return grammar
 
 
+def register_seasonal_tokens(grammar):
+    """Period detector + seasonal sinusoid features (auto-bundle friendly)."""
+    grammar.register(
+        PeriodDetectToken(),
+        follows=["START", "ZNormalization", "MeanAbsScaling"],
+        leads_to=["SeasonalFeatures"],
+    )
+    grammar.register(
+        SeasonalFeaturesToken(),
+        follows=["PeriodDetect"],
+        leads_to=["kernel_rbf", "rf_tabular", "lightgbm_tabular",
+                  "versatile_gb", "step_regression"],
+    )
+    grammar.register(
+        StepRegressionToken(),
+        follows=["ZNormalization", "MeanAbsScaling", "FourierFeatures",
+                 "SeasonalFeatures", "PeriodDetect"],
+        leads_to=["STOP"],
+    )
+    return grammar
+
+
 __all__ = [
-    "DayOfWeekFeatureToken",
+    "PeriodDetectToken",
+    "SeasonalFeaturesToken",
+    "StepRegressionToken",
+    "register_seasonal_tokens",
     "GBLevelForecastToken",
     "VersatileGradientBoostingToken",
-    "VersatileRandomForestToken",
     "VersatileTabularToken",
     "register_versatile_tokens",
     "register_flair_gb_swap",

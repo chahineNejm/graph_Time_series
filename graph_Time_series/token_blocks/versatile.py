@@ -4,13 +4,9 @@ These tokens demonstrate the combinatorial architecture in action:
 
 * ``VersatileTabularToken`` fits *any* tabular regressor on whatever feature
   signals exist in the active scale, with no binder token required. The same
-  token works after normalization, after Fourier features, after a FLAIR fold,
-  or after a calendar token, because it consumes the auto-built feature bundle
-  instead of one hard-coded ``model_input`` array.
-
-* ``DayOfWeekFeatureToken`` shows adding exogenous, known-future information
-  (a calendar covariate) at any point in a sequence; downstream models pick it
-  up automatically through the bundle.
+  token works after normalization, after Fourier features, or after a FLAIR
+  fold, because it consumes the auto-built feature bundle instead of one
+  hard-coded ``model_input`` array.
 
 * ``GBLevelForecastToken`` shows swapping a FLAIR sub-step for a different
   learner: it predicts the *scale of each period* with gradient boosting
@@ -24,7 +20,7 @@ from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 
-from ..token import FeatureToken, ModelToken
+from ..token import ModelToken
 from ..signal import Port
 
 if TYPE_CHECKING:
@@ -126,29 +122,6 @@ def _is_multioutput(estimator) -> bool:
     }
 
 
-class VersatileRandomForestToken(VersatileTabularToken):
-    name = "versatile_rf"
-    description = "RandomForest on the auto-built feature bundle (no binder needed)."
-
-    def __init__(self, *, n_estimators: int = 80, max_depth: int | None = 10,
-                 seed: int = 0, select_tags: tuple[str, ...] = ()):
-        super().__init__(select_tags=select_tags)
-        self.n_estimators = n_estimators
-        self.max_depth = max_depth
-        self.seed = seed
-
-    def model_params(self) -> dict[str, Any]:
-        return {"model": "RandomForestRegressor",
-                "n_estimators": self.n_estimators, "max_depth": self.max_depth}
-
-    def _make_regressor(self):
-        from sklearn.ensemble import RandomForestRegressor
-        return RandomForestRegressor(
-            n_estimators=self.n_estimators, max_depth=self.max_depth,
-            random_state=self.seed, n_jobs=-1,
-        )
-
-
 class VersatileGradientBoostingToken(VersatileTabularToken):
     """Gradient-boosted trees (XGBoost-style) on the auto-built bundle.
 
@@ -179,81 +152,6 @@ class VersatileGradientBoostingToken(VersatileTabularToken):
             max_iter=self.max_iter, learning_rate=self.learning_rate,
             max_depth=self.max_depth, random_state=self.seed,
         )
-
-
-# ---------------------------------------------------------------------------
-# Exogenous calendar feature: add day-of-week-like info at any point
-# ---------------------------------------------------------------------------
-
-
-class DayOfWeekFeatureToken(FeatureToken):
-    """Add a cyclical calendar covariate for history and known future.
-
-    No timestamps are assumed: position index modulo ``period`` stands in for a
-    seasonal calendar (e.g. day-of-week when period=7). Produces sine/cosine
-    encodings on both the history and the forecast horizon, so any later model
-    consumes them through the feature bundle without changes.
-    """
-
-    name = "DayOfWeekFeature"
-    token_class = "feature"
-    reads = ("raw_history",)
-    writes = ("calendar_features", "future_calendar_features")
-    description = "Cyclical calendar covariate (history + known future)."
-    max_uses = 1
-    provides = (
-        Port(sem="features", alignment="history", space="any"),
-        Port(sem="features", alignment="future", space="any"),
-    )
-
-    def __init__(self, period: int = 7):
-        if period <= 1:
-            raise ValueError("period must be > 1.")
-        self.period = int(period)
-
-    def check_specific_conditions(self, state: "State") -> bool:
-        if state.flags.get("calendar_encoded", False):
-            return False
-        return super().check_specific_conditions(state)
-
-    def apply(self, state: "State") -> "State":
-        n = state.n_samples
-        T = state.original_history.shape[1]
-        H = state.horizon
-
-        hist_pos = np.arange(T)
-        fut_pos = np.arange(T, T + H)
-
-        hist_feat = self._encode(hist_pos, n)
-        fut_feat = self._encode(fut_pos, n)
-
-        state.add_historical_feature("calendar_features", hist_feat)
-        state.register_artifact(
-            "calendar_features", store="historical_features", kind="tabular",
-            role="feature", source_token=self.name, tags=("calendar", "exog"),
-        )
-        state.add_future_feature("future_calendar_features", fut_feat)
-        state.register_artifact(
-            "future_calendar_features", store="future_features", kind="tabular",
-            role="known_future_feature", source_token=self.name,
-            tags=("calendar", "exog"),
-        )
-        state.flags["calendar_encoded"] = True
-        self._log_execution(
-            state,
-            reads={"raw_history": state.original_history.shape},
-            writes={"calendar_features": hist_feat.shape,
-                    "future_calendar_features": fut_feat.shape},
-        )
-        return state
-
-    def _encode(self, positions: np.ndarray, n_samples: int) -> np.ndarray:
-        phase = (positions % self.period).astype(np.float32)
-        angle = 2.0 * np.pi * phase / self.period
-        block = np.stack([np.sin(angle), np.cos(angle)], axis=1).astype(np.float32)
-        return np.broadcast_to(block[None, :, :], (n_samples,) + block.shape).reshape(
-            n_samples, -1
-        ).astype(np.float32)
 
 
 # ---------------------------------------------------------------------------

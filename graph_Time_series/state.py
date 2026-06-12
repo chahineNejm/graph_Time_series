@@ -534,6 +534,8 @@ class State:
         "period_shape": ("shape", ("sample", "phase")),
         "period_phase_id": ("features", None),
         "period_phase_onehot": ("features", None),
+        "seasonal_history": ("features", ("sample", "time", "feature")),
+        "seasonal_future": ("features", ("sample", "horizon", "feature")),
         "forecast": ("forecast", ("sample", "horizon")),
         "point_prediction": ("forecast", ("sample", "horizon")),
         "forecast_samples": ("samples", ("sample", "path", "horizon")),

@@ -31,8 +31,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from graph_Time_series.state import State
 from graph_Time_series.token_blocks import (
     ZNormalizationToken, MeanAbsScalingToken, FourierFeaturesToken,
-    DayOfWeekFeatureToken, KernelRBFToken, RandomForestTabularToken,
-    VersatileRandomForestToken, VersatileGradientBoostingToken,
+    KernelRBFToken, RandomForestTabularToken,
+    VersatileGradientBoostingToken,
     GBLevelForecastToken, FlairPreprocessToken, PeriodSelectionToken,
     PeriodPhaseOneHotToken, PeriodFoldToken, LevelShrinkageToken,
     ShapeLevelToken, SecondaryLevelSeasonalityToken, LevelBoxCoxCenterToken,
@@ -44,10 +44,8 @@ TOKENS = {
     "ZNormalization": ZNormalizationToken(),
     "MeanAbsScaling": MeanAbsScalingToken(),
     "FourierFeatures": FourierFeaturesToken(n_harmonics=6),
-    "DayOfWeekFeature": DayOfWeekFeatureToken(period=24),
     "kernel_rbf": KernelRBFToken(),
     "rf_tabular": RandomForestTabularToken(n_estimators=8),
-    "versatile_rf": VersatileRandomForestToken(n_estimators=8),
     "versatile_gb": VersatileGradientBoostingToken(max_iter=15),
     "FlairPreprocess": FlairPreprocessToken(),
     "PeriodSelection": PeriodSelectionToken(freq="H"),
@@ -72,10 +70,10 @@ CANON_ORDER = [
     # feature (FLAIR chain first, in dependency order, then generic features)
     "PeriodSelection", "PeriodPhaseOneHot", "PeriodFold", "LevelShrinkage",
     "ShapeLevel", "SecondaryLevelSeasonality", "LevelBoxCoxCenter",
-    "FourierFeatures", "DayOfWeekFeature",
+    "FourierFeatures",
     # model
     "gb_level_forecast", "FlairRidgeLevel", "kernel_rbf", "rf_tabular",
-    "versatile_rf", "versatile_gb",
+    "versatile_gb",
 ]
 
 # Mutually-exclusive groups: at most one token from each per pipeline.

@@ -335,6 +335,8 @@ def build_feature_bundle(
             continue
         if not sig.is_array:
             continue
+        if "no_bundle" in sig.tags:
+            continue
         if require_space and sig.space.id != current_space.id:
             # Only fuse signals in the active modeling scale for coherence.
             if sem_root(sig.sem) == "series":
