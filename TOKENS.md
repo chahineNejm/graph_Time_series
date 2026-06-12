@@ -1,40 +1,138 @@
 # Token Reference
 
-This file is the living index of tokens in the project. Keep it practical:
-when a new token is added, record what it reads, what it writes, whether it is
-package-level or notebook-only, and how it changes `State`.
+This is the living index of implemented tokens. It should stay aligned with the
+package code and the current signal-board architecture.
 
-## Reading This File
+Current rule: package models should work without binder/glue tokens. They use
+`state.feature_bundle()` whenever no legacy `historical_features["model_input"]`
+has been created manually.
 
-Status meanings:
+Do not add or modify tokens without explicit approval.
 
-- `package`: importable from `graph_Time_series` or `graph_Time_series.token_blocks`.
-- `notebook`: currently defined inside `examples/test_token_sequence_colab.ipynb`.
-- `planned`: useful direction, not implemented yet.
+## State Stores
 
-State stores:
+`State` keeps both legacy stores and the new semantic board:
 
-- `features`: compatibility/general store, currently includes `raw_history`.
-- `historical_features`: sample-aligned model features.
-- `future_features`: horizon-side known features.
-- `metadata`: scalar/debug/config values.
-- `flags`: lightweight booleans or guards.
-- `artifacts`: inspectable metadata for named state values.
-- `input_bundles`: inspectable metadata for bound model inputs.
-- `prediction_stack`: model outputs in the active target space.
+| Store | Purpose |
+| --- | --- |
+| `features` | Compatibility/general values, including `raw_history` |
+| `historical_features` | Sample-aligned history-side artifacts |
+| `future_features` | Horizon-side known features |
+| `metadata` | Scalar/debug/config values |
+| `flags` | Lightweight guards |
+| `artifacts` | Inspectable metadata for named values |
+| `board` | Typed `Signal` objects emitted by artifacts/transforms/models |
+| `prediction_stack` | Model outputs in the active target space |
 
-The core residual rule is:
+The residual rule is:
 
 ```text
 current_target = active_target_base - sum(prediction_stack)
 ```
 
-Any model token that calls `state.push_prediction(...)` automatically updates
-the residual for the next model.
+Any model token that calls `state.push_prediction(...)` updates the residual for
+the next model.
+
+## Signal Concepts
+
+Common semantics:
+
+| Sem | Meaning |
+| --- | --- |
+| `series` | History-like target values |
+| `features` | Model covariates or flattened feature blocks |
+| `level` | Per-period aggregate/scale |
+| `shape` | Within-period profile |
+| `forecast` | Point prediction |
+| `samples` | Stochastic paths |
+| `mask` | Validity or cleaning mask |
+| `param:*` | Scalar or structured parameters |
+
+Common axes:
+
+```text
+sample, time, horizon, feature, phase, period_idx, path
+```
+
+`state.feature_bundle()` adapts compatible sample-leading signals into one
+`(sample, feature)` matrix and records the component blocks.
+
+## Removed Legacy Tokens
+
+The previous package binder tokens are no longer active package tokens:
+
+```text
+BindScaledHistory
+BindAllSafeTabular
+BindFeatureToken
+StackFeatureBundleToken
+```
+
+`graph_Time_series/token_blocks/bindings.py` is a removal stub. Old notebooks
+that create `model_input` manually may still work because models keep a
+backward-compatible `model_input` path, but new package examples should not
+require binders.
+
+Future selector tokens may be useful, but they should be designed as optional
+search moves that narrow/tag the auto-bundle, not as required plumbing.
+
+## Registry Summary
+
+### Default
+
+Registered by `register_default_tokens(grammar)`:
+
+```text
+ZNormalization
+MeanAbsScaling
+FourierFeatures
+kernel_rbf
+rf_tabular
+lightgbm_tabular
+```
+
+### FLAIR
+
+Registered by `register_flair_tokens(grammar)`:
+
+```text
+FlairPreprocess
+PeriodSelection
+PeriodPhaseOneHot
+PeriodFold
+LevelShrinkage
+ShapeLevel
+SecondaryLevelSeasonality
+LevelBoxCoxCenter
+FlairRidgeLevel
+FlairSamplePaths
+```
+
+### Versatile
+
+Registered by `register_versatile_tokens(grammar)`:
+
+```text
+DayOfWeekFeature
+versatile_rf
+versatile_gb
+```
+
+### FLAIR GB Swap
+
+Registered by `register_flair_gb_swap(grammar)`:
+
+```text
+gb_level_forecast
+```
+
+With all registries enabled:
+
+```text
+Grammar(20 tokens, 58 edges)
+```
 
 ## Package Tokens
-
-These are the tokens currently promoted to the importable package.
 
 ### `ZNormalization`
 
@@ -44,11 +142,7 @@ Class: `TransformToken`
 
 File: `graph_Time_series/token_blocks/normalization.py`
 
-Purpose:
-
-Per-series z-normalization using each sample's history mean and standard
-deviation. It also transforms the target into the same normalized space and
-registers the inverse transform.
+Purpose: per-series z-normalization using history mean and standard deviation.
 
 Reads:
 
@@ -58,29 +152,32 @@ Writes:
 
 - `historical_features["scaled_history"]`
 - `active_target_base`
-- `transform_stack`
+- transform stack
 - `flags["is_z_normalized"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
 - no constructor hyperparameters
-- implicit numerical guard: `sigma + 1e-8`
-- state-dependent quantities: per-series history mean `mu` and standard
-  deviation `sigma`
+- numerical guard: `sigma + 1e-8`
+- state-dependent `mu` and `sigma`
 
 State effect:
 
 ```text
-history -> scaled_history
-future target -> normalized active_target_base
-current_target -> normalized residual target
+history -> (history - mu) / sigma
+future target -> (future - mu) / sigma
+final prediction inverse -> pred * sigma + mu
 ```
 
 Common next tokens:
 
-- `BindScaledHistory`
-- `BindAllSafeTabular`
+- `FourierFeatures`
 - `kernel_rbf`
+- `rf_tabular`
+- `lightgbm_tabular`
+- `DayOfWeekFeature`
+- `versatile_rf`
+- `versatile_gb`
 
 ### `MeanAbsScaling`
 
@@ -90,11 +187,7 @@ Class: `TransformToken`
 
 File: `graph_Time_series/token_blocks/normalization.py`
 
-Purpose:
-
-Scale each series by the mean absolute value of its history, without centering.
-This preserves the zero point while putting series on a comparable magnitude
-scale.
+Purpose: scale each series by mean absolute history value, without centering.
 
 Reads:
 
@@ -104,288 +197,32 @@ Writes:
 
 - `historical_features["scaled_history"]`
 - `active_target_base`
-- `transform_stack`
+- transform stack
 - `flags["is_mean_abs_scaled"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
 - no constructor hyperparameters
-- implicit numerical guard: `mean(abs(history)) + 1e-8`
-- state-dependent quantity: per-series mean absolute history scale
+- numerical guard: `mean(abs(history)) + 1e-8`
+- state-dependent per-series scale
 
 State effect:
 
 ```text
-scale = mean(abs(history))
 history -> history / scale
-future target -> future target / scale
-current_target -> scaled residual target
+future target -> future / scale
+final prediction inverse -> pred * scale
 ```
 
 Common next tokens:
 
-- `BindScaledHistory`
-- `BindAllSafeTabular`
+- `FourierFeatures`
 - `kernel_rbf`
-
-### `BindScaledHistory`
-
-Status: `package`
-
-Class: `FeatureToken` with `token_class = "binding"`
-
-File: `graph_Time_series/token_blocks/bindings.py`
-
-Purpose:
-
-Select `scaled_history` as the active model input. This is the simple, explicit
-way to say: "the next model should consume the normalized sequence."
-
-Reads:
-
-- `scaled_history`
-
-Writes:
-
-- `historical_features["model_input"]`
-- `features["model_input"]`
-- `input_bundles["scaled_history"]`
-- `metadata["active_input_bundle"]`
-
-Bundle:
-
-```text
-name = "scaled_history"
-kind = "sequence_flat"
-artifact_names = ("scaled_history",)
-```
-
-Hyperparameters in the current setting:
-
-- no constructor hyperparameters
-- fixed artifact: `scaled_history`
-- fixed bundle kind: `sequence_flat`
-
-Common next tokens:
-
-- `kernel_rbf`
-
-### `BindAllSafeTabular`
-
-Status: `package`
-
-Class: `FeatureToken` with `token_class = "binding"`
-
-File: `graph_Time_series/token_blocks/bindings.py`
-
-Purpose:
-
-Flatten all finite historical artifacts into one tabular bundle. This is useful
-for quick tests, but it can make the search space and feature width large.
-
-Reads:
-
-- all finite entries in `historical_features`, except `model_input`
-
-Writes:
-
-- `historical_features["model_input"]`
-- `features["model_input"]`
-- `input_bundles["all_safe_tabular"]`
-- `metadata["active_input_bundle"]`
-
-Bundle:
-
-```text
-name = "all_safe_tabular"
-kind = "tabular"
-artifact_names = all selected historical feature names
-```
-
-Hyperparameters in the current setting:
-
-- no constructor hyperparameters
-- state-dependent feature set: every finite entry in `historical_features`
-  except `model_input`
-- fixed bundle kind: `tabular`
-
-Use carefully:
-
-This token is broad by design. Prefer a targeted `StackFeatureBundleToken` when
-you already know which artifacts should be combined.
-
-### `BindFeatureToken`
-
-Status: `package`
-
-Class: `FeatureToken` with `token_class = "binding"`
-
-File: `graph_Time_series/token_blocks/bindings.py`
-
-Purpose:
-
-Generic single-artifact binder. It lets us create named binders such as
-`BindRawHistory`, `BindLevelSeries`, or `BindShapeVector` without writing a new
-class each time.
-
-Configured example:
-
-```python
-BindFeatureToken(
-    "raw_history",
-    token_name="BindRawHistory",
-    bundle_name="raw_history",
-    kind="sequence_flat",
-)
-```
-
-Reads:
-
-- one configured artifact name
-
-Writes:
-
-- `model_input`
-- active input bundle metadata
-
-Hyperparameters in the current setting:
-
-- `feature_name`: artifact to read
-- `token_name`: visible token name, default `Bind[{feature_name}]`
-- `bundle_name`: active bundle name, default `feature_name`
-- `kind`: input bundle kind, default `sequence_flat`
-- `target_space`: default `active_target`
-
-Notebook-configured examples:
-
-- `BindRawHistory`: `feature_name="raw_history"`, `kind="sequence_flat"`
-- `BindFourierFeatures`: `feature_name="fourier_features"`, `kind="tabular"`
-
-### `StackFeatureBundleToken`
-
-Status: `package`
-
-Class: `FeatureToken` with `token_class = "binding"`
-
-File: `graph_Time_series/token_blocks/bindings.py`
-
-Purpose:
-
-Flatten and concatenate a chosen set of artifacts into one tabular model input.
-This is the controlled version of "multi-output from previous tokens becomes
-multi-input for the next model."
-
-Configured example:
-
-```python
-StackFeatureBundleToken(
-    ("scaled_history", "context_history"),
-    token_name="StackScaledContext",
-    bundle_name="scaled_plus_context",
-)
-```
-
-Reads:
-
-- configured artifact names
-
-Writes:
-
-- `model_input`
-- active input bundle metadata
-
-Bundle:
-
-```text
-kind = "tabular"
-metadata["component_shapes"] = original shapes before flattening
-```
-
-Hyperparameters in the current setting:
-
-- `feature_names`: tuple of artifacts to flatten and concatenate
-- `token_name`: visible token name, default `Stack[a+b+...]`
-- `bundle_name`: active bundle name, default joined feature names
-- `kind`: default `tabular`
-- `target_space`: default `active_target`
-
-Notebook-configured examples:
-
-- `StackScaledContext`: `("scaled_history", "context_history")`
-- `StackFourierScaled`: `("fourier_features", "scaled_history")`
-
-### `PeriodPhaseOneHot`
-
-Status: `package`
-
-Class: `FeatureToken`
-
-File: `graph_Time_series/token_blocks/periodic.py`
-
-Purpose:
-
-Encode positions inside a selected period. This token expects a previous period
-selection step to have written `metadata["period"]`.
-
-Reads:
-
-- `raw_history`
-- `metadata["period"]`
-
-Writes:
-
-- `historical_features["history_period_phase_id"]`
-- optionally `historical_features["history_period_phase_onehot"]`
-- `future_features["future_period_phase_id"]`
-- `future_features["future_period_phase_onehot"]`
-- `metadata["period_phase_onehot"]`
-- `flags["period_phase_encoded"]`
-
-Hyperparameters in the current setting:
-
-- `anchor="fold"`: align phases with `PeriodFold`
-- `include_history_onehot="auto"`: write history one-hot only under the memory
-  guard
-- `max_history_onehot_cells=20_000_000`
-- `max_future_onehot_cells=50_000_000`
-- `dtype=np.float32`
-- state-dependent quantity: `metadata["period"]`
-
-State effect:
-
-```text
-period = metadata["period"]
-history_period_phase_id:      (n_samples, history_length)
-history_period_phase_onehot:  (n_samples, history_length, period), when small enough
-future_period_phase_id:       (n_samples, horizon)
-future_period_phase_onehot:   (n_samples, horizon, period)
-```
-
-Default alignment:
-
-`anchor="fold"` matches `PeriodFold`: trailing complete periods define phase
-zero, so the first forecast step starts at phase zero. Use
-`anchor="history_start"` if you want phases measured from the start of the
-current history array.
-
-Memory guard:
-
-The token always writes compact phase IDs. History-side one-hot is automatic
-only when it is below `max_history_onehot_cells`; this avoids exploding memory
-on long histories. Future-side one-hot is required, but `can_apply()` refuses if
-it would exceed `max_future_onehot_cells`.
-
-Typical use:
-
-```text
-PeriodSelection -> PeriodPhaseOneHot
-```
-
-Current limitation:
-
-The existing model tokens mostly consume `historical_features["model_input"]`.
-The future one-hot is stored correctly as a known future feature, but a future
-covariate-aware model/binder is still a planned next step.
+- `rf_tabular`
+- `lightgbm_tabular`
+- `DayOfWeekFeature`
+- `versatile_rf`
+- `versatile_gb`
 
 ### `FourierFeatures`
 
@@ -395,49 +232,42 @@ Class: `FeatureToken`
 
 File: `graph_Time_series/token_blocks/fourier.py`
 
-Purpose:
-
-Create fixed-width tabular FFT features from the history. This is meant for
-tabular models such as random forests and LightGBM.
+Purpose: create fixed-width FFT/tabular features from history.
 
 Reads:
 
-- preferred source: `historical_features["scaled_history"]`
-- fallback: `features["raw_history"]`
+- preferred `scaled_history`
+- fallback `raw_history`
 
 Writes:
 
 - `historical_features["fourier_features"]`
+- artifact metadata with tags `fourier`, `tabular`
 - `metadata["fourier_features"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
-- `n_harmonics=16`: number of low-frequency FFT bins requested
-- `source_feature="scaled_history"`: preferred history artifact
-- `fallback_to_raw=True`: use `raw_history` if `scaled_history` is absent
-- `include_summary=True`: append mean, std, min, max, last, and slope
-- `center=True`: subtract the per-series history mean before FFT
-- state-dependent quantity: actual bins are capped by available history length
+- `n_harmonics=16`
+- `source_feature="scaled_history"`
+- `fallback_to_raw=True`
+- `include_summary=True`
+- `center=True`
 
 State effect:
 
 ```text
-history -> low-frequency FFT real/imag/amplitude/relative-power features
-history -> summary features such as mean, std, min, max, last, slope
-fourier_features: (n_samples, 4 * n_harmonics + summary_width)
+history sequence -> real/imag/amplitude/relative-power FFT blocks
+optional summaries -> mean, std, min, max, last, slope
 ```
 
-Typical use:
+Common next tokens:
 
-```text
-MeanAbsScaling -> FourierFeatures -> BindFourierFeatures -> rf_tabular
-MeanAbsScaling -> FourierFeatures -> BindFourierFeatures -> lightgbm_tabular
-```
-
-Notes:
-
-The token uses fixed low-frequency bins rather than data-selected top bins, so
-train and holdout states keep the same feature width.
+- `kernel_rbf`
+- `rf_tabular`
+- `lightgbm_tabular`
+- `versatile_rf`
+- `versatile_gb`
+- `DayOfWeekFeature`
 
 ### `kernel_rbf`
 
@@ -447,53 +277,40 @@ Class: `ModelToken`
 
 File: `graph_Time_series/token_blocks/kernel_rbf.py`
 
-Purpose:
-
-RBF KernelRidge model using the active model input. If no explicit model input
-has been bound, it falls back to `scaled_history`.
+Purpose: RBF KernelRidge model with median-heuristic lengthscale and
+leave-one-out in-state predictions.
 
 Reads:
 
-- `historical_features["model_input"]`, or fallback `scaled_history`
-- `current_target`
+- legacy `historical_features["model_input"]` if present;
+- else `state.feature_bundle()`;
+- fallback `scaled_history` for older direct usage;
+- `current_target`.
 
 Writes:
 
-- `prediction_stack`
-- `prediction_names`
-- `features["last_prediction"]`
-- `features["cumulative_prediction"]`
-- `features["current_residual"]`
-- `metadata["last_prediction"]`
-- `metadata["cumulative_prediction"]`
-- `metadata["current_residual"]`
+- `prediction_stack[-1]`
+- execution log values for `lengthscale` and `gamma`
 
-Accepted bundle kinds:
+Hyperparameters:
 
-- `sequence_flat`
-- `tabular`
-
-Hyperparameters in the current setting:
-
-- `alpha=1e-2`: KernelRidge regularization
-- `median_subset=24`: maximum number of samples used for the median-distance
-  lengthscale heuristic
-- `seed=0`: subset sampling seed
-- derived parameter: `gamma = 1 / (2 * lengthscale ** 2)`
+- `alpha=1e-2`
+- `median_subset=24`
+- `seed=0`
 
 State effect:
 
 ```text
-fit model on current_target
-push prediction
+X = model_input or feature_bundle or scaled_history
+Y = current_target
+prediction -> state.push_prediction(...)
 current_target becomes residual
 ```
 
-Note:
+Common next tokens:
 
-The package token performs leave-one-out predictions inside the current state.
-For true holdout comparison, use the notebook's leakage-safe wrappers or a
-future package evaluator that separates train and query states.
+- `kernel_rbf`
+- `STOP`
 
 ### `rf_tabular`
 
@@ -503,23 +320,24 @@ Class: `ModelToken`
 
 File: `graph_Time_series/token_blocks/tabular_models.py`
 
-Purpose:
+Purpose: RandomForestRegressor over the active tabular feature bundle.
 
-Random forest regressor over the active tabular `model_input`. It supports
-multi-horizon targets directly through scikit-learn's multi-output regression.
+Requires:
+
+- `Port(sem="features", axes=("sample", "feature"), space="current", multiple=True, coerce=True)`
 
 Reads:
 
-- `historical_features["model_input"]`
-- active input bundle with `kind = "tabular"`
-- `current_target`
+- legacy `model_input` if present and tabular;
+- else `state.feature_bundle()`;
+- `current_target`.
 
 Writes:
 
-- `prediction_stack`
-- residual updates through `state.push_prediction(...)`
+- `prediction_stack[-1]`
+- `metadata["rf_tabular"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
 - `n_estimators=120`
 - `max_depth=12`
@@ -527,10 +345,15 @@ Hyperparameters in the current setting:
 - `seed=0`
 - `n_jobs=-1`
 
-Use carefully:
+State effect:
 
-Direct token application fits and predicts on the same state for diagnostics.
-Notebook comparison uses leakage-safe train/query wrappers.
+```text
+feature bundle -> RandomForestRegressor -> residual prediction
+```
+
+Common next tokens:
+
+- `STOP`
 
 ### `lightgbm_tabular`
 
@@ -540,25 +363,24 @@ Class: `ModelToken`
 
 File: `graph_Time_series/token_blocks/tabular_models.py`
 
-Purpose:
+Purpose: LightGBM tabular regressor for multi-horizon forecasting.
 
-LightGBM regressor over active tabular `model_input`. It is the gradient
-boosted tree tabular baseline for Fourier and other tabular feature bundles.
-The package import is lazy: installing the project does not require LightGBM
-until this token is actually built or run.
+Requires:
+
+- `Port(sem="features", axes=("sample", "feature"), space="current", multiple=True, coerce=True)`
 
 Reads:
 
-- `historical_features["model_input"]`
-- active input bundle with `kind = "tabular"`
-- `current_target`
+- legacy `model_input` if present and tabular;
+- else `state.feature_bundle()`;
+- `current_target`.
 
 Writes:
 
-- `prediction_stack`
-- residual updates through `state.push_prediction(...)`
+- `prediction_stack[-1]`
+- `metadata["lightgbm_tabular"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
 - `n_estimators=200`
 - `learning_rate=0.05`
@@ -569,201 +391,186 @@ Hyperparameters in the current setting:
 - `colsample_bytree=0.9`
 - `seed=0`
 - `n_jobs=-1`
-- wrapper: `MultiOutputRegressor(LGBMRegressor(...))` for multi-horizon
-  targets
 
-Dependency:
+Implementation note:
 
-- `lightgbm`, installed by the Colab setup cell for notebook comparisons
+- imports `lightgbm.LGBMRegressor` lazily;
+- wraps it in `sklearn.multioutput.MultiOutputRegressor`.
 
-Use carefully:
+Common next tokens:
 
-Direct token application fits and predicts on the same state for diagnostics.
-Notebook comparison uses leakage-safe train/query wrappers.
+- `STOP`
 
-## Notebook Prototype Tokens
+### `PeriodPhaseOneHot`
 
-These tokens currently live in `examples/test_token_sequence_colab.ipynb`.
-They are useful, but not yet promoted to package files.
+Status: `package`
 
-### `DataAugmentation`
+Class: `FeatureToken`
 
-Status: `notebook`
+File: `graph_Time_series/token_blocks/periodic.py`
 
-Class: `TransformToken`
-
-Purpose:
-
-Apply simple history augmentation such as jitter and smoothing. In leakage-safe
-evaluation, it is treated as training-only and skipped for query/holdout states.
+Purpose: one-hot encode the point position inside the selected period.
 
 Reads:
 
 - `raw_history`
+- `metadata["period"]`
 
 Writes:
 
-- augmented history values
-- augmentation metadata
+- `historical_features["history_period_phase_id"]`
+- optional `historical_features["history_period_phase_onehot"]`
+- `future_features["future_period_phase_id"]`
+- `future_features["future_period_phase_onehot"]`
+- `metadata["period_phase_onehot"]`
+- `flags["period_phase_encoded"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
-- `jitter_sigma=0.03`: noise scale as a fraction of each series std
-- `smooth_window=5`: moving-average window; values `<= 1` disable smoothing
-- `seed=42`: random seed for jitter
-
-Use carefully:
-
-This token must not learn from holdout futures. It should only modify histories
-in a train-safe way.
-
-### `ContextWindow`
-
-Status: `notebook`
-
-Class: `CleaningToken`
-
-Purpose:
-
-Keep only the latest `context_length` history points.
-
-Reads:
-
-- `raw_history`
-
-Writes:
-
-- `features["raw_history"]`
-- `historical_features["context_history"]`
-- `metadata["context_length"]`
-
-Hyperparameters in the current setting:
-
-- `context_length=min(720, H.shape[1])` in the notebook registry
-- constructor default: `context_length=720`
+- `anchor="fold"` or `"history_start"`
+- `include_history_onehot="auto"`
+- `max_history_onehot_cells=20_000_000`
+- `max_future_onehot_cells=50_000_000`
+- `dtype=np.float32`
 
 State effect:
 
 ```text
-original_history shape: (n_samples, full_history)
-after token:            (n_samples, context_length)
+period + positions -> phase ids
+phase ids -> horizon-side one-hot known feature
+optional history-side one-hot feature
 ```
 
-Example from the current notebook:
+Common next tokens:
 
-```text
-context_length = 720
-```
+- `PeriodFold`
 
-### `PeriodSelection`
+## FLAIR Tokens
 
-Status: `notebook`
+These tokens are package tokens but opt-in through `register_flair_tokens`.
+They expose the FLAIR decomposition as inspectable state instead of hiding it
+inside one monolithic model.
 
-Class: `FeatureToken`
+### `FlairPreprocess`
 
-Purpose:
+Status: `package`
 
-This is the token that recognizes/selects a period. It does not forecast by
-itself. It looks at the history, scores candidate periods, and stores the
-selected period in state metadata.
+Class: `CleaningToken`
+
+Purpose: interpolate finite values and shift each series positive.
 
 Reads:
 
 - `raw_history`
+
+Writes:
+
+- `historical_features["flair_history"]`
+- `metadata["flair_shift"]`
+- positivity-shift transform
+- `flags["flair_preprocessed"]`
+
+Hyperparameters:
+
+- `eps=1e-6`
+
+Next:
+
+- `PeriodSelection`
+
+### `PeriodSelection`
+
+Status: `package`
+
+Class: `FeatureToken`
+
+Purpose: select a global FLAIR period using candidate period BIC/SVD scores.
+
+Reads:
+
+- `flair_history`
 
 Writes:
 
 - `metadata["period"]`
 - `metadata["period_scores"]`
+- `metadata["flair_secondary_periods"]`
 - `flags["period_selected"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
-- `freq="H"` in the notebook registry
-- `max_series=8`: number of series used to score candidate periods
-- state-dependent filter: candidates need at least three complete cycles in
-  the current history window
+- `freq="H"`
+- `max_series=8`
+- `min_complete=3`
 
-How it works right now:
-
-1. It chooses candidate periods from a frequency map.
-2. For hourly data, candidates include values such as daily and weekly periods.
-3. It keeps candidates with enough complete cycles in the available history.
-4. It scores them with a simple BIC/MDL-style reconstruction criterion.
-5. It stores the lowest-scoring period as `metadata["period"]`.
-
-Current frequency map:
-
-```text
-H   -> [24, 168]
-D   -> [7, 365]
-W   -> [52]
-M   -> [12]
-15T -> [4, 96]
-5T  -> [12, 288]
-```
-
-Typical next token:
+Next:
 
 - `PeriodPhaseOneHot`
 - `PeriodFold`
 
-Important distinction:
-
-`PeriodSelection` identifies a period. `PeriodFold` uses that period to reshape
-the history into phase/cycle structure.
-
 ### `PeriodFold`
 
-Status: `notebook`
+Status: `package`
 
 Class: `FeatureToken`
 
-Purpose:
-
-Fold the history into period phases and complete cycles. This creates the shape
-needed by shape/level tokens.
+Purpose: fold preprocessed history into phase-by-period matrices.
 
 Reads:
 
-- `raw_history`
-- `metadata["period"]`
+- `flair_history`
+- `period`
 
 Writes:
 
 - `historical_features["period_matrix"]`
 - `historical_features["level_series"]`
+- compatibility aliases `flair_period_matrix`, `flair_level_raw`
 - `metadata["n_complete_periods"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
 - no constructor hyperparameters
-- state-dependent quantity: `metadata["period"]`
-- state-dependent quantity: number of complete periods available in history
 
-State effect:
+Next:
 
-```text
-raw_history:    (n_samples, history_length)
-period_matrix:  (n_samples, period, n_complete_periods)
-level_series:   (n_samples, n_complete_periods)
-```
-
-Typical next token:
-
+- `LevelShrinkage`
 - `ShapeLevel`
 
-### `ShapeLevel`
+### `LevelShrinkage`
 
-Status: `notebook`
+Status: `package`
 
 Class: `FeatureToken`
 
-Purpose:
+Purpose: denoise period totals using a rank-1 energy shrinkage estimate.
 
-Estimate a within-period shape vector using recent folded periods. This creates
-a normalized phase profile that can distribute level forecasts across the
-horizon.
+Reads:
+
+- `period_matrix`
+- `level_series`
+
+Writes:
+
+- `historical_features["flair_level_denoised"]`
+- `metadata["flair_level_shrinkage"]`
+
+Hyperparameters:
+
+- `min_factor=0.05`
+
+Next:
+
+- `ShapeLevel`
+- `gb_level_forecast`
+
+### `ShapeLevel`
+
+Status: `package`
+
+Class: `FeatureToken`
+
+Purpose: estimate within-period shape proportions from recent complete periods.
 
 Reads:
 
@@ -773,306 +580,374 @@ Reads:
 Writes:
 
 - `historical_features["shape_vector"]`
+- `historical_features["flair_shape"]`
+- `historical_features["flair_shape_history"]`
 - `metadata["shape_k"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
-- `shape_k=2`: number of most recent complete periods used to estimate shape
-- state-dependent cap: `shape_k` is clipped to available complete periods
+- `shape_k=2`
 
-State effect:
+Next:
 
-```text
-shape_vector: (n_samples, period)
-```
+- `SecondaryLevelSeasonality`
+- `gb_level_forecast`
 
-Typical next tokens:
+### `SecondaryLevelSeasonality`
 
-- `shape_naive`
-- `level_kernel_rbf`
+Status: `package`
 
-### `shape_naive`
+Class: `FeatureToken`
 
-Status: `notebook`
-
-Class: `ModelToken`
-
-Purpose:
-
-Forecast by taking the last observed level and spreading it over future phases
-using the frozen shape vector.
-
-Reads:
-
-- `shape_vector`
-- `level_series`
-
-Writes:
-
-- `prediction_stack`
-- residual updates through `state.push_prediction(...)`
-
-Hyperparameters in the current setting:
-
-- no constructor hyperparameters
-- state-dependent quantities: last value of `level_series`, `shape_vector`,
-  and forecast horizon
-
-Pipeline:
-
-```text
-PeriodSelection -> PeriodFold -> ShapeLevel -> shape_naive
-```
-
-### `kernel_rbf_fast`
-
-Status: `notebook`
-
-Class: `ModelToken`
-
-Purpose:
-
-Fast KernelRidge diagnostic token. It fits once and predicts on the same state,
-so it is useful for manual inspection but not safe as a direct holdout metric.
-
-Reads:
-
-- active `model_input`, or fallback `scaled_history`
-- `current_target`
-
-Writes:
-
-- `prediction_stack`
-- residual updates
-- kernel metadata such as lengthscale and gamma
-
-Hyperparameters in the current setting:
-
-- `alpha=1e-2`
-- `median_subset=24`
-- `seed=0`
-- derived parameter: `gamma = 1 / (2 * lengthscale ** 2)`
-
-Use carefully:
-
-Manual in-state metrics from this token can look very good because they are
-in-sample. For comparison, use `safe_score_sequence(...)` from the notebook.
-
-### `level_kernel_rbf`
-
-Status: `notebook`
-
-Class: `ModelToken`
-
-Purpose:
-
-Fit an RBF KernelRidge model on `level_series`, then expand predicted future
-levels through `shape_vector`.
+Purpose: estimate secondary seasonality on the compressed level series.
 
 Reads:
 
 - `level_series`
-- `shape_vector`
-- `current_target`
+- `period`
 
 Writes:
 
-- `prediction_stack`
-- residual updates
-- kernel metadata
+- `historical_features["flair_shape2"]`
+- `historical_features["flair_level_work"]`
+- `features["flair_level_future_shape2"]`
+- `metadata["flair_cross_period"]`
+- `metadata["flair_cross_periods"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
-- `alpha=1e-2`
-- `median_subset=24`
-- `seed=0`
-- derived parameter: `gamma = 1 / (2 * lengthscale ** 2)`
-- state-dependent quantity: number of future level blocks
-  `ceil(horizon / period)`
+- `min_complete=2`
 
-Pipeline:
+Next:
 
-```text
-PeriodSelection -> PeriodFold -> ShapeLevel -> level_kernel_rbf
-```
+- `LevelBoxCoxCenter`
 
-Known issue:
+### `LevelBoxCoxCenter`
 
-The direct notebook token is in-state. The leakage-safe evaluator has a separate
-train/query wrapper, but some current candidate combinations can fail when
-train and query feature widths differ after period folding.
+Status: `package`
 
-## Common Token Sequences
+Class: `FeatureToken`
 
-### Simple Normalized Kernel
-
-```text
-ZNormalization -> BindScaledHistory -> kernel_rbf
-```
-
-Meaning:
-
-Normalize the history and target, bind the normalized sequence, fit an RBF model.
-
-### Current Notebook Manual Sequence
-
-```text
-ContextWindow -> ZNormalization -> BindScaledHistory -> kernel_rbf_fast
-```
-
-Meaning:
-
-Use the last context window, normalize it, bind the normalized sequence, run the
-fast RBF diagnostic model.
-
-### Shape Naive Period Pipeline
-
-```text
-PeriodSelection -> PeriodFold -> ShapeLevel -> shape_naive
-```
-
-Meaning:
-
-Select a period, fold history into phases/cycles, estimate a shape, repeat the
-last level through that shape.
-
-### Period Phase Encoding
-
-```text
-PeriodSelection -> PeriodPhaseOneHot
-```
-
-Meaning:
-
-Select a period, then add compact phase IDs plus one-hot encodings of positions
-inside that period. This is useful for future covariate-aware models and for
-controlled tabular experiments after a context window.
-
-### Fourier Tabular Models
-
-```text
-MeanAbsScaling -> FourierFeatures -> BindFourierFeatures -> rf_tabular
-MeanAbsScaling -> FourierFeatures -> BindFourierFeatures -> lightgbm_tabular
-```
-
-Meaning:
-
-Scale the history, extract fixed-width Fourier features, bind them as tabular
-input, then fit a tabular regressor on the transformed target.
-
-Notebook comparison knobs:
-
-- `TABULAR_MAX_SAMPLES = min(160, H.shape[0])`
-- `TABULAR_MAX_HOLDOUT = min(40, H_holdout.shape[0])`
-- `RUN_TABULAR_CV = True`
-- `TABULAR_CV_FOLDS = 3`
-- `TABULAR_CV_SEED = 11`
-
-## STL Decomposition Proposal
-
-Status: `planned`
-
-No STL token is implemented yet. A good design would keep STL as a family of
-small composable tokens rather than one giant block.
-
-Potential token split:
-
-- `STLDecomposition`: reads `raw_history` and `metadata["period"]`, writes
-  `stl_trend`, `stl_seasonal`, and `stl_residual` historical artifacts.
-- `STLTrendFeatures`: turns trend into slope, last trend level, curvature, and
-  recent trend change tabular features.
-- `STLSeasonalFeatures`: summarizes the seasonal component; can combine with
-  `PeriodPhaseOneHot` or `FourierFeatures`.
-- `STLResidualFeatures`: computes residual volatility, autocorrelation, recent
-  residual windows, and residual Fourier features.
-- `STLSeasonalNaive`: model token that repeats the learned seasonal profile
-  into the horizon.
-- `STLResidualModel`: model token or sequence that fits the remaining residual
-  with `rf_tabular`, `lightgbm_tabular`, or `kernel_rbf`.
-
-How it would compose with existing tokens:
-
-```text
-PeriodSelection -> STLDecomposition -> STLSeasonalNaive
-PeriodSelection -> STLDecomposition -> STLTrendFeatures -> BindAllSafeTabular -> rf_tabular
-PeriodSelection -> STLDecomposition -> STLResidualFeatures -> FourierFeatures -> lightgbm_tabular
-```
-
-Important constraints:
-
-- STL must be fit on history only.
-- Period should come from `PeriodSelection` or a user-supplied period.
-- Seasonal forecast and residual forecast should enter through
-  `state.push_prediction(...)`, so residual stacking remains correct.
-- For leakage-safe evaluation, STL decomposition must be applied separately to
-  train and query histories.
-
-### Level Kernel Period Pipeline
-
-```text
-PeriodSelection -> PeriodFold -> ShapeLevel -> level_kernel_rbf
-```
-
-Meaning:
-
-Select a period, create level and shape features, predict future levels with an
-RBF kernel, then expand levels back into the forecast horizon.
-
-## How To Add A Token Entry
-
-Use this template:
-
-```text
-### `TokenName`
-
-Status: `package`, `notebook`, or `planned`
-
-Class: `CleaningToken`, `FeatureToken`, `TransformToken`, `ModelToken`, or `ControlToken`
-
-Purpose:
-
-One or two sentences.
+Purpose: apply per-series Box-Cox transform to FLAIR levels and center at the
+latest level.
 
 Reads:
 
-- state key or artifact
+- `flair_level_work`
 
 Writes:
 
-- state key or artifact
+- `historical_features["flair_level_bc"]`
+- `historical_features["flair_level_innov"]`
+- `metadata["flair_boxcox"]`
 
-Hyperparameters in the current setting:
+Hyperparameters:
 
-- parameter name and default
-- state-dependent quantities, if any
+- `n_lambda_grid=21`
+- `eps=1e-6`
+
+Next:
+
+- `FlairRidgeLevel`
+
+### `FlairRidgeLevel`
+
+Status: `package`
+
+Class: `ModelToken`
+
+Purpose: forecast compressed FLAIR levels with soft-averaged Ridge, expand
+through shape, and push a point forecast.
+
+Reads:
+
+- `flair_level_innov`
+- `shape_vector`
+- `flair_boxcox`
+- `period`
+- optional secondary shape data
+
+Writes:
+
+- `prediction_stack[-1]`
+- `features["flair_point_forecast"]`
+- `features["flair_level_point"]`
+- `features["flair_level_innov_point"]`
+- ridge diagnostics
+- `metadata["FlairRidgeLevel"]`
+
+Hyperparameters:
+
+- `alpha_log_min=-6.0`
+- `alpha_log_max=3.0`
+- `n_alphas=25`
+- `show_progress=True`
+- `progress_min_samples=32`
 
 State effect:
 
-Short description of how the state changes.
-
-Typical next tokens:
-
-- token name
-
-Notes:
-
-Leakage risks, shape constraints, bundle kinds, or search implications.
+```text
+level innovations -> Ridge forecast -> inverse Box-Cox -> shape expansion
 ```
 
-## Planned Token Families
+Next:
 
-These are open-ended possibilities. Add concrete entries above only when they
-become real package tokens or notebook prototypes.
+- `FlairSamplePaths`
+- `STOP`
 
-| Family | Possible tokens |
+### `FlairSamplePaths`
+
+Status: `package`
+
+Class: `FeatureToken`
+
+Purpose: generate FLAIR-style stochastic sample paths around the point forecast.
+
+Reads:
+
+- `flair_level_innov`
+- `shape_vector`
+- `period_matrix`
+- `level_series`
+- `flair_ridge_beta`
+- `flair_ridge_phi`
+- `flair_ridge_residuals`
+
+Writes:
+
+- `features["flair_samples"]`
+- `features["flair_sample_mean"]`
+- `metadata["FlairSamplePaths"]`
+
+Hyperparameters:
+
+- `n_paths=100`
+- `seed=0`
+- `phase_noise_scale=1.0`
+- `clip_to_history=True`
+- `max_sample_values=5_000_000`
+- `show_progress=True`
+- `progress_min_samples=16`
+
+Next:
+
+- `STOP`
+
+## Versatile Tokens
+
+These tokens demonstrate the signal-board design. They are opt-in through
+`register_versatile_tokens`.
+
+### `DayOfWeekFeature`
+
+Status: `package`
+
+Class: `FeatureToken`
+
+Purpose: add cyclical calendar-like covariates using position modulo a period.
+
+Reads:
+
+- `raw_history`
+
+Writes:
+
+- `historical_features["calendar_features"]`
+- `future_features["future_calendar_features"]`
+- `flags["calendar_encoded"]`
+
+Provides:
+
+- history `features`
+- future `features`
+
+Hyperparameters:
+
+- `period=7` in the class default
+- `period=24` in `register_versatile_tokens`
+
+Next:
+
+- `FourierFeatures`
+- `versatile_rf`
+- `versatile_gb`
+
+### `versatile_rf`
+
+Status: `package`
+
+Class: `ModelToken`
+
+Purpose: RandomForestRegressor over any auto-built feature bundle.
+
+Requires:
+
+- history `features(sample, feature)` in current space, with coercion enabled.
+
+Writes:
+
+- `prediction_stack[-1]`
+- `metadata["versatile_rf"]`
+
+Hyperparameters:
+
+- `n_estimators=80`
+- `max_depth=10`
+- `seed=0`
+- `select_tags=()`
+
+Next:
+
+- `versatile_rf`
+- `versatile_gb`
+- `STOP`
+
+### `versatile_gb`
+
+Status: `package`
+
+Class: `ModelToken`
+
+Purpose: sklearn `HistGradientBoostingRegressor` over any auto-built feature
+bundle.
+
+Requires:
+
+- history `features(sample, feature)` in current space, with coercion enabled.
+
+Writes:
+
+- `prediction_stack[-1]`
+- `metadata["versatile_gb"]`
+
+Hyperparameters:
+
+- `max_iter=150`
+- `learning_rate=0.06`
+- `max_depth=None`
+- `seed=0`
+- `select_tags=()`
+
+Next:
+
+- `versatile_rf`
+- `versatile_gb`
+- `STOP`
+
+### `gb_level_forecast`
+
+Status: `package`
+
+Class: `ModelToken`
+
+Purpose: FLAIR sub-step replacement that forecasts period levels with gradient
+boosting and expands through `shape_vector`.
+
+Requires:
+
+- `level(sample, period_idx)`
+- `shape(sample, phase)`
+
+Reads:
+
+- `level_series`
+- `shape_vector`
+- `period`
+
+Writes:
+
+- `prediction_stack[-1]`
+- `features["gb_level_point"]`
+- `metadata["gb_level_forecast"]`
+
+Hyperparameters:
+
+- `n_lags=3`
+- `max_iter=120`
+- `learning_rate=0.08`
+- `seed=0`
+
+Next:
+
+- `STOP`
+
+## Common Sequences
+
+Default package:
+
+```text
+ZNormalization -> kernel_rbf -> STOP
+MeanAbsScaling -> FourierFeatures -> rf_tabular -> STOP
+MeanAbsScaling -> FourierFeatures -> lightgbm_tabular -> STOP
+ZNormalization -> FourierFeatures -> kernel_rbf -> STOP
+```
+
+Residual stacking:
+
+```text
+ZNormalization -> kernel_rbf -> kernel_rbf -> STOP
+ZNormalization -> FourierFeatures -> versatile_rf -> versatile_gb -> STOP
+```
+
+FLAIR:
+
+```text
+FlairPreprocess
+-> PeriodSelection
+-> PeriodPhaseOneHot
+-> PeriodFold
+-> LevelShrinkage
+-> ShapeLevel
+-> SecondaryLevelSeasonality
+-> LevelBoxCoxCenter
+-> FlairRidgeLevel
+-> STOP
+```
+
+FLAIR sample paths:
+
+```text
+FlairPreprocess
+-> PeriodSelection
+-> PeriodFold
+-> ShapeLevel
+-> SecondaryLevelSeasonality
+-> LevelBoxCoxCenter
+-> FlairRidgeLevel
+-> FlairSamplePaths
+-> STOP
+```
+
+FLAIR level-model swap:
+
+```text
+FlairPreprocess
+-> PeriodSelection
+-> PeriodFold
+-> LevelShrinkage
+-> ShapeLevel
+-> gb_level_forecast
+-> STOP
+```
+
+Calendar plus tabular:
+
+```text
+ZNormalization -> DayOfWeekFeature -> FourierFeatures -> versatile_rf -> STOP
+```
+
+## Notebook-Only / Prototype Space
+
+The notebook remains the place to test ideas before promoting them into
+package tokens. Useful directions, not implemented as current package tokens:
+
+| Direction | Notes |
 | --- | --- |
-| Context selection | adaptive window, multi-resolution context |
-| Period features | robust period search, multiple periods, period confidence |
-| Shape/level | residual shape correction, multi-shape mixtures |
-| Tabular models | ridge, random forest, gradient boosting, XGBoost |
-| Sequence models | multi-channel binders, convolutional models, patch models |
-| Future covariates | calendar binders, known-price features, holidays |
-| Residual ensembles | model chains that deliberately fit remaining residuals |
-| Kernel variants | DTW, shape-only, level-only, hybrid shape-level kernels |
-| Search | grammar enumeration, MCTS, cost-aware candidate pruning |
-| AST/config | keyword-configured tokens, config-file token registry |
+| STL decomposition | Decompose trend/seasonal/residual, then publish signals |
+| Lag/rolling features | Create tabular history summaries for RF/LightGBM |
+| Residual feature tokens | Let later models see previous residual structure |
+| Sequence-native models | Use ports for multi-channel sequence tensors |
+| Known-future covariates | Holidays, timestamps, external calendar data |
+| Selector tokens | Optional feature-bundle narrowing by tags |
+
+Any promoted token should update this file, the README, and the graph catalog.

@@ -1,0 +1,1182 @@
+length,sequence
+2,DayOfWeekFeature -> kernel_rbf
+2,DayOfWeekFeature -> rf_tabular
+2,DayOfWeekFeature -> versatile_gb
+2,DayOfWeekFeature -> versatile_rf
+2,FlairPreprocess -> kernel_rbf
+2,FlairPreprocess -> rf_tabular
+2,FlairPreprocess -> versatile_gb
+2,FlairPreprocess -> versatile_rf
+2,FourierFeatures -> kernel_rbf
+2,FourierFeatures -> rf_tabular
+2,FourierFeatures -> versatile_gb
+2,FourierFeatures -> versatile_rf
+2,MeanAbsScaling -> kernel_rbf
+2,MeanAbsScaling -> rf_tabular
+2,MeanAbsScaling -> versatile_gb
+2,MeanAbsScaling -> versatile_rf
+2,ZNormalization -> kernel_rbf
+2,ZNormalization -> rf_tabular
+2,ZNormalization -> versatile_gb
+2,ZNormalization -> versatile_rf
+3,FlairPreprocess -> DayOfWeekFeature -> kernel_rbf
+3,FlairPreprocess -> DayOfWeekFeature -> rf_tabular
+3,FlairPreprocess -> DayOfWeekFeature -> versatile_gb
+3,FlairPreprocess -> DayOfWeekFeature -> versatile_rf
+3,FlairPreprocess -> FourierFeatures -> kernel_rbf
+3,FlairPreprocess -> FourierFeatures -> rf_tabular
+3,FlairPreprocess -> FourierFeatures -> versatile_gb
+3,FlairPreprocess -> FourierFeatures -> versatile_rf
+3,FlairPreprocess -> MeanAbsScaling -> kernel_rbf
+3,FlairPreprocess -> MeanAbsScaling -> rf_tabular
+3,FlairPreprocess -> MeanAbsScaling -> versatile_gb
+3,FlairPreprocess -> MeanAbsScaling -> versatile_rf
+3,FlairPreprocess -> PeriodSelection -> kernel_rbf
+3,FlairPreprocess -> PeriodSelection -> rf_tabular
+3,FlairPreprocess -> PeriodSelection -> versatile_gb
+3,FlairPreprocess -> PeriodSelection -> versatile_rf
+3,FlairPreprocess -> ZNormalization -> kernel_rbf
+3,FlairPreprocess -> ZNormalization -> rf_tabular
+3,FlairPreprocess -> ZNormalization -> versatile_gb
+3,FlairPreprocess -> ZNormalization -> versatile_rf
+3,FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+3,FourierFeatures -> DayOfWeekFeature -> rf_tabular
+3,FourierFeatures -> DayOfWeekFeature -> versatile_gb
+3,FourierFeatures -> DayOfWeekFeature -> versatile_rf
+3,MeanAbsScaling -> DayOfWeekFeature -> kernel_rbf
+3,MeanAbsScaling -> DayOfWeekFeature -> rf_tabular
+3,MeanAbsScaling -> DayOfWeekFeature -> versatile_gb
+3,MeanAbsScaling -> DayOfWeekFeature -> versatile_rf
+3,MeanAbsScaling -> FourierFeatures -> kernel_rbf
+3,MeanAbsScaling -> FourierFeatures -> rf_tabular
+3,MeanAbsScaling -> FourierFeatures -> versatile_gb
+3,MeanAbsScaling -> FourierFeatures -> versatile_rf
+3,ZNormalization -> DayOfWeekFeature -> kernel_rbf
+3,ZNormalization -> DayOfWeekFeature -> rf_tabular
+3,ZNormalization -> DayOfWeekFeature -> versatile_gb
+3,ZNormalization -> DayOfWeekFeature -> versatile_rf
+3,ZNormalization -> FourierFeatures -> kernel_rbf
+3,ZNormalization -> FourierFeatures -> rf_tabular
+3,ZNormalization -> FourierFeatures -> versatile_gb
+3,ZNormalization -> FourierFeatures -> versatile_rf
+4,FlairPreprocess -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+4,FlairPreprocess -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+4,FlairPreprocess -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+4,FlairPreprocess -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+4,FlairPreprocess -> MeanAbsScaling -> DayOfWeekFeature -> kernel_rbf
+4,FlairPreprocess -> MeanAbsScaling -> DayOfWeekFeature -> rf_tabular
+4,FlairPreprocess -> MeanAbsScaling -> DayOfWeekFeature -> versatile_gb
+4,FlairPreprocess -> MeanAbsScaling -> DayOfWeekFeature -> versatile_rf
+4,FlairPreprocess -> MeanAbsScaling -> FourierFeatures -> kernel_rbf
+4,FlairPreprocess -> MeanAbsScaling -> FourierFeatures -> rf_tabular
+4,FlairPreprocess -> MeanAbsScaling -> FourierFeatures -> versatile_gb
+4,FlairPreprocess -> MeanAbsScaling -> FourierFeatures -> versatile_rf
+4,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> kernel_rbf
+4,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> rf_tabular
+4,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> versatile_gb
+4,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> versatile_rf
+4,FlairPreprocess -> PeriodSelection -> DayOfWeekFeature -> kernel_rbf
+4,FlairPreprocess -> PeriodSelection -> DayOfWeekFeature -> rf_tabular
+4,FlairPreprocess -> PeriodSelection -> DayOfWeekFeature -> versatile_gb
+4,FlairPreprocess -> PeriodSelection -> DayOfWeekFeature -> versatile_rf
+4,FlairPreprocess -> PeriodSelection -> FourierFeatures -> kernel_rbf
+4,FlairPreprocess -> PeriodSelection -> FourierFeatures -> rf_tabular
+4,FlairPreprocess -> PeriodSelection -> FourierFeatures -> versatile_gb
+4,FlairPreprocess -> PeriodSelection -> FourierFeatures -> versatile_rf
+4,FlairPreprocess -> PeriodSelection -> PeriodFold -> kernel_rbf
+4,FlairPreprocess -> PeriodSelection -> PeriodFold -> rf_tabular
+4,FlairPreprocess -> PeriodSelection -> PeriodFold -> versatile_gb
+4,FlairPreprocess -> PeriodSelection -> PeriodFold -> versatile_rf
+4,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> kernel_rbf
+4,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> rf_tabular
+4,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> versatile_gb
+4,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> versatile_rf
+4,FlairPreprocess -> ZNormalization -> DayOfWeekFeature -> kernel_rbf
+4,FlairPreprocess -> ZNormalization -> DayOfWeekFeature -> rf_tabular
+4,FlairPreprocess -> ZNormalization -> DayOfWeekFeature -> versatile_gb
+4,FlairPreprocess -> ZNormalization -> DayOfWeekFeature -> versatile_rf
+4,FlairPreprocess -> ZNormalization -> FourierFeatures -> kernel_rbf
+4,FlairPreprocess -> ZNormalization -> FourierFeatures -> rf_tabular
+4,FlairPreprocess -> ZNormalization -> FourierFeatures -> versatile_gb
+4,FlairPreprocess -> ZNormalization -> FourierFeatures -> versatile_rf
+4,FlairPreprocess -> ZNormalization -> PeriodSelection -> kernel_rbf
+4,FlairPreprocess -> ZNormalization -> PeriodSelection -> rf_tabular
+4,FlairPreprocess -> ZNormalization -> PeriodSelection -> versatile_gb
+4,FlairPreprocess -> ZNormalization -> PeriodSelection -> versatile_rf
+4,MeanAbsScaling -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+4,MeanAbsScaling -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+4,MeanAbsScaling -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+4,MeanAbsScaling -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+4,ZNormalization -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+4,ZNormalization -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+4,ZNormalization -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+4,ZNormalization -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+5,FlairPreprocess -> MeanAbsScaling -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+5,FlairPreprocess -> MeanAbsScaling -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+5,FlairPreprocess -> MeanAbsScaling -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+5,FlairPreprocess -> MeanAbsScaling -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> DayOfWeekFeature -> kernel_rbf
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> DayOfWeekFeature -> rf_tabular
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> DayOfWeekFeature -> versatile_gb
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> DayOfWeekFeature -> versatile_rf
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> FourierFeatures -> kernel_rbf
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> FourierFeatures -> rf_tabular
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> FourierFeatures -> versatile_gb
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> FourierFeatures -> versatile_rf
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> kernel_rbf
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> rf_tabular
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> versatile_gb
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> versatile_rf
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> kernel_rbf
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> rf_tabular
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> versatile_gb
+5,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> FourierFeatures -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> FourierFeatures -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> FourierFeatures -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> FourierFeatures -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> gb_level_forecast
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> versatile_rf
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> kernel_rbf
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> rf_tabular
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> versatile_gb
+5,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> versatile_rf
+5,FlairPreprocess -> ZNormalization -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+5,FlairPreprocess -> ZNormalization -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+5,FlairPreprocess -> ZNormalization -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+5,FlairPreprocess -> ZNormalization -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> DayOfWeekFeature -> kernel_rbf
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> DayOfWeekFeature -> rf_tabular
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> DayOfWeekFeature -> versatile_gb
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> DayOfWeekFeature -> versatile_rf
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> FourierFeatures -> kernel_rbf
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> FourierFeatures -> rf_tabular
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> FourierFeatures -> versatile_gb
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> FourierFeatures -> versatile_rf
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> kernel_rbf
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> rf_tabular
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> versatile_gb
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> versatile_rf
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> kernel_rbf
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> rf_tabular
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> versatile_gb
+5,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> FourierFeatures -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> FourierFeatures -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> FourierFeatures -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> FourierFeatures -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> versatile_rf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> kernel_rbf
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> rf_tabular
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> versatile_gb
+6,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> gb_level_forecast
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> gb_level_forecast
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> gb_level_forecast
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> gb_level_forecast
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> versatile_rf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> gb_level_forecast
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> kernel_rbf
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> rf_tabular
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> versatile_gb
+6,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> FourierFeatures -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> FourierFeatures -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> FourierFeatures -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> FourierFeatures -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> DayOfWeekFeature -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> versatile_rf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> kernel_rbf
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> rf_tabular
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> versatile_gb
+6,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> kernel_rbf
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> rf_tabular
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> versatile_gb
+7,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FlairRidgeLevel
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> gb_level_forecast
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> DayOfWeekFeature -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> versatile_rf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> kernel_rbf
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> rf_tabular
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> versatile_gb
+7,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+8,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FlairRidgeLevel
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> FlairRidgeLevel
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> FlairRidgeLevel
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FlairRidgeLevel
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> gb_level_forecast
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> versatile_rf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+8,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+9,FlairPreprocess -> MeanAbsScaling -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> FlairRidgeLevel
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> FlairRidgeLevel
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> FlairRidgeLevel
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FlairRidgeLevel
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> FlairRidgeLevel
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> FlairRidgeLevel
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> gb_level_forecast
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> LevelShrinkage -> ShapeLevel -> SecondaryLevelSeasonality -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> FourierFeatures -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> DayOfWeekFeature -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> FourierFeatures -> versatile_rf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> kernel_rbf
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> rf_tabular
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_gb
+9,FlairPreprocess -> ZNormalization -> PeriodSelection -> PeriodPhaseOneHot -> PeriodFold -> ShapeLevel -> SecondaryLevelSeasonality -> LevelBoxCoxCenter -> versatile_rf

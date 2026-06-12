@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from typing import Any, Callable, TYPE_CHECKING
 
+from .signal import Port, sem_root
+
 # Use TYPE_CHECKING to prevent circular imports between State and Token
 if TYPE_CHECKING:
     from .state import State
@@ -24,6 +26,14 @@ class Token(ABC):
     reads: dict | list | tuple | set = ()
     writes: dict | list | tuple | set = ()
 
+    # Declarative port contract over the Signal board. When non-empty, these
+    # supersede the string-based reads/writes for dependency checking: a token
+    # is applicable only when every required (non-optional) port is satisfiable
+    # by meaning, optionally via adapter coercion. Tokens that still use the
+    # legacy reads/writes keep working because these default to empty.
+    requires: tuple = ()
+    provides: tuple = ()
+
     def can_apply(self, state: 'State') -> bool:
         """
         Universal verification logic. 
@@ -38,12 +48,50 @@ class Token(ABC):
         if uses >= self.max_uses:
             return False
 
-        # 3. Check declared state dependencies
+        # 3. Check declared state dependencies (legacy string reads)
         if not self.dependencies_available(state):
+            return False
+
+        # 3b. Check declarative port requirements (Signal board)
+        if self.requires and not self.ports_satisfied(state):
             return False
 
         # 4. Check token-specific business logic
         return self.check_specific_conditions(state)
+
+    def ports_satisfied(self, state: 'State') -> bool:
+        """True iff every required, non-optional port is satisfiable."""
+        for port in self.requires:
+            if getattr(port, "optional", False):
+                continue
+            if not self._port_ok(state, port):
+                return False
+        return True
+
+    def _port_ok(self, state: 'State', port: 'Port') -> bool:
+        space = port.space
+        if isinstance(space, str) and space not in {"current", "raw", "any"}:
+            space = "any"
+        alignment = None if port.alignment == "any" else port.alignment
+        matches = state.query(
+            sem=port.sem,
+            axes=port.axes,
+            alignment=alignment,
+            space=space,
+            tags=(port.tags or None),
+        )
+        if matches:
+            return True
+        # Adapter fallback: a features port can be met by anything coercible.
+        if getattr(port, "coerce", False) and sem_root(port.sem) == "features":
+            try:
+                bundle = state.feature_bundle(
+                    select_tags=frozenset(port.tags or ()),
+                )
+                return bundle.matrix.shape[1] > 0
+            except Exception:
+                return False
+        return False
 
     def dependencies_available(self, state: 'State') -> bool:
         """Check that all declared reads exist somewhere in State."""

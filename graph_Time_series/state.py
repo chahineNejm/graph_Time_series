@@ -19,12 +19,22 @@ z-normalization, log transforms, differencing, or Box-Cox transforms.
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import replace
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
 import numpy as np
 
 from .artifacts import ArtifactSpec, InputBundle
+from .signal import (
+    Signal,
+    Space,
+    Transform,
+    RAW_SPACE,
+    sem_root,
+    build_feature_bundle,
+    Bundle,
+)
 
 
 Array = np.ndarray
@@ -83,6 +93,13 @@ class State:
         # Visible artifact/bundle registry. Feature tokens may create many
         # named artifacts; binder tokens choose one approved active model input.
         self.artifacts: dict[str, ArtifactSpec] = {}
+        # --- Signal layer (normalized inter-token information) ---
+        # The board holds Signal objects derived from the stores below.
+        # current_space is the active scale lineage; transforms carry the
+        # invertible scale changes that define it.
+        self.board: list[Signal] = []
+        self.current_space: Space = RAW_SPACE
+        self.transforms: list[Transform] = []
         self.input_bundles: dict[str, InputBundle] = {}
         self.active_input_bundle_name: str | None = None
         self.register_artifact(
@@ -184,6 +201,7 @@ class State:
         )
         self.artifacts[name] = spec
         self.metadata.setdefault("artifacts", {})[name] = spec.to_dict()
+        self._emit_signal(spec, value)
         return spec
 
     def set_model_input(
@@ -299,6 +317,7 @@ class State:
         self.transform_stack.append(record)
         if inverse_fn is not None:
             self.pending_conditions.append(inverse_fn)
+        self._advance_space(name, inverse_fn, params or {}, affects)
         return record
 
     def register_inverse_transform(
@@ -385,6 +404,18 @@ class State:
         self.features["last_prediction"] = pred
         self.features["cumulative_prediction"] = cumulative
         self.features["current_residual"] = self.current_target
+        self.board.append(
+            Signal(
+                value=pred,
+                sem="forecast",
+                axes=("sample", "horizon"),
+                alignment="future",
+                space=self.current_space,
+                name=f"forecast#{token_name}",
+                source=token_name,
+                tags=frozenset({"prediction"}),
+            )
+        )
         return pred
 
     # ------------------------------------------------------------------
@@ -465,10 +496,234 @@ class State:
         ]
         s.pending_conditions = list(self.pending_conditions)
 
+        # Signals are frozen dataclasses -> safe to share by reference.
+        s.board = list(self.board)
+        s.current_space = self.current_space
+        s.transforms = [
+            Transform(
+                name=t.name,
+                inverse=t.inverse,
+                forward=t.forward,
+                params=deepcopy(t.params),
+                affects=t.affects,
+            )
+            for t in self.transforms
+        ]
+
         s.log = deepcopy(self.log)
         s.terminated = self.terminated
         s.mase = self.mase
         return s
+
+    # ------------------------------------------------------------------
+    # Signal layer: normalized inter-token information
+    # ------------------------------------------------------------------
+
+    # Map artifact "kind" -> (sem, axes-or-None). axes=None means infer from
+    # ndim. This is the single place that translates the legacy naming/kind
+    # vocabulary into the normalized sem/axes vocabulary.
+    _KIND_SEM = {
+        "sequence": ("series", None),
+        "sequence_flat": ("series", None),
+        "raw_input": ("series", ("sample", "time")),
+        "clean_history": ("series", ("sample", "time")),
+        "tabular": ("features", ("sample", "feature")),
+        "active_model_input": ("features", ("sample", "feature")),
+        "period_matrix": ("series", ("sample", "phase", "period_idx")),
+        "level_series": ("level", ("sample", "period_idx")),
+        "period_shape": ("shape", ("sample", "phase")),
+        "period_phase_id": ("features", None),
+        "period_phase_onehot": ("features", None),
+        "forecast": ("forecast", ("sample", "horizon")),
+        "point_prediction": ("forecast", ("sample", "horizon")),
+        "forecast_samples": ("samples", ("sample", "path", "horizon")),
+    }
+
+    def _infer_sem_axes(self, spec: "ArtifactSpec", value):
+        sem_axes = self._KIND_SEM.get(spec.kind)
+        if sem_axes is None:
+            sem_axes = self._KIND_SEM.get(spec.role)
+        if sem_axes is not None:
+            sem, axes = sem_axes
+        else:
+            # Generic fallback: any sample-leading array is bindable as either a
+            # series (2D, looks like a sequence) or a feature block.
+            sem, axes = ("features", None)
+            if "history" in spec.name:
+                sem = "series"
+        if axes is None:
+            ndim = getattr(value, "ndim", 2)
+            if sem == "series":
+                axes = ("sample", "time") if ndim == 2 else ("sample",) + ("dim",) * 0
+                axes = ("sample", "time") if ndim >= 2 else ("sample",)
+            else:
+                axes = ("sample", "feature") if ndim == 2 else (
+                    ("sample",) if ndim == 1 else ("sample", "time", "feature")
+                )
+        return sem, axes
+
+    def _alignment_for_store(self, store: str) -> str:
+        return "future" if store == "future_features" else "history"
+
+    def _space_for_spec(self, spec: "ArtifactSpec") -> "Space":
+        # Raw inputs are pinned to the raw scale; everything else lives in the
+        # scale that is active at creation time.
+        if spec.role in {"raw_input"} or spec.name in {"raw_history"}:
+            return RAW_SPACE
+        return self.current_space
+
+    def _emit_signal(self, spec: "ArtifactSpec", value) -> None:
+        """Create/refresh a Signal on the board from a registered artifact."""
+        if not isinstance(value, np.ndarray):
+            return
+        sem, axes = self._infer_sem_axes(spec, value)
+        alignment = self._alignment_for_store(spec.store)
+        space = self._space_for_spec(spec)
+        tags = set(spec.tags)
+        if space.id == RAW_SPACE.id and (
+            spec.role == "raw_input" or spec.name == "raw_history"
+        ):
+            tags.add("raw_scale")
+        # Drop any prior signal carrying this provenance name (refresh in place).
+        self.board = [b for b in self.board if b.name != spec.name]
+        self.board.append(
+            Signal(
+                value=value,
+                sem=sem,
+                axes=tuple(axes),
+                alignment=alignment,
+                space=space,
+                name=spec.name,
+                source=spec.source_token or "",
+                tags=frozenset(tags),
+            )
+        )
+
+    def _advance_space(self, name, inverse_fn, params, affects) -> None:
+        """Advance current_space and re-stamp active signals into the new scale.
+
+        A target/both scaling transform changes the scale of everything that is
+        currently "active" (non-raw). Raw signals stay raw so they remain a
+        stable reference. Both directions are stored when available so the
+        adapter layer can lift signals between scales later.
+        """
+        self.transforms.append(
+            Transform(
+                name=name,
+                inverse=inverse_fn,
+                forward=params.get("forward"),
+                params=params,
+                affects=affects,
+            )
+        )
+        if affects not in {"target", "both"}:
+            return
+        old = self.current_space
+        new = old.then(name)
+        rebased = []
+        for sig in self.board:
+            if (
+                sig.is_array
+                and sig.space.id == old.id
+                and sem_root(sig.sem) != "param"
+                and "prediction" not in sig.tags
+                and "raw_scale" not in sig.tags
+            ):
+                rebased.append(replace(sig, space=new))
+            else:
+                rebased.append(sig)
+        self.board = rebased
+        self.current_space = new
+
+    def put_param(self, name: str, value, *, source_token: str = "") -> "Signal":
+        """Publish a non-array parameter (e.g. a selected period) as a Signal.
+
+        This is the typed replacement for stashing scalars in ``metadata`` and
+        is what lets tokens declare ``Port(sem='param:period')`` dependencies.
+        """
+        sig = Signal(
+            value=value,
+            sem=f"param:{name}",
+            axes=(),
+            alignment="static",
+            space=RAW_SPACE,
+            name=f"param:{name}",
+            source=source_token,
+        )
+        self.board = [b for b in self.board if b.name != sig.name]
+        self.board.append(sig)
+        self.metadata[name] = value
+        return sig
+
+    def query(
+        self,
+        *,
+        sem=None,
+        axes=None,
+        alignment=None,
+        space="any",
+        tags=None,
+    ) -> list["Signal"]:
+        """Return matching signals, most-recent first."""
+        want_space = None
+        if space == "current":
+            want_space = self.current_space.id
+        elif space == "raw":
+            want_space = RAW_SPACE.id
+        elif isinstance(space, Space):
+            want_space = space.id
+        elif space != "any":
+            want_space = space
+        out = []
+        for sig in reversed(self.board):
+            if sem is not None and sem_root(sig.sem) != sem_root(sem):
+                continue
+            if sem is not None and ":" in sem and sig.sem != sem:
+                continue
+            if axes is not None and sig.axes != tuple(axes):
+                continue
+            if alignment is not None and sig.alignment != alignment:
+                continue
+            if want_space is not None and sig.space.id != want_space:
+                continue
+            if tags and not set(tags).issubset(sig.tags):
+                continue
+            out.append(sig)
+        return out
+
+    def one(self, **q) -> "Signal":
+        matches = self.query(**q)
+        if not matches:
+            raise KeyError(
+                f"No signal matches {q}. Board: "
+                f"{[(b.name, b.sem, b.space.id) for b in self.board]}"
+            )
+        return matches[0]
+
+    def has(self, **q) -> bool:
+        return bool(self.query(**q))
+
+    def feature_bundle(
+        self,
+        *,
+        select_tags=frozenset(),
+        select_names=(),
+        require_space: bool = True,
+    ) -> "Bundle":
+        """Fuse every history-aligned, coercible feature into one matrix.
+
+        This is the mechanism that makes models versatile: a model calls this
+        and receives a single ``(n_samples, n_features)`` design matrix built
+        from whatever upstream tokens happened to produce, in the active scale.
+        """
+        return build_feature_bundle(
+            list(self.board),
+            self.n_samples,
+            current_space=self.current_space,
+            require_space=require_space,
+            select_tags=frozenset(select_tags),
+            select_names=tuple(select_names),
+        )
 
     # ------------------------------------------------------------------
     # Internal helpers

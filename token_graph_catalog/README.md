@@ -1,15 +1,11 @@
 # Token Graph Catalog
 
-This mini-project keeps a visual map of token dependencies separate from the
-main code README.
+This mini-project keeps visual maps of token parents and possible next tokens
+separate from the main README.
 
-The goal is simple:
-
-- edit one token catalog when tokens change;
-- generate readable graph views;
-- keep binding/adapter tokens visible in the full graph but hide them from the
-  simpler core graph;
-- export a CSV matrix for quick inspection.
+The current runtime architecture is binder-free by default. The graph should
+therefore show direct transitions from transforms/features to models, with
+models consuming `state.feature_bundle()` when no legacy `model_input` exists.
 
 ## Files
 
@@ -24,49 +20,57 @@ token_graph_catalog/
     `-- token_matrix.csv
 ```
 
+## Current Source Of Truth
+
+The most reliable source of token transitions is the live package registry in
+`graph_Time_series/token_blocks/__init__.py`.
+
+Registry helpers:
+
+- `register_default_tokens`
+- `register_flair_tokens`
+- `register_versatile_tokens`
+- `register_flair_gb_swap`
+
+With all four enabled, the current graph is:
+
+```text
+Grammar(20 tokens, 58 edges)
+```
+
+`outputs/token_graph.md` has been refreshed to match that live grammar.
+
+## Catalog Note
+
+`token_catalog.json` is a manual catalog used by `render_token_graph.py`. It may
+lag behind the live grammar after architecture changes. Before regenerating the
+HTML/CSV outputs, update `token_catalog.json` so it matches the current
+binder-free registry.
+
 ## Update Workflow
 
 When a token is added or its valid parents/next tokens change:
 
-1. Edit `token_catalog.json`.
-2. Run:
+1. Inspect the live registry in `token_blocks/__init__.py`.
+2. Update `token_catalog.json`.
+3. Run:
 
    ```bash
    python render_token_graph.py
    ```
 
-3. Open `outputs/token_graph.html` or preview `outputs/token_graph.md`.
+4. Check `outputs/token_graph.md`, `outputs/token_graph.html`, and
+   `outputs/token_matrix.csv`.
 
 ## Core vs Full Graph
 
-The catalog has a `core` flag per token.
+The catalog has a `core` flag per token:
 
 - `core: true` means the token appears in the compact graph.
 - `core: false` means the token appears only in the full graph.
 
-Use `core: false` for generic factories, broad binders, aliases, or planned
-tokens that would make the day-to-day graph noisy.
-
-## Catalog Fields
-
-Each token entry uses this shape:
-
-```json
-{
-  "id": "PeriodSelection",
-  "status": "notebook",
-  "class": "feature",
-  "core": true,
-  "description": "Select a candidate period and store it in metadata.",
-  "reads": ["features.raw_history"],
-  "writes": ["metadata.period", "metadata.period_scores"],
-  "parents": ["START", "ContextWindow"],
-  "next": ["PeriodPhaseOneHot", "PeriodFold"]
-}
-```
-
-The renderer accepts edges from both `parents` and `next`, merges duplicates,
-and reports unknown token references.
+Use `core: false` for noisy experimental adapters, aliases, deprecated entries,
+or future proposals. Do not mark removed binder/glue tokens as core.
 
 ## Visual Classes
 
@@ -76,9 +80,9 @@ Current classes:
 - `cleaning`
 - `transform`
 - `feature`
-- `binding`
 - `model`
 - `planned`
 
-Binding tokens are intentionally separate from feature tokens because they are
-mostly adapters: they choose what becomes `model_input`.
+The renderer still knows about a historical `binding` class, but active package
+docs should treat binder tokens as removed unless a future selector-token design
+is explicitly approved.

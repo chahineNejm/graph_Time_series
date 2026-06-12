@@ -75,7 +75,7 @@ class KernelRBFToken(ModelToken):
             return False
         try:
             _, _, bundle = self._resolve_model_input(state)
-        except KeyError:
+        except (KeyError, ValueError):
             return False
         if bundle is None:
             return True
@@ -95,6 +95,14 @@ class KernelRBFToken(ModelToken):
                 bundle,
             )
 
+        # No binder: fuse available features via the Signal-board auto-bundle.
+        try:
+            fb = state.feature_bundle()
+            if fb.matrix.shape[1] > 0:
+                return np.asarray(fb.matrix, dtype=np.float32), "feature_bundle", None
+        except Exception:
+            pass
+
         # Backward-compatible path for existing notebooks and direct token use.
         if "scaled_history" in state.historical_features:
             return (
@@ -103,7 +111,7 @@ class KernelRBFToken(ModelToken):
                 None,
             )
 
-        raise KeyError("kernel_rbf requires model_input or scaled_history.")
+        raise KeyError("kernel_rbf requires model_input, features, or scaled_history.")
 
     def _median_lengthscale(self, X: np.ndarray) -> float:
         if X.shape[0] <= 1:

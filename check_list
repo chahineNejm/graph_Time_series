@@ -54,8 +54,14 @@ full on data augmentation for kernel methods would generalise the mimic system
 
 filters?
 
+eventually I want to add a folder that takes in a sequnce and plots all outputs for dioagnosis.
 
 
+
+
+###### very important
+check that each tranformation if done has a counter transformation applyed correctly to it.
+#### 
 
 data augmentation: chronos does TSmixup where they randomly mix time series (ok I guess)
 grammar to clean:

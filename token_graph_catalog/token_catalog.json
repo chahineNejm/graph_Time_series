@@ -18,11 +18,32 @@
       "next": [
         "DataAugmentation",
         "ContextWindow",
+        "FlairPreprocess",
         "PeriodSelection",
         "ZNormalization",
         "MeanAbsScaling",
         "BindRawHistory",
         "FourierFeatures"
+      ]
+    },
+    {
+      "id": "FlairPreprocess",
+      "status": "package",
+      "class": "cleaning",
+      "core": true,
+      "description": "Experimental FLAIR preprocessing: interpolate history and shift each series positive.",
+      "reads": [
+        "features.raw_history"
+      ],
+      "writes": [
+        "historical_features.flair_history",
+        "metadata.flair_shift"
+      ],
+      "parents": [
+        "START"
+      ],
+      "next": [
+        "PeriodSelection"
       ]
     },
     {
@@ -157,12 +178,12 @@
     },
     {
       "id": "PeriodSelection",
-      "status": "notebook",
+      "status": "package + notebook",
       "class": "feature",
       "core": true,
       "description": "Select a period from frequency candidates and store it in metadata.period.",
       "reads": [
-        "features.raw_history"
+        "historical_features.flair_history or features.raw_history"
       ],
       "writes": [
         "metadata.period",
@@ -171,7 +192,8 @@
       ],
       "parents": [
         "START",
-        "ContextWindow"
+        "ContextWindow",
+        "FlairPreprocess"
       ],
       "next": [
         "PeriodPhaseOneHot",
@@ -205,23 +227,25 @@
     },
     {
       "id": "PeriodFold",
-      "status": "notebook",
+      "status": "package + notebook",
       "class": "feature",
       "core": true,
       "description": "Fold history into period phases and compute level_series.",
       "reads": [
-        "features.raw_history",
+        "historical_features.flair_history or features.raw_history",
         "metadata.period"
       ],
       "writes": [
         "historical_features.period_matrix",
-        "historical_features.level_series"
+        "historical_features.level_series",
+        "historical_features.flair_level_raw"
       ],
       "parents": [
         "PeriodSelection",
         "PeriodPhaseOneHot"
       ],
       "next": [
+        "LevelShrinkage",
         "ShapeLevel",
         "BindAllSafeTabular",
         "StackFeatureBundleToken"
@@ -229,7 +253,7 @@
     },
     {
       "id": "ShapeLevel",
-      "status": "notebook",
+      "status": "package + notebook",
       "class": "feature",
       "core": true,
       "description": "Estimate a within-period shape vector from recent folded periods.",
@@ -244,10 +268,75 @@
         "PeriodFold"
       ],
       "next": [
+        "SecondaryLevelSeasonality",
         "shape_naive",
         "level_kernel_rbf",
         "BindAllSafeTabular",
         "StackFeatureBundleToken"
+      ]
+    },
+    {
+      "id": "LevelShrinkage",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "Experimental FLAIR level denoising with a rank-1 SVD shrinkage factor.",
+      "reads": [
+        "historical_features.period_matrix",
+        "historical_features.level_series"
+      ],
+      "writes": [
+        "historical_features.flair_level_denoised",
+        "metadata.flair_level_shrinkage"
+      ],
+      "parents": [
+        "PeriodFold"
+      ],
+      "next": [
+        "ShapeLevel"
+      ]
+    },
+    {
+      "id": "SecondaryLevelSeasonality",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "Experimental FLAIR secondary seasonality over compressed level totals.",
+      "reads": [
+        "historical_features.level_series or flair_level_denoised",
+        "metadata.period"
+      ],
+      "writes": [
+        "historical_features.flair_shape2",
+        "historical_features.flair_level_work",
+        "features.flair_level_future_shape2"
+      ],
+      "parents": [
+        "ShapeLevel"
+      ],
+      "next": [
+        "LevelBoxCoxCenter"
+      ]
+    },
+    {
+      "id": "LevelBoxCoxCenter",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "Experimental FLAIR Box-Cox transform and innovation centering over level totals.",
+      "reads": [
+        "historical_features.flair_level_work"
+      ],
+      "writes": [
+        "historical_features.flair_level_bc",
+        "historical_features.flair_level_innov",
+        "metadata.flair_boxcox"
+      ],
+      "parents": [
+        "SecondaryLevelSeasonality"
+      ],
+      "next": [
+        "FlairRidgeLevel"
       ]
     },
     {
@@ -293,6 +382,7 @@
         "PeriodPhaseOneHot",
         "PeriodFold",
         "ShapeLevel",
+        "FlairRidgeLevel",
         "BindScaledHistory",
         "kernel_rbf",
         "FourierFeatures"
@@ -652,6 +742,52 @@
       ]
     },
     {
+      "id": "FlairRidgeLevel",
+      "status": "package",
+      "class": "model",
+      "core": true,
+      "description": "Experimental FLAIR soft-averaged Ridge over level innovations, expanded through shape.",
+      "reads": [
+        "historical_features.flair_level_innov",
+        "historical_features.shape_vector"
+      ],
+      "writes": [
+        "prediction_stack",
+        "features.flair_point_forecast",
+        "features.current_residual"
+      ],
+      "parents": [
+        "LevelBoxCoxCenter"
+      ],
+      "next": [
+        "FlairSamplePaths",
+        "BindAllSafeTabular",
+        "STOP"
+      ]
+    },
+    {
+      "id": "FlairSamplePaths",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "Experimental FLAIR stochastic samples from level bootstrap and coherent phase noise.",
+      "reads": [
+        "features.flair_ridge_beta",
+        "historical_features.period_matrix",
+        "historical_features.shape_vector"
+      ],
+      "writes": [
+        "features.flair_samples",
+        "features.flair_sample_mean"
+      ],
+      "parents": [
+        "FlairRidgeLevel"
+      ],
+      "next": [
+        "STOP"
+      ]
+    },
+    {
       "id": "STOP",
       "status": "synthetic",
       "class": "control",
@@ -669,6 +805,8 @@
         "kernel_rbf_loo",
         "shape_naive",
         "level_kernel_rbf",
+        "FlairRidgeLevel",
+        "FlairSamplePaths",
         "rf_tabular",
         "lightgbm_tabular"
       ],

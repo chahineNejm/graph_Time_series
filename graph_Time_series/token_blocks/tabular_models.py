@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.multioutput import MultiOutputRegressor
 
 from ..token import ModelToken
+from ..signal import Port
 
 if TYPE_CHECKING:
     from ..state import State
@@ -17,16 +18,20 @@ if TYPE_CHECKING:
 class _TabularRegressorToken(ModelToken):
     """Base class for fit-on-current-state tabular regressors."""
 
-    reads = ("model_input",)
+    reads = ()
     writes = ("prediction_stack",)
     accepted_input_kinds = {"tabular"}
+    requires = (
+        Port(sem="features", axes=("sample", "feature"), space="current",
+             multiple=True, coerce=True),
+    )
 
     def check_specific_conditions(self, state: "State") -> bool:
         if not super().check_specific_conditions(state):
             return False
         try:
             _, bundle = self._resolve_model_input(state)
-        except KeyError:
+        except (KeyError, ValueError):
             return False
         return bundle is None or bundle.kind in self.accepted_input_kinds
 
@@ -59,16 +64,19 @@ class _TabularRegressorToken(ModelToken):
         return state
 
     def _resolve_model_input(self, state: "State"):
-        if "model_input" not in state.historical_features:
-            raise KeyError(f"{self.name} requires an explicit tabular model_input.")
-        bundle = state.active_input_bundle()
-        if bundle is not None and bundle.kind not in self.accepted_input_kinds:
-            raise ValueError(
-                f"{self.name} accepts {sorted(self.accepted_input_kinds)}, "
-                f"got bundle kind {bundle.kind!r}."
-            )
-        X = np.asarray(state.historical_features["model_input"], dtype=np.float32)
-        return X.reshape(state.n_samples, -1), bundle
+        # Explicit binder bundle wins when present (back-compat); otherwise the
+        # model fuses whatever features exist via the Signal-board auto-bundle.
+        if "model_input" in state.historical_features:
+            bundle = state.active_input_bundle()
+            if bundle is not None and bundle.kind not in self.accepted_input_kinds:
+                raise ValueError(
+                    f"{self.name} accepts {sorted(self.accepted_input_kinds)}, "
+                    f"got bundle kind {bundle.kind!r}."
+                )
+            X = np.asarray(state.historical_features["model_input"], dtype=np.float32)
+            return X.reshape(state.n_samples, -1), bundle
+        fb = state.feature_bundle()
+        return np.asarray(fb.matrix, dtype=np.float32), None
 
     def get_model(self) -> dict[str, Any]:
         return self.model_params()

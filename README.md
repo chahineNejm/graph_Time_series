@@ -1,26 +1,28 @@
 # Graph Time Series
 
-Small experimental framework for composing time-series forecasting pipelines from
-inspectable tokens.
+Small experimental framework for composing time-series forecasting pipelines
+from inspectable tokens.
 
-The current checkout is focused on a compact core:
+The current architecture is centered on a broad `State` plus a semantic
+Signal board. Tokens can still write to the older dictionaries
+(`historical_features`, `future_features`, `features`, `metadata`, `flags`),
+but those writes are mirrored into typed `Signal` objects. Models can then
+consume the auto-built feature bundle instead of depending on one hard-coded
+feature name.
 
-- a shared `State` object that owns features, transforms, residuals, artifacts,
-  and model-input bundles;
-- token classes for transforms, feature/binding steps, models, and controls;
-- a graph `Grammar` for valid token transitions;
-- an optional Lark pipeline DSL for writing linear token chains;
-- a Colab notebook used as the main playground for dataset loading,
-  exploration, leakage-safe holdout scoring, and prototype tokens.
+The practical result:
 
-This README describes the code that is present in this repository now. Older
-ideas such as large MCTS search, random forests, XGBoost, FFT encoders, and
-other model families are kept as open extension directions rather than listed as
-implemented blocks.
+- scalers, feature tokens, FLAIR-style decomposition tokens, and model tokens
+  can be recombined more freely;
+- tabular models no longer need explicit binder/glue tokens in normal use;
+- residual stacking remains supported, so multiple model tokens can fit the
+  remaining target after earlier predictions;
+- the notebook can continue to inspect familiar state dictionaries while the
+  package moves toward semantic ports.
 
-For a growing token-by-token index, see `TOKENS.md`.
-For graph views of token parents and possible next tokens, see
-`token_graph_catalog/`.
+For the token-by-token reference, see `TOKENS.md`.
+For the current signal-board architecture, see `SIGNAL_ARCHITECTURE.md`.
+For graph views of registered token transitions, see `token_graph_catalog/`.
 
 ## Repository Layout
 
@@ -28,26 +30,36 @@ For graph views of token parents and possible next tokens, see
 graph_Time_series/
 |-- README.md
 |-- TOKENS.md
+|-- SIGNAL_ARCHITECTURE.md
+|-- ARCHITECTURE_PROPOSAL.md
 |-- check_list
-|-- token_graph_catalog/
-|   |-- README.md
-|   |-- token_catalog.json
-|   |-- render_token_graph.py
-|   `-- outputs/
 |-- graph_Time_series/
 |   |-- __init__.py
 |   |-- artifacts.py
 |   |-- grammar.py
 |   |-- pipeline_ast.py
+|   |-- signal.py
 |   |-- state.py
 |   |-- token.py
 |   `-- token_blocks/
 |       |-- __init__.py
 |       |-- bindings.py
+|       |-- flair.py
+|       |-- fourier.py
 |       |-- kernel_rbf.py
-|       `-- normalization.py
-`-- examples/
-    `-- test_token_sequence_colab.ipynb
+|       |-- normalization.py
+|       |-- periodic.py
+|       |-- tabular_models.py
+|       `-- versatile.py
+|-- examples/
+|   `-- test_token_sequence_colab.ipynb
+|-- tests/
+|   `-- test_token_combinations.py
+`-- token_graph_catalog/
+    |-- README.md
+    |-- token_catalog.json
+    |-- render_token_graph.py
+    `-- outputs/
 ```
 
 ## Core Concepts
@@ -56,436 +68,345 @@ graph_Time_series/
 
 `State` is the runtime contract between tokens. It stores:
 
-- immutable input references: `original_history`, `original_future`;
-- historical and future feature stores;
-- legacy/general `features` for compatibility and notebook inspection;
+- immutable inputs: `original_history`, `original_future`;
+- compatibility stores: `features`, `historical_features`, `future_features`;
 - metadata and flags;
-- an artifact registry describing values created by tokens;
-- model-input bundles describing which artifacts a model is allowed to consume;
-- target transforms and inverse transforms;
-- a prediction stack and current residual target.
+- artifact metadata;
+- `board`, a list of typed `Signal` objects emitted by token writes;
+- `current_space` and registered transforms;
+- a prediction stack and the current residual target.
 
-The important invariant is:
+The residual invariant is still:
 
 ```text
 current_target = active_target_base - sum(prediction_stack)
 ```
 
-This means models can be chained: the first model predicts the transformed
-target, the second model fits the residual, the third model fits the next
-residual, and so on. `get_final_prediction()` decodes the cumulative prediction
-back to the original data scale using registered inverse transforms.
+Any model token that calls `state.push_prediction(...)` fits the current
+residual and makes the next model fit what remains. `get_final_prediction()`
+decodes the cumulative prediction back to the original scale through the
+registered inverse transforms.
 
-### Artifacts And Bundles
+### Signal Board
 
-Feature tokens are allowed to create broad state. They can leave many named
-artifacts in `historical_features`, `future_features`, or `features`.
+`graph_Time_series/signal.py` defines the semantic layer:
 
-Binder tokens then decide what becomes the active model input:
+- `Signal`: a value with `sem`, `axes`, `alignment`, `space`, source, tags, and
+  metadata.
+- `Port`: a declarative requirement/provision contract for tokens.
+- `Space` and `Transform`: the transform lineage.
+- `build_feature_bundle(...)`: coercion of sample-leading signals into a single
+  tabular matrix.
+
+Tokens should couple on meaning, not on names. For example:
 
 ```text
-many artifacts in State -> one active InputBundle -> model_input
+scaled_history     -> Signal(sem="series", axes=("sample", "time"))
+fourier_features   -> Signal(sem="features", axes=("sample", "feature"))
+shape_vector       -> Signal(sem="shape", axes=("sample", "phase"))
+level_series       -> Signal(sem="level", axes=("sample", "period_idx"))
+model prediction   -> Signal(sem="forecast", axes=("sample", "horizon"))
 ```
 
-This keeps search/control manageable. Models do not need to guess from every
-possible feature in the state; they read one explicit `model_input` bundle, plus
-bundle metadata such as kind, shape, source token, and component artifacts.
+### Feature Bundle
+
+The normal model input path is now:
+
+```text
+state signals -> state.feature_bundle() -> model X matrix
+```
+
+`feature_bundle()` gathers finite, sample-aligned signals and flattens them into
+`(n_samples, n_features)`. It records block metadata so the notebook can still
+inspect which pieces were used.
+
+The old `historical_features["model_input"]` path is still honored for backward
+compatibility, but the package no longer ships active binder/glue tokens.
+`token_blocks/bindings.py` is intentionally empty except for the removal note.
 
 ### Tokens
 
-The token base classes live in `token.py`:
+The base classes live in `token.py`:
 
 | Class | Purpose |
 | --- | --- |
 | `CleaningToken` | Pre-model data cleanup or context selection |
-| `FeatureToken` | Creates reusable features or binding decisions |
-| `TransformToken` | Changes target/feature scale and registers inverses |
+| `FeatureToken` | Creates reusable features or decomposition artifacts |
+| `TransformToken` | Changes target/feature scale and registers inverse transforms |
 | `ModelToken` | Fits on `state.current_target` and pushes predictions |
 | `ControlToken` | Sequence controls such as `STOP` |
 
-Each token exposes:
+Tokens expose legacy `reads` / `writes` for logging and may also expose semantic
+`requires` / `provides` ports. `can_apply(state)` checks usage caps, legacy
+dependencies, port requirements, and token-specific conditions.
 
-- `name`
-- `token_class`
-- `reads`
-- `writes`
-- `can_apply(state)`
-- `apply(state)`
+## Token Registries
 
-`can_apply()` checks class/token usage caps, declared dependencies, and
-token-specific conditions. `apply()` mutates or copies the state and records the
-execution log.
+The package exposes several registry helpers in `token_blocks/__init__.py`.
 
-## Implemented Package Tokens
-
-### `ZNormalization`
-
-File: `graph_Time_series/token_blocks/normalization.py`
-
-Per-series z-normalization based on the history. It writes
-`scaled_history`, transforms the active target into normalized space, and
-registers an inverse transform so final predictions are decoded correctly.
-
-Typical use:
-
-```text
-ZNormalization -> BindScaledHistory -> kernel_rbf
-```
-
-### `MeanAbsScaling`
-
-File: `graph_Time_series/token_blocks/normalization.py`
-
-Per-series scaling by the mean absolute history value, without centering. It
-writes the same `scaled_history` contract as `ZNormalization`, registers an
-inverse transform, and can be followed by the same bind/model tokens.
-
-Typical use:
-
-```text
-MeanAbsScaling -> BindScaledHistory -> kernel_rbf
-```
-
-### `BindScaledHistory`
-
-File: `graph_Time_series/token_blocks/bindings.py`
-
-Binds `scaled_history` as the active `model_input`.
-
-Bundle metadata:
-
-```text
-name = "scaled_history"
-kind = "sequence_flat"
-artifact_names = ("scaled_history",)
-```
-
-### `BindAllSafeTabular`
-
-File: `graph_Time_series/token_blocks/bindings.py`
-
-Flattens all finite historical artifacts, except an existing `model_input`, into
-one tabular bundle. This is useful for quick experiments, but it can make the
-feature space large, so more targeted binders are often preferable.
-
-### `BindFeatureToken`
-
-File: `graph_Time_series/token_blocks/bindings.py`
-
-Generic binder for one named artifact. It is intended for creating configured
-tokens such as `BindRawHistory`, `BindLevelSeries`, or `BindCalendarFeatures`.
-
-### `StackFeatureBundleToken`
-
-File: `graph_Time_series/token_blocks/bindings.py`
-
-Generic binder that flattens and concatenates selected artifacts into one
-tabular bundle. This supports controlled multi-input experiments without making
-every model inspect the entire state.
-
-### `PeriodPhaseOneHot`
-
-File: `graph_Time_series/token_blocks/periodic.py`
-
-Encodes positions inside a selected period. It expects `metadata["period"]` to
-already exist, so in the current notebook it is used after `PeriodSelection`.
-It writes compact history/future phase IDs, a future one-hot feature, and a
-history one-hot feature when the tensor is small enough.
-
-This token is exported from the package, but it is not part of the default
-package grammar yet because the period-selection token still lives in the
-notebook.
-
-### `FourierFeatures`
-
-File: `graph_Time_series/token_blocks/fourier.py`
-
-Creates fixed-width tabular FFT features from history. It prefers
-`scaled_history` when available and falls back to `raw_history`. The intended
-path is to feed these features into tabular models through an explicit binder.
-
-Typical use:
-
-```text
-MeanAbsScaling -> FourierFeatures -> BindFourierFeatures -> rf_tabular
-MeanAbsScaling -> FourierFeatures -> BindFourierFeatures -> lightgbm_tabular
-```
-
-`lightgbm_tabular` loads LightGBM lazily, so the package can import without the
-optional dependency. The Colab notebook installs `lightgbm` before running the
-LightGBM comparisons.
-
-### `kernel_rbf`
-
-File: `graph_Time_series/token_blocks/kernel_rbf.py`
-
-RBF KernelRidge model token. It reads the active `model_input` if one exists,
-otherwise falls back to `scaled_history`. It accepts bundle kinds:
-
-```text
-sequence_flat
-tabular
-```
-
-It fits leave-one-out predictions inside a single state and pushes those
-predictions onto the residual stack.
-
-## Default Grammar
-
-The current built-in grammar is registered by:
+### Default Registry
 
 ```python
-from graph_Time_series import Grammar
+from graph_Time_series.grammar import Grammar
 from graph_Time_series.token_blocks import register_default_tokens
 
 grammar = register_default_tokens(Grammar())
 ```
 
-The default token vocabulary is:
+Registered tokens:
 
 ```text
 ZNormalization
-BindScaledHistory
-BindAllSafeTabular
+MeanAbsScaling
+FourierFeatures
 kernel_rbf
-STOP
+rf_tabular
+lightgbm_tabular
 ```
+
+Typical binder-free chains:
+
+```text
+ZNormalization -> kernel_rbf -> STOP
+MeanAbsScaling -> FourierFeatures -> rf_tabular -> STOP
+MeanAbsScaling -> FourierFeatures -> lightgbm_tabular -> STOP
+ZNormalization -> FourierFeatures -> kernel_rbf -> kernel_rbf -> STOP
+```
+
+### FLAIR Registry
+
+```python
+from graph_Time_series.token_blocks import register_flair_tokens
+
+grammar = register_flair_tokens(register_default_tokens(Grammar()))
+```
+
+Adds:
+
+```text
+FlairPreprocess
+PeriodSelection
+PeriodPhaseOneHot
+PeriodFold
+LevelShrinkage
+ShapeLevel
+SecondaryLevelSeasonality
+LevelBoxCoxCenter
+FlairRidgeLevel
+FlairSamplePaths
+```
+
+Typical FLAIR point forecast:
+
+```text
+FlairPreprocess
+-> PeriodSelection
+-> PeriodPhaseOneHot
+-> PeriodFold
+-> LevelShrinkage
+-> ShapeLevel
+-> SecondaryLevelSeasonality
+-> LevelBoxCoxCenter
+-> FlairRidgeLevel
+-> STOP
+```
+
+`FlairSamplePaths` can follow `FlairRidgeLevel` to generate stochastic sample
+paths.
+
+### Versatile Registry
+
+```python
+from graph_Time_series.token_blocks import register_versatile_tokens
+
+grammar = register_versatile_tokens(register_default_tokens(Grammar()))
+```
+
+Adds:
+
+```text
+DayOfWeekFeature
+versatile_rf
+versatile_gb
+```
+
+These are demonstration tokens for the signal-board architecture. The model
+tokens use `state.feature_bundle()` and can pick up whatever compatible feature
+signals exist.
 
 Example:
 
-```python
-from graph_Time_series import State, Grammar, apply_pipeline
-from graph_Time_series.token_blocks import register_default_tokens
-
-grammar = register_default_tokens(Grammar())
-state = State(H, F)
-state = apply_pipeline(
-    "ZNormalization -> BindScaledHistory -> kernel_rbf -> STOP",
-    grammar,
-    state,
-)
-
-forecast = state.features["final_forecast"]
+```text
+ZNormalization -> DayOfWeekFeature -> FourierFeatures -> versatile_rf -> STOP
 ```
 
-## Optional Lark Pipeline DSL
-
-`pipeline_ast.py` adds a lightweight parser for linear token chains:
+### FLAIR GB Swap
 
 ```python
-from graph_Time_series import parse_pipeline, pipeline_to_sequence
+from graph_Time_series.token_blocks import register_flair_gb_swap
 
-ast = parse_pipeline("ZNormalization -> BindScaledHistory -> kernel_rbf -> STOP")
-print(ast.names)
-print(ast.to_source())
+grammar = register_flair_gb_swap(register_flair_tokens(register_default_tokens(Grammar())))
 ```
 
-Install the optional parser dependency when needed:
+Adds:
+
+```text
+gb_level_forecast
+```
+
+This is a drop-in model-side experiment after `ShapeLevel` or
+`LevelShrinkage`: it predicts FLAIR period levels with gradient boosting and
+expands them through the FLAIR shape.
+
+## Implemented Package Tokens
+
+### Transforms
+
+`ZNormalization`
+
+- reads `raw_history`;
+- writes `scaled_history`;
+- transforms the active target by per-series mean/std;
+- registers the inverse transform.
+
+`MeanAbsScaling`
+
+- reads `raw_history`;
+- writes `scaled_history`;
+- scales history and target by per-series mean absolute history value;
+- registers the inverse transform.
+
+### Features And Decomposition
+
+`FourierFeatures`
+
+- creates fixed-width FFT features from `scaled_history` or raw history;
+- writes `fourier_features`;
+- useful before `rf_tabular`, `lightgbm_tabular`, `kernel_rbf`, and versatile
+  models.
+
+`PeriodPhaseOneHot`
+
+- requires `metadata["period"]`;
+- writes history/future phase IDs and future one-hot period positions;
+- optionally writes history one-hot when the tensor is below its configured
+  size guard.
+
+FLAIR feature tokens:
+
+- `FlairPreprocess`
+- `PeriodSelection`
+- `PeriodFold`
+- `LevelShrinkage`
+- `ShapeLevel`
+- `SecondaryLevelSeasonality`
+- `LevelBoxCoxCenter`
+- `FlairSamplePaths`
+
+### Models
+
+`kernel_rbf`
+
+- KernelRidge with RBF kernel;
+- uses explicit legacy `model_input` if present;
+- otherwise uses `state.feature_bundle()`;
+- falls back to `scaled_history` for older direct usage;
+- fits leave-one-out predictions inside the current state.
+
+`rf_tabular`
+
+- `RandomForestRegressor` over the active feature bundle;
+- supports multi-horizon targets directly.
+
+`lightgbm_tabular`
+
+- LightGBM `LGBMRegressor` wrapped in `MultiOutputRegressor`;
+- imports LightGBM lazily, so `lightgbm` must be installed only when this token
+  is used.
+
+`FlairRidgeLevel`
+
+- FLAIR-style soft-averaged Ridge over compressed level innovations;
+- expands through the learned shape and pushes a horizon forecast.
+
+`versatile_rf` and `versatile_gb`
+
+- experimental model tokens that declare semantic feature ports and fit on the
+  auto-built bundle;
+- useful for testing whether new feature tokens combine cleanly.
+
+`gb_level_forecast`
+
+- experimental FLAIR sub-step replacement;
+- predicts period-level values with gradient boosting and expands via shape.
+
+## Pipeline DSL
+
+The optional Lark parser lives in `pipeline_ast.py`. It parses simple linear
+pipelines:
+
+```python
+from graph_Time_series.pipeline_ast import parse_pipeline
+
+ast = parse_pipeline("ZNormalization -> FourierFeatures -> rf_tabular -> STOP")
+```
+
+The DSL is intentionally thin: it expresses order, while `Grammar` and
+`Token.can_apply(...)` still decide whether a sequence is valid for a given
+state.
+
+## Notebook
+
+`examples/test_token_sequence_colab.ipynb` is the main exploration notebook. It
+is used for:
+
+- loading datasets and checking holdout-only comparisons;
+- testing token sequences interactively;
+- comparing kernel, RF, and LightGBM paths;
+- exploring prototype ideas before promoting them into package tokens.
+
+Any long loop in the notebook should use `tqdm` from now on.
+
+## Validation
+
+Read-only smoke command:
 
 ```bash
-pip install lark
+python tests/test_token_combinations.py
 ```
 
-The parser is deliberately non-invasive. It validates token names and graph
-transitions, then delegates execution to the existing token instances.
-
-Token keyword arguments are parsed into the AST, but not applied dynamically yet.
-For now, configured variants should be registered as explicit token instances in
-the grammar.
-
-## Notebook Playground
-
-The main working notebook is:
+Current expected result:
 
 ```text
-examples/test_token_sequence_colab.ipynb
+7/7 named signature pipelines passed
+completed pipelines: 41
+failures: 0
+RESULT: ALL GREEN
 ```
 
-It currently includes:
-
-- dataset loading through the companion exploratory repo;
-- full state inspection and token-by-token diffs;
-- notebook-local prototype tokens;
-- artifact and bundle tables;
-- leakage-safe holdout comparison;
-- optional cross-validation;
-- plots for manual and holdout forecasts.
-
-Notebook-local prototype tokens include:
-
-| Token | Status | Purpose |
-| --- | --- | --- |
-| `DataAugmentation` | notebook prototype | Jitter/smooth history for training experiments |
-| `ContextWindow` | notebook prototype | Keep a fixed recent context window |
-| `PeriodSelection` | notebook prototype | Pick a simple candidate period |
-| `PeriodPhaseOneHot` | package token used in notebook | Encode phase inside selected period |
-| `FourierFeatures` | package token used in notebook | Fixed-width FFT tabular features |
-| `PeriodFold` | notebook prototype | Fold history into period phases |
-| `ShapeLevel` | notebook prototype | Estimate a within-period shape vector |
-| `shape_naive` | notebook prototype | Predict last level distributed through shape |
-| `kernel_rbf_fast` | notebook prototype | Faster in-sample RBF diagnostic token |
-| `level_kernel_rbf` | notebook prototype | RBF on level features, expanded through shape |
-| `rf_tabular` | package token used in notebook | Random forest on tabular model input |
-| `lightgbm_tabular` | package token used in notebook | LightGBM on tabular model input |
-
-The notebook distinguishes manual in-sample diagnostics from leakage-safe
-holdout scoring. Use the leakage-safe section for model comparison.
-
-## State Evolution Example
-
-For this sequence:
+In this Windows workspace, the `python` command may point to the WindowsApps
+launcher. The working interpreter used during review was:
 
 ```text
-ContextWindow -> ZNormalization -> BindScaledHistory -> kernel_rbf_fast
+C:\Users\chahine\AppData\Local\Python\pythoncore-3.14-64\python.exe
 ```
 
-the state evolves as:
+## Adding Tokens
 
-```text
-State(H, F)
-  raw_history registered as an artifact
-  active_target_base = F
-  current_target = F
+Do not add or modify tokens casually. The working convention is:
 
-ContextWindow
-  original_history becomes the last context window
-  features["raw_history"] is updated
-  historical_features["context_history"] is added
+1. propose the token and get explicit approval;
+2. define the state effect first: reads, writes, signals, alignment, and space;
+3. add constructor hyperparameters deliberately;
+4. expose semantic `requires` / `provides` when the token should combine with
+   other families;
+5. add a focused test or notebook sequence showing the expected combination.
 
-ZNormalization
-  historical_features["scaled_history"] is added
-  active_target_base becomes normalized future
-  current_target becomes normalized residual target
-  inverse transform is registered
+Open-ended directions kept for later:
 
-BindScaledHistory
-  historical_features["model_input"] is set
-  active InputBundle is set to "scaled_history"
-
-kernel_rbf_fast
-  reads model_input and current_target
-  pushes one prediction
-  current_target becomes the remaining residual
-```
-
-Package `kernel_rbf` follows the same state contract, with explicit leave-one-out
-prediction inside the current state.
-
-## Leakage-Safe Evaluation
-
-For learned models, comparison should fit on training futures only and predict
-separate holdout histories. The notebook's leakage-safe section does this by:
-
-1. applying feature/binder tokens separately to train and query states;
-2. fitting learned model wrappers on train features and train targets;
-3. pushing predictions only into the query state;
-4. ranking candidates by holdout metrics.
-
-This avoids the older pattern where a model could accidentally fit on the same
-future values used for evaluation.
-
-## Adding New Tokens
-
-New tokens should keep the broad-state plus explicit-binder pattern:
-
-1. Feature tokens can create named artifacts.
-2. Binder tokens decide which artifacts become `model_input`.
-3. Model tokens consume declared bundle kinds.
-4. Models call `state.push_prediction(...)` so residual chaining stays correct.
-5. Transforms call `state.register_transform(...)` so final predictions decode
-   correctly.
-
-Minimal feature token sketch:
-
-```python
-from graph_Time_series.token import FeatureToken
-
-
-class MyFeatureToken(FeatureToken):
-    name = "MyFeature"
-    reads = ("raw_history",)
-    writes = ("my_feature",)
-
-    def apply(self, state):
-        value = ...  # shape must start with state.n_samples
-        state.add_historical_feature("my_feature", value)
-        self._log_execution(
-            state,
-            reads={"raw_history": state.features["raw_history"].shape},
-            writes={"my_feature": value.shape},
-        )
-        return state
-```
-
-Minimal model token sketch:
-
-```python
-from graph_Time_series.token import ModelToken
-
-
-class MyModelToken(ModelToken):
-    name = "my_model"
-    accepted_input_kinds = {"tabular"}
-
-    def get_model(self):
-        return {"model": "my_model"}
-
-    def apply(self, state):
-        X = state.historical_features["model_input"]
-        Y = state.current_target
-        pred = ...  # same shape as Y
-        state.push_prediction(pred, self.name)
-        self._log_execution(
-            state,
-            reads={"model_input": X.shape, "current_target": Y.shape},
-            writes={"prediction_stack[-1]": pred.shape},
-        )
-        return state
-```
-
-## Open Extension Directions
-
-These are intentionally left open-ended. They reflect directions explored in
-discussion or the notebook, but are not fully promoted to package tokens yet.
-
-| Direction | Possible token family |
-| --- | --- |
-| Context selection | `ContextWindow`, adaptive windows, multi-resolution windows |
-| Period/seasonality features | `PeriodSelection`, `PeriodFold`, phase embeddings |
-| Shape/level decomposition | `ShapeLevel`, level models, residual shape correction |
-| Rich tabular models | linear/ridge, random forest, LightGBM, gradient boosting, XGBoost |
-| Multi-channel sequence models | binders with `sequence_multi` or `tensor` bundle kinds |
-| Residual ensembles | multiple model tokens chained through `current_target` |
-| Calendar/known-future covariates | future feature artifacts and horizon-aware binders |
-| Kernel variants | DTW kernels, shape kernels, level kernels, hybrid kernels |
-| Search | grammar-guided candidate enumeration or MCTS over registered tokens |
-| Configurable AST tokens | parsed keyword arguments mapped to configured token instances |
-
-The most important rule for all of these is to keep token interfaces explicit:
-create artifacts broadly, bind inputs deliberately, and let the state manage
-transforms and residuals.
-
-## Quick Smoke Test
-
-```python
-import numpy as np
-
-from graph_Time_series import State, Grammar, apply_pipeline
-from graph_Time_series.token_blocks import register_default_tokens
-
-H = np.random.randn(16, 48).astype("float32")
-F = np.random.randn(16, 12).astype("float32")
-
-grammar = register_default_tokens(Grammar())
-state = State(H, F)
-state = apply_pipeline(
-    "ZNormalization -> BindScaledHistory -> kernel_rbf -> STOP",
-    grammar,
-    state,
-)
-
-print(state.token_sequence)
-print(state.features["final_forecast"].shape)
-print(state.describe_artifacts())
-print(state.describe_input_bundles())
-```
+- STL decomposition tokens;
+- lag/rolling/tabular feature generators;
+- residual-specific model tokens and residual selectors;
+- sequence-native models with multi-channel ports;
+- known-future covariates such as holidays or real timestamps;
+- search policies that use port compatibility to control graph size.
