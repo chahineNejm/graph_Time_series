@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 
 class KernelRBFToken(ModelToken):
+    learning_scope = "cross_series"  # RBF kernel-ridge (GP posterior mean) across series
     name = "kernel_rbf"
     reads = ()
     writes = ("prediction_stack",)

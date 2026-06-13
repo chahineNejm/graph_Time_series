@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 
 
 class VersatileTabularToken(ModelToken):
+    learning_scope = "cross_series"
     """Fit a tabular regressor on the auto-built feature bundle.
 
     Subclasses only supply ``_make_regressor``; the data wiring is identical
@@ -160,6 +161,7 @@ class VersatileGradientBoostingToken(VersatileTabularToken):
 
 
 class GBLevelForecastToken(ModelToken):
+    learning_scope = "cross_series"  # pooled period-level booster across series
     """Forecast each period's level (scale) with gradient boosting, then expand.
 
     Drop-in alternative to ``FlairRidgeLevel``: it consumes the same FLAIR

@@ -111,6 +111,7 @@ def token_table(seasonal_period=48):
         tok = make()
         rows.append({
             "token": name, "class": getattr(tok, "token_class", ""),
+            "learning_scope": getattr(tok, "learning_scope", "n/a"),
             "reads": ", ".join(getattr(tok, "reads", ()) or ()),
             "writes": ", ".join(getattr(tok, "writes", ()) or ()),
             "description": getattr(tok, "description", ""),

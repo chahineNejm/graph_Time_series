@@ -402,6 +402,7 @@ class LevelBoxCoxCenterToken(FeatureToken):
 
 
 class FlairRidgeLevelToken(ModelToken):
+    learning_scope = "within_series"  # per-series ridge AR on its own level
     """Forecast compressed FLAIR levels, expand through shape, and push a point forecast."""
 
     name = "FlairRidgeLevel"
@@ -518,6 +519,7 @@ class FlairRidgeLevelToken(ModelToken):
 
 
 class FlairSamplePathsToken(FeatureToken):
+    learning_scope = "within_series"
     """Generate FLAIR-style stochastic samples around the point forecast."""
 
     name = "FlairSamplePaths"

@@ -16,6 +16,7 @@ class Token(ABC):
     name: str = "BaseToken"
     token_class: str = "control"
     description: str = "Base description"
+    learning_scope: str = "n/a"  # cross_series | within_series | configurable | n/a
     
     # Caps and limits (Default to infinite, override later in config/algo)
     class_max_uses: int | float = float('inf')  

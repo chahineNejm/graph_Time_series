@@ -73,6 +73,8 @@ def collect_step_covariates(state: "State"):
 class StepRegressionToken(ModelToken):
     """Per-date regression over known-future covariates (+ optional index)."""
 
+    learning_scope = "configurable"  # per_series=True within-series, False cross-series
+
     name = "step_regression"
     token_class = "model"
     reads = ()

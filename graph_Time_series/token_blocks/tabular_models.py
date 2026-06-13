@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 class _TabularRegressorToken(ModelToken):
     """Base class for fit-on-current-state tabular regressors."""
 
+    learning_scope = "cross_series"  # one model over all series (rows = series)
+
     reads = ()
     writes = ("prediction_stack",)
     accepted_input_kinds = {"tabular"}
