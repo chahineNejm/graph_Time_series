@@ -100,7 +100,8 @@ class SeasonalFeaturesToken(FeatureToken):
     token_class = "feature"
     reads = ("raw_history",)
     writes = ("seasonal_features", "future_seasonal_features")
-    description = "Sin/cos (+harmonics) per detected period, history + known future."
+    description = ("Per-detected-period sin/cos channels (history + known future, no_bundle) "
+                   "plus a bundle-safe per-series projection (Fourier amplitudes at h/p + seasonal_strength).")
     max_uses = 1
     requires = (Port(sem="param:periods", alignment="static", space="any"),)
     provides = (

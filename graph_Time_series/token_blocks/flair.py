@@ -18,18 +18,21 @@ if TYPE_CHECKING:
 
 
 FREQ_PERIODS = {
-    "H": [24, 168],
-    "HOURLY": [24, 168],
-    "D": [7, 365],
-    "DAILY": [7, 365],
-    "W": [52],
-    "WEEKLY": [52],
-    "M": [12],
-    "MONTHLY": [12],
-    "15T": [4, 96],
-    "5T": [12, 288],
-}
+    "H": [6, 8, 12, 24, 48, 72, 168, 336,720],
+    "HOURLY": [6, 8, 12, 24, 48, 72, 168, 336,720],
 
+    "D": [2, 3, 4, 5, 7, 14, 28, 30, 31, 90, 182, 365],
+    "DAILY": [2, 3, 4, 5, 7, 14, 28, 30, 31, 90, 182, 365],
+
+    "W": [4, 13, 26, 52],
+    "WEEKLY": [4, 13, 26, 52],
+
+    "M": [3,4, 6, 12],
+    "MONTHLY": [3, 6, 12],
+
+    "15T": [4, 8, 16, 48, 96, 192, 672],
+    "5T": [12, 36, 72, 144, 288, 576, 2016],
+}
 _EPS = 1e-8
 
 
@@ -91,72 +94,37 @@ class FlairPreprocessToken(CleaningToken):
         return state
 
 
-class PeriodSelectionToken(FeatureToken):
-    """Choose a global period with a rank-1 SVD/BIC score."""
-
-    name = "PeriodSelection"
-    reads = ("flair_history",)
-    writes = ("period", "period_scores")
-    description = "Select a FLAIR-style MDL/BIC period from frequency candidates."
-
-    def __init__(
-        self,
-        freq: str = "H",
-        max_series: int = 8,
-        min_complete: int = 3,
-    ):
-        self.freq = freq
-        self.max_series = max_series
-        self.min_complete = min_complete
-
-    def check_specific_conditions(self, state: "State") -> bool:
-        return super().check_specific_conditions(state) and "period" not in state.metadata
-
-    def apply(self, state: "State") -> "State":
-        hist = _flair_history(state)
-        n_steps = hist.shape[1]
-        candidates = [
-            p
-            for p in FREQ_PERIODS.get(self.freq.upper(), [1])
-            if p > 0 and n_steps // p >= self.min_complete
-        ]
-        candidates = sorted(set([1] + candidates))
-        subset = hist[: min(self.max_series, hist.shape[0])]
-
-        scores: dict[int, float] = {}
-        for period in candidates:
-            vals = [_period_bic(row, period) for row in subset]
-            scores[int(period)] = float(np.mean(vals))
-
-        period = min(scores, key=scores.get)
-        secondary = [
-            int(p)
-            for p in candidates
-            if p > period and period > 1 and p % period == 0
-        ]
-        state.metadata["period"] = int(period)
-        state.metadata["period_scores"] = scores
-        state.metadata["flair_secondary_periods"] = secondary
-        state.flags["period_selected"] = True
-        self._log_execution(
-            state,
-            reads={"flair_history": hist.shape},
-            writes={
-                "period": int(period),
-                "period_scores": scores,
-                "flair_secondary_periods": secondary,
-            },
-        )
-        return state
-
-
 class PeriodFoldToken(FeatureToken):
-    """Fold preprocessed history into phase x complete-period matrices."""
+    """Fold preprocessed history into phase x complete-period matrices.
+
+    Optionally denoises the per-cycle level totals with a rank-1 SVD energy
+    shrinkage (formerly the separate ``LevelShrinkage`` token; merged here).
+
+    Shrinkage rationale: a clean periodic signal makes the folded
+    (phase x cycle) matrix essentially rank-1, so ``s0^2`` is the dominant cycle
+    energy and ``s1^2, s2^2, ...`` are noise. The factor
+
+        f = clip( max(s0^2 - mean(s1^2..), 0) / s0^2 , min_factor, 1 )
+
+    is the fraction of the leading component that is real signal, and the levels
+    are scaled by it (Wiener / James-Stein style).
+
+    NOTE (theory): on STRONG/clean seasonality this is a no-op (f -> 1), so it
+    only helps when many noisy cycles are dominated by one periodic component.
+    Leave ``shrink_level=False`` (un-shrunk) when the series is genuinely
+    multi-component (two periodicities, amplitude modulation, within-cycle
+    trend) -- those higher singular values are real signal, not noise -- or when
+    an unbiased / calibrated level magnitude matters downstream.
+    """
 
     name = "PeriodFold"
     reads = ("flair_history", "period")
     writes = ("period_matrix", "level_series")
-    description = "Fold FLAIR history into period phases and level totals."
+    description = "Fold FLAIR history into period phases + level totals (optional SVD level shrink)."
+
+    def __init__(self, shrink_level: bool = True, min_factor: float = 0.05):
+        self.shrink_level = bool(shrink_level)
+        self.min_factor = float(min_factor)
 
     def check_specific_conditions(self, state: "State") -> bool:
         if not super().check_specific_conditions(state):
@@ -164,6 +132,17 @@ class PeriodFoldToken(FeatureToken):
         period = int(state.metadata.get("period", 0))
         hist = _flair_history(state)
         return period > 0 and hist.shape[1] // period >= 1
+
+    def _level_shrink_factors(self, matrix: np.ndarray) -> np.ndarray:
+        factors = np.ones(matrix.shape[0], dtype=np.float64)
+        for i in range(matrix.shape[0]):
+            s = np.linalg.svd(matrix[i], compute_uv=False)
+            if s.size <= 1 or s[0] <= _EPS:
+                continue
+            residual_noise = float(np.mean(s[1:] ** 2))
+            signal = max(float(s[0] ** 2) - residual_noise, 0.0)
+            factors[i] = np.clip(signal / float(s[0] ** 2), self.min_factor, 1.0)
+        return factors
 
     def apply(self, state: "State") -> "State":
         hist = _flair_history(state)
@@ -193,56 +172,26 @@ class PeriodFoldToken(FeatureToken):
             source_token=self.name,
             tags=("flair", "level"),
         )
+
+        writes = {"period_matrix": matrix.shape, "level_series": level.shape}
+        if self.shrink_level:
+            factors = self._level_shrink_factors(matrix.astype(np.float64))
+            denoised = (level.astype(np.float64) * factors[:, None]).astype(np.float32)
+            state.add_historical_feature("flair_level_denoised", denoised)
+            state.metadata["flair_level_shrinkage"] = factors.astype(np.float32)
+            state.register_artifact(
+                "flair_level_denoised",
+                store="historical_features",
+                kind="level_series",
+                source_token=self.name,
+                tags=("flair", "level", "denoised"),
+            )
+            writes["flair_level_denoised"] = denoised.shape
+
         self._log_execution(
             state,
             reads={"flair_history": hist.shape, "period": period},
-            writes={"period_matrix": matrix.shape, "level_series": level.shape},
-        )
-        return state
-
-
-class LevelShrinkageToken(FeatureToken):
-    """Denoise period totals with a rank-1 energy shrinkage factor."""
-
-    name = "LevelShrinkage"
-    reads = ("period_matrix", "level_series")
-    writes = ("flair_level_denoised", "flair_level_shrinkage")
-    description = "Shrink FLAIR level totals using the folded matrix SVD spectrum."
-
-    def __init__(self, min_factor: float = 0.05):
-        self.min_factor = min_factor
-
-    def apply(self, state: "State") -> "State":
-        matrix = np.asarray(state.historical_features["period_matrix"], dtype=np.float64)
-        level = np.asarray(state.historical_features["level_series"], dtype=np.float64)
-        factors = np.ones(matrix.shape[0], dtype=np.float64)
-
-        for i in range(matrix.shape[0]):
-            s = np.linalg.svd(matrix[i], compute_uv=False)
-            if s.size <= 1 or s[0] <= _EPS:
-                factors[i] = 1.0
-                continue
-            residual_noise = float(np.mean(s[1:] ** 2))
-            signal = max(float(s[0] ** 2) - residual_noise, 0.0)
-            factors[i] = np.clip(signal / float(s[0] ** 2), self.min_factor, 1.0)
-
-        denoised = (level * factors[:, None]).astype(np.float32)
-        state.add_historical_feature("flair_level_denoised", denoised)
-        state.metadata["flair_level_shrinkage"] = factors.astype(np.float32)
-        state.register_artifact(
-            "flair_level_denoised",
-            store="historical_features",
-            kind="level_series",
-            source_token=self.name,
-            tags=("flair", "level", "denoised"),
-        )
-        self._log_execution(
-            state,
-            reads={"period_matrix": matrix.shape, "level_series": level.shape},
-            writes={
-                "flair_level_denoised": denoised.shape,
-                "flair_level_shrinkage": factors.shape,
-            },
+            writes=writes,
         )
         return state
 
@@ -882,4 +831,3 @@ def _maybe_tqdm(iterable, enabled: bool, desc: str):
         return tqdm(iterable, desc=desc)
     except Exception:
         return iterable
-

@@ -39,11 +39,10 @@ from graph_Time_series.token_blocks import (
     GBLevelForecastToken,
     KernelRBFToken,
     LevelBoxCoxCenterToken,
-    LevelShrinkageToken,
     MeanAbsScalingToken,
     PeriodFoldToken,
     PeriodPhaseOneHotToken,
-    PeriodSelectionToken,
+    PeriodDetectToken,
     RandomForestTabularToken,
     SecondaryLevelSeasonalityToken,
     ShapeLevelToken,
@@ -136,12 +135,12 @@ def enumerate_pipelines(tokens, H, F, max_depth=6, max_pipelines=4000, time_budg
 def run_named(tokens, H, F):
     pipelines = {
         "full_FLAIR": [
-            "FlairPreprocess", "PeriodSelection", "PeriodFold",
-            "LevelShrinkage", "ShapeLevel", "SecondaryLevelSeasonality",
+            "FlairPreprocess", "PeriodDetect", "PeriodFold",
+            "ShapeLevel", "SecondaryLevelSeasonality",
             "LevelBoxCoxCenter", "FlairRidgeLevel",
         ],
         "FLAIR_with_GB_level_swap": [
-            "FlairPreprocess", "PeriodSelection", "PeriodFold",
+            "FlairPreprocess", "PeriodDetect", "PeriodFold",
             "ShapeLevel", "gb_level_forecast",
         ],
         "versatile_GB_no_binder": [
@@ -181,10 +180,9 @@ def build_tokens(H):
         "versatile_gb": VersatileGradientBoostingToken(max_iter=40),
         # FLAIR family
         "FlairPreprocess": FlairPreprocessToken(),
-        "PeriodSelection": PeriodSelectionToken(freq="H"),
+        "PeriodDetect": PeriodDetectToken(freq="H"),
         "PeriodPhaseOneHot": PeriodPhaseOneHotToken(),
         "PeriodFold": PeriodFoldToken(),
-        "LevelShrinkage": LevelShrinkageToken(),
         "ShapeLevel": ShapeLevelToken(),
         "SecondaryLevelSeasonality": SecondaryLevelSeasonalityToken(),
         "LevelBoxCoxCenter": LevelBoxCoxCenterToken(),
@@ -216,7 +214,7 @@ def main():
     enum_tokens = {k: tokens[k] for k in [
         "MeanAbsScaling", "ZNormalization", "FourierFeatures",
         "versatile_gb",
-        "FlairPreprocess", "PeriodSelection", "PeriodFold", "LevelShrinkage",
+        "FlairPreprocess", "PeriodDetect", "PeriodFold",
         "ShapeLevel", "gb_level_forecast",
     ]}
     completed, failures = enumerate_pipelines(

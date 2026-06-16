@@ -11,7 +11,7 @@ The enumeration respects three structural rules on top of each token's own
      never ZNormalization AND MeanAbsScaling in the same pipeline).
   3. Within a phase, tokens follow a fixed canonical order, so we emit ONE
      representative per combination instead of every permutation. Real
-     dependencies (the FLAIR chain PeriodSelection -> PeriodFold -> ShapeLevel
+     dependencies (the FLAIR chain PeriodDetect -> PeriodFold -> ShapeLevel
      -> ...) are encoded in that canonical order and therefore preserved.
 
 Fast by design: model tokens are recorded as terminal steps without being
@@ -33,8 +33,8 @@ from graph_Time_series.token_blocks import (
     ZNormalizationToken, MeanAbsScalingToken, FourierFeaturesToken,
     KernelRBFToken, RandomForestTabularToken,
     VersatileGradientBoostingToken,
-    GBLevelForecastToken, FlairPreprocessToken, PeriodSelectionToken,
-    PeriodPhaseOneHotToken, PeriodFoldToken, LevelShrinkageToken,
+    GBLevelForecastToken, FlairPreprocessToken,
+    PeriodPhaseOneHotToken, PeriodFoldToken,
     ShapeLevelToken, SecondaryLevelSeasonalityToken, LevelBoxCoxCenterToken,
     FlairRidgeLevelToken, FlairSamplePathsToken,
 )
@@ -48,10 +48,8 @@ TOKENS = {
     "rf_tabular": RandomForestTabularToken(n_estimators=8),
     "versatile_gb": VersatileGradientBoostingToken(max_iter=15),
     "FlairPreprocess": FlairPreprocessToken(),
-    "PeriodSelection": PeriodSelectionToken(freq="H"),
     "PeriodPhaseOneHot": PeriodPhaseOneHotToken(),
     "PeriodFold": PeriodFoldToken(),
-    "LevelShrinkage": LevelShrinkageToken(),
     "ShapeLevel": ShapeLevelToken(),
     "SecondaryLevelSeasonality": SecondaryLevelSeasonalityToken(),
     "LevelBoxCoxCenter": LevelBoxCoxCenterToken(),
@@ -68,7 +66,7 @@ CANON_ORDER = [
     # scaling
     "ZNormalization", "MeanAbsScaling",
     # feature (FLAIR chain first, in dependency order, then generic features)
-    "PeriodSelection", "PeriodPhaseOneHot", "PeriodFold", "LevelShrinkage",
+    "PeriodPhaseOneHot", "PeriodFold",
     "ShapeLevel", "SecondaryLevelSeasonality", "LevelBoxCoxCenter",
     "FourierFeatures",
     # model

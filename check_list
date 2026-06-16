@@ -64,6 +64,16 @@ check that each tranformation if done has a counter transformation applyed corre
 the fourier features are not good yet
 #### 
 
+####### needed
+RBF needs to learn to use other types of features
+#######
+
+
+
+##### 
+ideally at some point I d liek that decomposed time series could profit from forecasting and models and features on each of the branches and note only the full 
+#####
+
 data augmentation: chronos does TSmixup where they randomly mix time series (ok I guess)
 grammar to clean:
 bundling tokens for now I don t like them

@@ -31,9 +31,9 @@ from graph_Time_series.grammar import Grammar
 from graph_Time_series.token_blocks import (
     FlairPreprocessToken, FlairRidgeLevelToken,
     FlairSamplePathsToken, FourierFeaturesToken, GBLevelForecastToken,
-    KernelRBFToken, LevelBoxCoxCenterToken, LevelShrinkageToken,
+    KernelRBFToken, LevelBoxCoxCenterToken,
     LightGBMTabularToken, MeanAbsScalingToken, PeriodFoldToken,
-    PeriodPhaseOneHotToken, PeriodSelectionToken, RandomForestTabularToken,
+    PeriodPhaseOneHotToken, RandomForestTabularToken,
     SecondaryLevelSeasonalityToken, ShapeLevelToken,
     VersatileGradientBoostingToken,
     ZNormalizationToken, register_default_tokens, register_flair_gb_swap,
@@ -47,7 +47,7 @@ __all__ = [
     "shape_of", "snapshot", "describe_inputs", "print_step_report",
     "summarize_state", "signal_board_df", "feature_bundle_df", "artifact_df",
     "plot_raw_data", "plot_array_artifact", "plot_intermediate_artifacts",
-    "plot_prediction_state", "score_prediction", "valid_next_from_grammar",
+    "plot_prediction_state", "plot_decode", "score_prediction", "valid_next_from_grammar",
     "run_sequence", "inspect_pipeline",
 ]
 
@@ -80,10 +80,8 @@ def make_token_factory(seasonal_period=48):
         "rf_tabular": lambda: RandomForestTabularToken(n_estimators=80, max_depth=10, min_samples_leaf=2, seed=0, n_jobs=-1),
         "lightgbm_tabular": lambda: LightGBMTabularToken(n_estimators=160, learning_rate=0.05, num_leaves=31, seed=0, n_jobs=-1),
         "FlairPreprocess": lambda: FlairPreprocessToken(),
-        "PeriodSelection": lambda: PeriodSelectionToken(freq="H"),
         "PeriodPhaseOneHot": lambda: PeriodPhaseOneHotToken(),
         "PeriodFold": lambda: PeriodFoldToken(),
-        "LevelShrinkage": lambda: LevelShrinkageToken(),
         "ShapeLevel": lambda: ShapeLevelToken(shape_k=2),
         "SecondaryLevelSeasonality": lambda: SecondaryLevelSeasonalityToken(),
         "LevelBoxCoxCenter": lambda: LevelBoxCoxCenterToken(),
@@ -330,11 +328,65 @@ def plot_prediction_state(state, sample_idx=0, title=""):
     plt.axvline(hist.shape[0] - 1, color="gray", linestyle="--", linewidth=1)
     plt.title(title or "Prediction state"); plt.legend(); plt.show()
 
-def score_prediction(state):
+def plot_decode(state, sample_idx=0):
+    """Visualise the inverse-transform (e.g. un-z-normalize) at decode time.
+
+    Left: the cumulative prediction in the MODEL's scale (current space) vs the
+    scaled target. Right: the same prediction after the inverse transform chain
+    (get_final_prediction) vs the original future. The gap between panels is
+    exactly the rescaling that the transform stack undoes at the end.
+    """
+    if plt is None or state.n_models_applied == 0:
+        print("Need matplotlib and at least one model prediction.")
+        return
+    i = sample_idx
+    scaled_pred = np.asarray(state.cumulative_prediction())[i]
+    scaled_true = np.asarray(state.active_target_base)[i]
+    decoded_pred = np.asarray(state.get_final_prediction())[i]
+    raw_true = np.asarray(state.original_future)[i]
+    chain = [t.name for t in state.transforms] or ["(none)"]
+    H = np.arange(scaled_pred.shape[0])
+
+    fig, ax = plt.subplots(1, 2, figsize=(13, 4))
+    ax[0].plot(H, scaled_true, color="black", lw=1.5, label="target (scaled)")
+    ax[0].plot(H, scaled_pred, "--", color="tab:blue", lw=1.5, label="prediction (scaled)")
+    ax[0].set_title(f"model scale: {state.current_space.id}")
+    ax[0].legend(fontsize=8)
+    ax[1].plot(H, raw_true, color="black", lw=1.5, label="future (original)")
+    ax[1].plot(H, decoded_pred, "--", color="tab:orange", lw=1.5, label="decoded prediction")
+    ax[1].set_title("original scale  (after inverse: " + " -> ".join(reversed(chain)) + ")")
+    ax[1].legend(fontsize=8)
+    fig.suptitle(f"Decode / rescale - sample {i}")
+    plt.tight_layout(); plt.show()
+
+
+def score_prediction(state, seasonal_period=1):
+    """Decoded-forecast metrics, incl. MASE.
+
+    MASE scales each series' MAE by its in-sample naive error
+    mean|y_t - y_{t-m}| on the history (m = seasonal_period, default 1 =
+    random-walk naive). MASE < 1 beats that naive baseline.
+    """
     if state.n_models_applied == 0:
         return None
-    err = state.get_final_prediction() - state.original_future
-    return {"mae": float(np.mean(np.abs(err))), "rmse": float(np.sqrt(np.mean(err ** 2))),
+    pred = np.asarray(state.get_final_prediction(), float)
+    F = np.asarray(state.original_future, float)
+    Hh = np.asarray(state.original_history, float)
+    err = pred - F
+    m = max(1, int(seasonal_period))
+    mae_series = np.mean(np.abs(err), axis=1)
+    if Hh.shape[1] > m:
+        scale = np.mean(np.abs(Hh[:, m:] - Hh[:, :-m]), axis=1)
+    else:
+        scale = np.zeros(Hh.shape[0])
+    # Series whose naive error is ~0 (flat/constant history) are EXCLUDED from
+    # the average (set to NaN), so they neither blow it up nor drag it to 0.
+    ok = scale > 1e-12
+    per_series = np.where(ok, mae_series / np.where(ok, scale, 1.0), np.nan)
+    mase = float(np.nanmean(per_series)) if ok.any() else float("nan")
+    return {"mae": float(np.mean(np.abs(err))),
+            "rmse": float(np.sqrt(np.mean(err ** 2))),
+            "mase": mase,
             "max_abs_error": float(np.max(np.abs(err)))}
 
 

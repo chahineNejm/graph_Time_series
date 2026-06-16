@@ -7,9 +7,7 @@ from .flair import (
     FlairRidgeLevelToken,
     FlairSamplePathsToken,
     LevelBoxCoxCenterToken,
-    LevelShrinkageToken,
     PeriodFoldToken,
-    PeriodSelectionToken,
     SecondaryLevelSeasonalityToken,
     ShapeLevelToken,
 )
@@ -66,31 +64,26 @@ def register_flair_tokens(grammar):
     grammar.register(
         FlairPreprocessToken(),
         follows=["START"],
-        leads_to=["PeriodSelection"],
+        leads_to=["PeriodDetect"],
     )
     grammar.register(
-        PeriodSelectionToken(),
+        PeriodDetectToken(),
         follows=["FlairPreprocess"],
         leads_to=["PeriodPhaseOneHot", "PeriodFold"],
     )
     grammar.register(
         PeriodPhaseOneHotToken(),
-        follows=["PeriodSelection"],
+        follows=["PeriodDetect"],
         leads_to=["PeriodFold"],
     )
     grammar.register(
         PeriodFoldToken(),
-        follows=["PeriodSelection", "PeriodPhaseOneHot"],
-        leads_to=["LevelShrinkage", "ShapeLevel"],
-    )
-    grammar.register(
-        LevelShrinkageToken(),
-        follows=["PeriodFold"],
+        follows=["PeriodDetect", "PeriodPhaseOneHot"],
         leads_to=["ShapeLevel"],
     )
     grammar.register(
         ShapeLevelToken(),
-        follows=["PeriodFold", "LevelShrinkage"],
+        follows=["PeriodFold"],
         leads_to=["SecondaryLevelSeasonality"],
     )
     grammar.register(
@@ -142,7 +135,7 @@ def register_flair_gb_swap(grammar):
     """
     grammar.register(
         GBLevelForecastToken(),
-        follows=["ShapeLevel", "LevelShrinkage"],
+        follows=["ShapeLevel"],
         leads_to=["STOP"],
     )
     return grammar
@@ -186,12 +179,10 @@ __all__ = [
     "FourierFeaturesToken",
     "KernelRBFToken",
     "LevelBoxCoxCenterToken",
-    "LevelShrinkageToken",
     "LightGBMTabularToken",
     "MeanAbsScalingToken",
     "PeriodFoldToken",
     "PeriodPhaseOneHotToken",
-    "PeriodSelectionToken",
     "RandomForestTabularToken",
     "SecondaryLevelSeasonalityToken",
     "ShapeLevelToken",
