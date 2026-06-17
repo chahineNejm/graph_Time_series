@@ -350,6 +350,118 @@ class LevelBoxCoxCenterToken(FeatureToken):
         return state
 
 
+class LevelShapeRidgeToken(ModelToken):
+    learning_scope = "within_series"
+    """Forecast period-level values with internal Box-Cox ridge, then expand."""
+
+    name = "level_shape_ridge"
+    reads = ("level_series", "shape_vector", "period")
+    writes = ("prediction_stack",)
+    description = (
+        "Compact Box-Cox soft-averaged ridge over period levels + shape expansion."
+    )
+
+    def __init__(
+        self,
+        alpha_log_min: float = -6.0,
+        alpha_log_max: float = 3.0,
+        n_alphas: int = 25,
+        n_lambda_grid: int = 21,
+        eps: float = 1e-6,
+        level_sources: tuple[str, ...] = (
+            "flair_level_work",
+            "flair_level_denoised",
+            "level_series",
+        ),
+        show_progress: bool = True,
+        progress_min_samples: int = 32,
+    ):
+        self.alpha_log_min = alpha_log_min
+        self.alpha_log_max = alpha_log_max
+        self.n_alphas = int(n_alphas)
+        self.n_lambda_grid = int(n_lambda_grid)
+        self.eps = float(eps)
+        self.level_sources = tuple(level_sources)
+        self.show_progress = show_progress
+        self.progress_min_samples = int(progress_min_samples)
+
+    def get_model(self) -> dict[str, Any]:
+        return {
+            "model": "boxcox_soft_averaged_ridge",
+            "target": "period_level",
+            "n_alphas": self.n_alphas,
+            "n_lambda_grid": self.n_lambda_grid,
+        }
+
+    def check_specific_conditions(self, state: "State") -> bool:
+        if not super().check_specific_conditions(state):
+            return False
+        return (
+            state.n_models_applied == 0
+            and "period" in state.metadata
+            and "shape_vector" in state.historical_features
+            and self._level_name(state) is not None
+        )
+
+    def _level_name(self, state: "State") -> str | None:
+        for name in self.level_sources:
+            if name in state.historical_features:
+                return name
+        return None
+
+    def apply(self, state: "State") -> "State":
+        level_name = self._level_name(state)
+        if level_name is None:
+            raise KeyError(
+                f"{self.name} requires one of {self.level_sources!r} in historical_features."
+            )
+
+        level = np.asarray(state.historical_features[level_name], dtype=np.float64)
+        shape = np.asarray(state.historical_features["shape_vector"], dtype=np.float64)
+        period = int(state.metadata["period"])
+        horizon = state.horizon
+        m = int(np.ceil(horizon / max(period, 1)))
+        cp = int(state.metadata.get("flair_cross_period", 1))
+        future_shape2 = np.asarray(
+            state.features.get("flair_level_future_shape2", np.ones((state.n_samples, m))),
+            dtype=np.float64,
+        )
+
+        pred = np.zeros((state.n_samples, horizon), dtype=np.float32)
+        alphas = np.logspace(self.alpha_log_min, self.alpha_log_max, self.n_alphas)
+        iterator = _maybe_tqdm(
+            range(state.n_samples),
+            self.show_progress and state.n_samples >= self.progress_min_samples,
+            "level_shape_ridge",
+        )
+        for i in iterator:
+            offset = max(0.0, self.eps - float(np.min(level[i])))
+            positive = level[i] + offset
+            lam = _boxcox_lambda_grid(positive, self.n_lambda_grid)
+            transformed = _boxcox(positive, lam)
+            last = float(transformed[-1])
+            innov = transformed - last
+
+            beta, _, phi = _fit_level_ridge(innov, cp, alphas)
+            innov_hat = _forecast_level_innov(innov, beta, cp, phi, m)
+            level_hat = _boxcox_inv(innov_hat + last, lam) - offset
+            level_hat = level_hat * future_shape2[i, :m]
+            pred[i] = _expand_levels(level_hat, shape[i], horizon).astype(np.float32)
+
+        state.push_prediction(pred, self.name)
+        self._log_execution(
+            state,
+            reads={
+                level_name: level.shape,
+                "shape_vector": shape.shape,
+                "period": period,
+                "cross_period": cp,
+            },
+            writes={"prediction_stack[-1]": pred.shape},
+        )
+        return state
+
+
 class FlairRidgeLevelToken(ModelToken):
     learning_scope = "within_series"  # per-series ridge AR on its own level
     """Forecast compressed FLAIR levels, expand through shape, and push a point forecast."""

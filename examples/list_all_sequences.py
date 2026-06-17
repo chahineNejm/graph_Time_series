@@ -34,9 +34,9 @@ from graph_Time_series.token_blocks import (
     KernelRBFToken, RandomForestTabularToken,
     VersatileGradientBoostingToken,
     GBLevelForecastToken, FlairPreprocessToken,
-    PeriodPhaseOneHotToken, PeriodFoldToken,
+    PeriodDetectToken, PeriodPhaseOneHotToken, PeriodFoldToken,
     ShapeLevelToken, SecondaryLevelSeasonalityToken, LevelBoxCoxCenterToken,
-    FlairRidgeLevelToken, FlairSamplePathsToken,
+    LevelShapeRidgeToken, FlairRidgeLevelToken, FlairSamplePathsToken,
 )
 
 # --- tokens to enumerate (edit freely) ---
@@ -48,11 +48,13 @@ TOKENS = {
     "rf_tabular": RandomForestTabularToken(n_estimators=8),
     "versatile_gb": VersatileGradientBoostingToken(max_iter=15),
     "FlairPreprocess": FlairPreprocessToken(),
+    "PeriodDetect": PeriodDetectToken(freq="H"),
     "PeriodPhaseOneHot": PeriodPhaseOneHotToken(),
     "PeriodFold": PeriodFoldToken(),
     "ShapeLevel": ShapeLevelToken(),
     "SecondaryLevelSeasonality": SecondaryLevelSeasonalityToken(),
     "LevelBoxCoxCenter": LevelBoxCoxCenterToken(),
+    "level_shape_ridge": LevelShapeRidgeToken(show_progress=False),
     "FlairRidgeLevel": FlairRidgeLevelToken(show_progress=False),
     "FlairSamplePaths": FlairSamplePathsToken(),
     "gb_level_forecast": GBLevelForecastToken(max_iter=15),
@@ -66,12 +68,12 @@ CANON_ORDER = [
     # scaling
     "ZNormalization", "MeanAbsScaling",
     # feature (FLAIR chain first, in dependency order, then generic features)
-    "PeriodPhaseOneHot", "PeriodFold",
+    "PeriodDetect", "PeriodPhaseOneHot", "PeriodFold",
     "ShapeLevel", "SecondaryLevelSeasonality", "LevelBoxCoxCenter",
     "FourierFeatures",
     # model
-    "gb_level_forecast", "FlairRidgeLevel", "kernel_rbf", "rf_tabular",
-    "versatile_gb",
+    "gb_level_forecast", "level_shape_ridge", "FlairRidgeLevel",
+    "kernel_rbf", "rf_tabular", "versatile_gb",
 ]
 
 # Mutually-exclusive groups: at most one token from each per pipeline.

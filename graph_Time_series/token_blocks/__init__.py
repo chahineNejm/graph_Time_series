@@ -7,6 +7,7 @@ from .flair import (
     FlairRidgeLevelToken,
     FlairSamplePathsToken,
     LevelBoxCoxCenterToken,
+    LevelShapeRidgeToken,
     PeriodFoldToken,
     SecondaryLevelSeasonalityToken,
     ShapeLevelToken,
@@ -84,12 +85,17 @@ def register_flair_tokens(grammar):
     grammar.register(
         ShapeLevelToken(),
         follows=["PeriodFold"],
-        leads_to=["SecondaryLevelSeasonality"],
+        leads_to=["SecondaryLevelSeasonality", "level_shape_ridge"],
     )
     grammar.register(
         SecondaryLevelSeasonalityToken(),
         follows=["ShapeLevel"],
-        leads_to=["LevelBoxCoxCenter"],
+        leads_to=["LevelBoxCoxCenter", "level_shape_ridge"],
+    )
+    grammar.register(
+        LevelShapeRidgeToken(),
+        follows=["ShapeLevel", "SecondaryLevelSeasonality"],
+        leads_to=["kernel_rbf", "STOP"],
     )
     grammar.register(
         LevelBoxCoxCenterToken(),
@@ -179,6 +185,7 @@ __all__ = [
     "FourierFeaturesToken",
     "KernelRBFToken",
     "LevelBoxCoxCenterToken",
+    "LevelShapeRidgeToken",
     "LightGBMTabularToken",
     "MeanAbsScalingToken",
     "PeriodFoldToken",

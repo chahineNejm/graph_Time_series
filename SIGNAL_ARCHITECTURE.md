@@ -126,30 +126,34 @@ current package architecture.
 `register_flair_tokens(grammar)`:
 
 - `FlairPreprocess`
-- `PeriodSelection`
+- `PeriodDetect`
 - `PeriodPhaseOneHot`
 - `PeriodFold`
-- `LevelShrinkage`
 - `ShapeLevel`
 - `SecondaryLevelSeasonality`
+- `level_shape_ridge`
 - `LevelBoxCoxCenter`
 - `FlairRidgeLevel`
 - `FlairSamplePaths`
 
 `register_versatile_tokens(grammar)`:
 
-- `DayOfWeekFeature`
-- `versatile_rf`
 - `versatile_gb`
 
 `register_flair_gb_swap(grammar)`:
 
 - `gb_level_forecast`
 
+`register_seasonal_tokens(grammar)`:
+
+- `PeriodDetect`
+- `SeasonalFeatures`
+- `step_regression`
+
 When all registries are enabled together, the grammar currently reports:
 
 ```text
-Grammar(20 tokens, 58 edges)
+Grammar(20 tokens, 57 edges)
 ```
 
 ## Demonstrated Combinations
@@ -158,17 +162,17 @@ Grammar(20 tokens, 58 edges)
 
 - full FLAIR;
 - FLAIR with `gb_level_forecast` replacing the Ridge level forecaster;
+- compact `level_shape_ridge` using internal Box-Cox ridge with minimal state;
 - binder-free RF and gradient boosting variants;
 - package `rf_tabular` without binder tokens;
-- calendar feature inserted before RF;
 - `kernel_rbf` without binder tokens;
 - time-bounded reachability enumeration.
 
 Current expected output:
 
 ```text
-7/7 named pipelines passed
-completed pipelines: 41
+6/6 named pipelines passed
+completed pipelines: 39
 failures: 0
 RESULT: ALL GREEN
 ```

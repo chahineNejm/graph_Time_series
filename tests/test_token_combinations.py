@@ -39,6 +39,7 @@ from graph_Time_series.token_blocks import (
     GBLevelForecastToken,
     KernelRBFToken,
     LevelBoxCoxCenterToken,
+    LevelShapeRidgeToken,
     MeanAbsScalingToken,
     PeriodFoldToken,
     PeriodPhaseOneHotToken,
@@ -143,6 +144,11 @@ def run_named(tokens, H, F):
             "FlairPreprocess", "PeriodDetect", "PeriodFold",
             "ShapeLevel", "gb_level_forecast",
         ],
+        "level_shape_ridge_compact": [
+            "FlairPreprocess", "PeriodDetect", "PeriodFold",
+            "ShapeLevel", "SecondaryLevelSeasonality",
+            "level_shape_ridge",
+        ],
         "versatile_GB_no_binder": [
             "MeanAbsScaling", "FourierFeatures", "versatile_gb",
         ],
@@ -186,6 +192,7 @@ def build_tokens(H):
         "ShapeLevel": ShapeLevelToken(),
         "SecondaryLevelSeasonality": SecondaryLevelSeasonalityToken(),
         "LevelBoxCoxCenter": LevelBoxCoxCenterToken(),
+        "level_shape_ridge": LevelShapeRidgeToken(show_progress=False),
         "FlairRidgeLevel": FlairRidgeLevelToken(show_progress=False),
         "gb_level_forecast": GBLevelForecastToken(),
     }
@@ -215,7 +222,8 @@ def main():
         "MeanAbsScaling", "ZNormalization", "FourierFeatures",
         "versatile_gb",
         "FlairPreprocess", "PeriodDetect", "PeriodFold",
-        "ShapeLevel", "gb_level_forecast",
+        "ShapeLevel", "SecondaryLevelSeasonality",
+        "level_shape_ridge", "gb_level_forecast",
     ]}
     completed, failures = enumerate_pipelines(
         enum_tokens, H, F, max_depth=6, max_pipelines=5000, time_budget_s=30)

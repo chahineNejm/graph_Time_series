@@ -138,12 +138,12 @@ FLAIR opt-in registry:
 
 ```text
 FlairPreprocess
-PeriodSelection
+PeriodDetect
 PeriodPhaseOneHot
 PeriodFold
-LevelShrinkage
 ShapeLevel
 SecondaryLevelSeasonality
+level_shape_ridge
 LevelBoxCoxCenter
 FlairRidgeLevel
 FlairSamplePaths
@@ -152,8 +152,6 @@ FlairSamplePaths
 Versatile opt-in registry:
 
 ```text
-DayOfWeekFeature
-versatile_rf
 versatile_gb
 ```
 
@@ -163,10 +161,18 @@ FLAIR swap opt-in registry:
 gb_level_forecast
 ```
 
+Seasonal opt-in registry:
+
+```text
+PeriodDetect
+SeasonalFeatures
+step_regression
+```
+
 With all registries enabled:
 
 ```text
-Grammar(20 tokens, 58 edges)
+Grammar(20 tokens, 57 edges)
 ```
 
 ## Still Proposal / Next Architecture

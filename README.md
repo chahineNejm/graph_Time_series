@@ -185,12 +185,12 @@ Adds:
 
 ```text
 FlairPreprocess
-PeriodSelection
+PeriodDetect
 PeriodPhaseOneHot
 PeriodFold
-LevelShrinkage
 ShapeLevel
 SecondaryLevelSeasonality
+level_shape_ridge
 LevelBoxCoxCenter
 FlairRidgeLevel
 FlairSamplePaths
@@ -200,10 +200,22 @@ Typical FLAIR point forecast:
 
 ```text
 FlairPreprocess
--> PeriodSelection
+-> PeriodDetect
 -> PeriodPhaseOneHot
 -> PeriodFold
--> LevelShrinkage
+-> ShapeLevel
+-> SecondaryLevelSeasonality
+-> level_shape_ridge
+-> STOP
+```
+
+Verbose FLAIR inspection path:
+
+```text
+FlairPreprocess
+-> PeriodDetect
+-> PeriodPhaseOneHot
+-> PeriodFold
 -> ShapeLevel
 -> SecondaryLevelSeasonality
 -> LevelBoxCoxCenter
@@ -225,8 +237,6 @@ grammar = register_versatile_tokens(register_default_tokens(Grammar()))
 Adds:
 
 ```text
-DayOfWeekFeature
-versatile_rf
 versatile_gb
 ```
 
@@ -237,7 +247,7 @@ signals exist.
 Example:
 
 ```text
-ZNormalization -> DayOfWeekFeature -> FourierFeatures -> versatile_rf -> STOP
+ZNormalization -> FourierFeatures -> versatile_gb -> STOP
 ```
 
 ### FLAIR GB Swap
@@ -254,9 +264,8 @@ Adds:
 gb_level_forecast
 ```
 
-This is a drop-in model-side experiment after `ShapeLevel` or
-`LevelShrinkage`: it predicts FLAIR period levels with gradient boosting and
-expands them through the FLAIR shape.
+This is a drop-in model-side experiment after `ShapeLevel`: it predicts period
+levels with gradient boosting and expands them through the learned shape.
 
 ## Implemented Package Tokens
 
@@ -295,9 +304,8 @@ expands them through the FLAIR shape.
 FLAIR feature tokens:
 
 - `FlairPreprocess`
-- `PeriodSelection`
+- `PeriodDetect`
 - `PeriodFold`
-- `LevelShrinkage`
 - `ShapeLevel`
 - `SecondaryLevelSeasonality`
 - `LevelBoxCoxCenter`
@@ -324,14 +332,23 @@ FLAIR feature tokens:
 - imports LightGBM lazily, so `lightgbm` must be installed only when this token
   is used.
 
+`level_shape_ridge`
+
+- compact period-level predictor;
+- reads existing level/shape state;
+- handles Box-Cox positivity internally;
+- does not write Box-Cox arrays, ridge coefficients, or level forecasts into
+  `State`;
+- pushes only the final horizon forecast through the normal prediction stack.
+
 `FlairRidgeLevel`
 
 - FLAIR-style soft-averaged Ridge over compressed level innovations;
 - expands through the learned shape and pushes a horizon forecast.
 
-`versatile_rf` and `versatile_gb`
+`versatile_gb`
 
-- experimental model tokens that declare semantic feature ports and fit on the
+- experimental model token that declares semantic feature ports and fits on the
   auto-built bundle;
 - useful for testing whether new feature tokens combine cleanly.
 

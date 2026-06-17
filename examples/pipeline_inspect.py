@@ -31,7 +31,7 @@ from graph_Time_series.grammar import Grammar
 from graph_Time_series.token_blocks import (
     FlairPreprocessToken, FlairRidgeLevelToken,
     FlairSamplePathsToken, FourierFeaturesToken, GBLevelForecastToken,
-    KernelRBFToken, LevelBoxCoxCenterToken,
+    KernelRBFToken, LevelBoxCoxCenterToken, LevelShapeRidgeToken,
     LightGBMTabularToken, MeanAbsScalingToken, PeriodFoldToken,
     PeriodPhaseOneHotToken, RandomForestTabularToken,
     SecondaryLevelSeasonalityToken, ShapeLevelToken,
@@ -85,6 +85,7 @@ def make_token_factory(seasonal_period=48):
         "ShapeLevel": lambda: ShapeLevelToken(shape_k=2),
         "SecondaryLevelSeasonality": lambda: SecondaryLevelSeasonalityToken(),
         "LevelBoxCoxCenter": lambda: LevelBoxCoxCenterToken(),
+        "level_shape_ridge": lambda: LevelShapeRidgeToken(show_progress=True, progress_min_samples=16),
         "FlairRidgeLevel": lambda: FlairRidgeLevelToken(show_progress=True, progress_min_samples=16),
         "FlairSamplePaths": lambda: FlairSamplePathsToken(n_paths=50, show_progress=True, progress_min_samples=8),
         "PeriodDetect": lambda: PeriodDetectToken(freq="H"),

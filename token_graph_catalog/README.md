@@ -31,11 +31,12 @@ Registry helpers:
 - `register_flair_tokens`
 - `register_versatile_tokens`
 - `register_flair_gb_swap`
+- `register_seasonal_tokens`
 
-With all four enabled, the current graph is:
+With all five enabled, the current graph is:
 
 ```text
-Grammar(20 tokens, 58 edges)
+Grammar(20 tokens, 57 edges)
 ```
 
 `outputs/token_graph.md` has been refreshed to match that live grammar.
