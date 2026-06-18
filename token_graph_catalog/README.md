@@ -13,6 +13,7 @@ models consuming `state.feature_bundle()` when no legacy `model_input` exists.
 token_graph_catalog/
 |-- README.md
 |-- token_catalog.json
+|-- refresh_from_registry.py
 |-- render_token_graph.py
 `-- outputs/
     |-- token_graph.html
@@ -36,25 +37,29 @@ Registry helpers:
 With all five enabled, the current graph is:
 
 ```text
-Grammar(20 tokens, 57 edges)
+Grammar(23 tokens, 112 edges)
 ```
 
-`outputs/token_graph.md` has been refreshed to match that live grammar.
+`token_catalog.json` and `outputs/` have been refreshed from that live grammar.
 
 ## Catalog Note
 
-`token_catalog.json` is a manual catalog used by `render_token_graph.py`. It may
-lag behind the live grammar after architecture changes. Before regenerating the
-HTML/CSV outputs, update `token_catalog.json` so it matches the current
-binder-free registry.
+`token_catalog.json` is now refreshed from the live registry and then rendered
+by `render_token_graph.py`. If a future token has notebook-only or planned
+status, add that entry deliberately after regenerating the package graph.
 
 ## Update Workflow
 
 When a token is added or its valid parents/next tokens change:
 
 1. Inspect the live registry in `token_blocks/__init__.py`.
-2. Update `token_catalog.json`.
-3. Run:
+2. Refresh `token_catalog.json` from the live registry:
+
+   ```bash
+   python refresh_from_registry.py
+   ```
+
+3. Render the readable outputs:
 
    ```bash
    python render_token_graph.py

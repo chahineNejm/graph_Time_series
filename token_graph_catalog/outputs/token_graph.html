@@ -1,144 +1,408 @@
-<!doctype html><meta charset="utf-8"><title>Token Graph</title><style>body{font-family:Arial,sans-serif;margin:24px;line-height:1.4}pre{white-space:pre-wrap;background:#f8fafc;padding:16px;border:1px solid #cbd5e1;border-radius:8px}</style><h1>Token Graph</h1><p>Generated from the live package registries. Open <code>token_graph.md</code> for Mermaid rendering in VS Code.</p><pre># Token Graph
-
-Project: `graph_Time_series`
-
-Generated from the live package registries, not the manual catalog JSON.
-
-Registry stack:
-
-```python
-register_seasonal_tokens(
-    register_flair_gb_swap(
-        register_versatile_tokens(
-            register_flair_tokens(
-                register_default_tokens(Grammar())
-            )
-        )
-    )
-)
-```
-
-Current live grammar:
-
-```text
-Grammar(20 tokens, 57 edges)
-```
-
-## Graph
-
-```mermaid
-flowchart LR
-  n_START[&quot;START&lt;br/&gt;START&quot;]:::START
-  n_FlairPreprocess[&quot;FlairPreprocess&lt;br/&gt;cleaning&quot;]:::cleaning
-  n_STOP[&quot;STOP&lt;br/&gt;control&quot;]:::control
-  n_FlairSamplePaths[&quot;FlairSamplePaths&lt;br/&gt;feature&quot;]:::feature
-  n_FourierFeatures[&quot;FourierFeatures&lt;br/&gt;feature&quot;]:::feature
-  n_LevelBoxCoxCenter[&quot;LevelBoxCoxCenter&lt;br/&gt;feature&quot;]:::feature
-  n_PeriodDetect[&quot;PeriodDetect&lt;br/&gt;feature&quot;]:::feature
-  n_PeriodFold[&quot;PeriodFold&lt;br/&gt;feature&quot;]:::feature
-  n_PeriodPhaseOneHot[&quot;PeriodPhaseOneHot&lt;br/&gt;feature&quot;]:::feature
-  n_SeasonalFeatures[&quot;SeasonalFeatures&lt;br/&gt;feature&quot;]:::feature
-  n_SecondaryLevelSeasonality[&quot;SecondaryLevelSeasonality&lt;br/&gt;feature&quot;]:::feature
-  n_ShapeLevel[&quot;ShapeLevel&lt;br/&gt;feature&quot;]:::feature
-  n_FlairRidgeLevel[&quot;FlairRidgeLevel&lt;br/&gt;model&quot;]:::model
-  n_gb_level_forecast[&quot;gb_level_forecast&lt;br/&gt;model&quot;]:::model
-  n_kernel_rbf[&quot;kernel_rbf&lt;br/&gt;model&quot;]:::model
-  n_level_shape_ridge[&quot;level_shape_ridge&lt;br/&gt;model&quot;]:::model
-  n_lightgbm_tabular[&quot;lightgbm_tabular&lt;br/&gt;model&quot;]:::model
-  n_rf_tabular[&quot;rf_tabular&lt;br/&gt;model&quot;]:::model
-  n_step_regression[&quot;step_regression&lt;br/&gt;model&quot;]:::model
-  n_versatile_gb[&quot;versatile_gb&lt;br/&gt;model&quot;]:::model
-  n_MeanAbsScaling[&quot;MeanAbsScaling&lt;br/&gt;transform&quot;]:::transform
-  n_ZNormalization[&quot;ZNormalization&lt;br/&gt;transform&quot;]:::transform
-  n_FlairPreprocess --&gt; n_PeriodDetect
-  n_FlairRidgeLevel --&gt; n_FlairSamplePaths
-  n_FlairRidgeLevel --&gt; n_STOP
-  n_FlairSamplePaths --&gt; n_STOP
-  n_FourierFeatures --&gt; n_FourierFeatures
-  n_FourierFeatures --&gt; n_kernel_rbf
-  n_FourierFeatures --&gt; n_lightgbm_tabular
-  n_FourierFeatures --&gt; n_rf_tabular
-  n_FourierFeatures --&gt; n_step_regression
-  n_FourierFeatures --&gt; n_versatile_gb
-  n_LevelBoxCoxCenter --&gt; n_FlairRidgeLevel
-  n_MeanAbsScaling --&gt; n_FourierFeatures
-  n_MeanAbsScaling --&gt; n_PeriodDetect
-  n_MeanAbsScaling --&gt; n_kernel_rbf
-  n_MeanAbsScaling --&gt; n_lightgbm_tabular
-  n_MeanAbsScaling --&gt; n_rf_tabular
-  n_MeanAbsScaling --&gt; n_step_regression
-  n_MeanAbsScaling --&gt; n_versatile_gb
-  n_PeriodDetect --&gt; n_PeriodFold
-  n_PeriodDetect --&gt; n_PeriodPhaseOneHot
-  n_PeriodDetect --&gt; n_SeasonalFeatures
-  n_PeriodDetect --&gt; n_step_regression
-  n_PeriodFold --&gt; n_ShapeLevel
-  n_PeriodPhaseOneHot --&gt; n_PeriodFold
-  n_START --&gt; n_FlairPreprocess
-  n_START --&gt; n_FourierFeatures
-  n_START --&gt; n_MeanAbsScaling
-  n_START --&gt; n_PeriodDetect
-  n_START --&gt; n_ZNormalization
-  n_START --&gt; n_versatile_gb
-  n_SeasonalFeatures --&gt; n_kernel_rbf
-  n_SeasonalFeatures --&gt; n_lightgbm_tabular
-  n_SeasonalFeatures --&gt; n_rf_tabular
-  n_SeasonalFeatures --&gt; n_step_regression
-  n_SeasonalFeatures --&gt; n_versatile_gb
-  n_SecondaryLevelSeasonality --&gt; n_LevelBoxCoxCenter
-  n_SecondaryLevelSeasonality --&gt; n_level_shape_ridge
-  n_ShapeLevel --&gt; n_SecondaryLevelSeasonality
-  n_ShapeLevel --&gt; n_gb_level_forecast
-  n_ShapeLevel --&gt; n_level_shape_ridge
-  n_ZNormalization --&gt; n_FourierFeatures
-  n_ZNormalization --&gt; n_PeriodDetect
-  n_ZNormalization --&gt; n_kernel_rbf
-  n_ZNormalization --&gt; n_lightgbm_tabular
-  n_ZNormalization --&gt; n_rf_tabular
-  n_ZNormalization --&gt; n_step_regression
-  n_ZNormalization --&gt; n_versatile_gb
-  n_gb_level_forecast --&gt; n_STOP
-  n_kernel_rbf --&gt; n_STOP
-  n_kernel_rbf --&gt; n_kernel_rbf
-  n_level_shape_ridge --&gt; n_STOP
-  n_level_shape_ridge --&gt; n_kernel_rbf
-  n_lightgbm_tabular --&gt; n_STOP
-  n_rf_tabular --&gt; n_STOP
-  n_step_regression --&gt; n_STOP
-  n_versatile_gb --&gt; n_STOP
-  n_versatile_gb --&gt; n_versatile_gb
-  classDef control fill:#ffe2e2,stroke:#b91c1c,stroke-width:1px,color:#111827
-  classDef START fill:#dcfce7,stroke:#166534,stroke-width:1px,color:#111827
-  classDef cleaning fill:#dff0ff,stroke:#2563eb,stroke-width:1px,color:#111827
-  classDef transform fill:#fff1c2,stroke:#b45309,stroke-width:1px,color:#111827
-  classDef feature fill:#d8f7ef,stroke:#047857,stroke-width:1px,color:#111827
-  classDef model fill:#ffe6cf,stroke:#ea580c,stroke-width:1px,color:#111827
-```
-
-## Token Matrix
-
-| Token | Class | Parents | Next |
-| --- | --- | --- | --- |
-| `START` | START |  | `FlairPreprocess`, `FourierFeatures`, `MeanAbsScaling`, `PeriodDetect`, `ZNormalization`, `versatile_gb` |
-| `FlairPreprocess` | cleaning | `START` | `PeriodDetect` |
-| `STOP` | control | `FlairRidgeLevel`, `FlairSamplePaths`, `gb_level_forecast`, `kernel_rbf`, `level_shape_ridge`, `lightgbm_tabular`, `rf_tabular`, `step_regression`, `versatile_gb` |  |
-| `FlairSamplePaths` | feature | `FlairRidgeLevel` | `STOP` |
-| `FourierFeatures` | feature | `FourierFeatures`, `MeanAbsScaling`, `START`, `ZNormalization` | `FourierFeatures`, `kernel_rbf`, `lightgbm_tabular`, `rf_tabular`, `step_regression`, `versatile_gb` |
-| `LevelBoxCoxCenter` | feature | `SecondaryLevelSeasonality` | `FlairRidgeLevel` |
-| `PeriodDetect` | feature | `FlairPreprocess`, `MeanAbsScaling`, `START`, `ZNormalization` | `PeriodFold`, `PeriodPhaseOneHot`, `SeasonalFeatures`, `step_regression` |
-| `PeriodFold` | feature | `PeriodDetect`, `PeriodPhaseOneHot` | `ShapeLevel` |
-| `PeriodPhaseOneHot` | feature | `PeriodDetect` | `PeriodFold` |
-| `SeasonalFeatures` | feature | `PeriodDetect` | `kernel_rbf`, `lightgbm_tabular`, `rf_tabular`, `step_regression`, `versatile_gb` |
-| `SecondaryLevelSeasonality` | feature | `ShapeLevel` | `LevelBoxCoxCenter`, `level_shape_ridge` |
-| `ShapeLevel` | feature | `PeriodFold` | `SecondaryLevelSeasonality`, `gb_level_forecast`, `level_shape_ridge` |
-| `FlairRidgeLevel` | model | `LevelBoxCoxCenter` | `FlairSamplePaths`, `STOP` |
-| `gb_level_forecast` | model | `ShapeLevel` | `STOP` |
-| `kernel_rbf` | model | `FourierFeatures`, `MeanAbsScaling`, `SeasonalFeatures`, `ZNormalization`, `kernel_rbf`, `level_shape_ridge` | `STOP`, `kernel_rbf` |
-| `level_shape_ridge` | model | `SecondaryLevelSeasonality`, `ShapeLevel` | `STOP`, `kernel_rbf` |
-| `lightgbm_tabular` | model | `FourierFeatures`, `MeanAbsScaling`, `SeasonalFeatures`, `ZNormalization` | `STOP` |
-| `rf_tabular` | model | `FourierFeatures`, `MeanAbsScaling`, `SeasonalFeatures`, `ZNormalization` | `STOP` |
-| `step_regression` | model | `FourierFeatures`, `MeanAbsScaling`, `PeriodDetect`, `SeasonalFeatures`, `ZNormalization` | `STOP` |
-| `versatile_gb` | model | `FourierFeatures`, `MeanAbsScaling`, `START`, `SeasonalFeatures`, `ZNormalization`, `versatile_gb` | `STOP`, `versatile_gb` |
-| `MeanAbsScaling` | transform | `START` | `FourierFeatures`, `PeriodDetect`, `kernel_rbf`, `lightgbm_tabular`, `rf_tabular`, `step_regression`, `versatile_gb` |
-| `ZNormalization` | transform | `START` | `FourierFeatures`, `PeriodDetect`, `kernel_rbf`, `lightgbm_tabular`, `rf_tabular`, `step_regression`, `versatile_gb` |
-</pre>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Token Graph Catalog</title>
+  <style>
+body {
+  margin: 0;
+  color: #111827;
+  background: #f8fafc;
+  font-family: Arial, sans-serif;
+}
+main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px;
+}
+section, header {
+  margin-bottom: 28px;
+}
+h1, h2 {
+  margin: 0 0 10px;
+}
+p {
+  margin: 6px 0;
+  color: #475569;
+}
+code {
+  background: #e5e7eb;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+.graph {
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  overflow: visible;
+}
+.edge {
+  fill: none;
+  stroke: #64748b;
+  stroke-width: 1.5;
+  marker-end: url(#arrow);
+  opacity: 0.8;
+}
+.node-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+.node-meta {
+  font-size: 11px;
+  fill: #475569;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid #cbd5e1;
+}
+th, td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+  font-size: 13px;
+}
+th {
+  background: #f1f5f9;
+}
+</style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Token Graph Catalog</h1>
+      <p>Project: <code>graph_Time_series</code></p>
+      <p>Edit <code>token_catalog.json</code>, then rerun <code>python render_token_graph.py</code>.</p>
+    </header>
+    <section>
+      <h2>Core Graph</h2>
+      <p>Compact view. Generic binders, broad adapters, and aliases are hidden.</p>
+      <svg class="graph" viewBox="0 0 2040 875" role="img" aria-label="Core Token Graph">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+</marker>
+</defs>
+<path class="edge" d="M 470 65 C 515 65, 735 335, 780 335" />
+<path class="edge" d="M 470 65 C 515 65, 735 425, 780 425" />
+<path class="edge" d="M 470 65 C 515 65, 735 515, 780 515" />
+<path class="edge" d="M 1470 65 C 1515 65, 735 65, 780 65" />
+<path class="edge" d="M 1470 65 C 1515 65, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 65 C 1515 65, 1235 515, 1280 515" />
+<path class="edge" d="M 970 65 C 1015 65, 1735 65, 1780 65" />
+<path class="edge" d="M 470 155 C 515 155, 735 155, 780 155" />
+<path class="edge" d="M 470 155 C 515 155, 485 65, 530 65" />
+<path class="edge" d="M 470 155 C 515 155, 735 335, 780 335" />
+<path class="edge" d="M 470 155 C 515 155, 735 425, 780 425" />
+<path class="edge" d="M 470 155 C 515 155, 735 515, 780 515" />
+<path class="edge" d="M 470 155 C 515 155, 485 155, 530 155" />
+<path class="edge" d="M 470 155 C 515 155, 1235 245, 1280 245" />
+<path class="edge" d="M 470 155 C 515 155, 1235 425, 1280 425" />
+<path class="edge" d="M 470 155 C 515 155, 1235 515, 1280 515" />
+<path class="edge" d="M 470 155 C 515 155, 1235 605, 1280 605" />
+<path class="edge" d="M 470 155 C 515 155, 1235 785, 1280 785" />
+<path class="edge" d="M 970 155 C 1015 155, 735 155, 780 155" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 245, 1280 245" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 425, 1280 425" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 515, 1280 515" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 605, 1280 605" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 695, 1280 695" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 785, 1280 785" />
+<path class="edge" d="M 970 245 C 1015 245, 1235 65, 1280 65" />
+<path class="edge" d="M 470 245 C 515 245, 735 155, 780 155" />
+<path class="edge" d="M 470 245 C 515 245, 485 65, 530 65" />
+<path class="edge" d="M 470 245 C 515 245, 735 335, 780 335" />
+<path class="edge" d="M 470 245 C 515 245, 735 425, 780 425" />
+<path class="edge" d="M 470 245 C 515 245, 735 515, 780 515" />
+<path class="edge" d="M 470 245 C 515 245, 485 155, 530 155" />
+<path class="edge" d="M 470 245 C 515 245, 1235 245, 1280 245" />
+<path class="edge" d="M 470 245 C 515 245, 1235 425, 1280 425" />
+<path class="edge" d="M 470 245 C 515 245, 1235 515, 1280 515" />
+<path class="edge" d="M 470 245 C 515 245, 1235 605, 1280 605" />
+<path class="edge" d="M 470 245 C 515 245, 1235 785, 1280 785" />
+<path class="edge" d="M 720 65 C 765 65, 735 155, 780 155" />
+<path class="edge" d="M 720 65 C 765 65, 735 335, 780 335" />
+<path class="edge" d="M 720 65 C 765 65, 735 425, 780 425" />
+<path class="edge" d="M 720 65 C 765 65, 735 515, 780 515" />
+<path class="edge" d="M 720 65 C 765 65, 1235 245, 1280 245" />
+<path class="edge" d="M 720 65 C 765 65, 1235 425, 1280 425" />
+<path class="edge" d="M 720 65 C 765 65, 1235 515, 1280 515" />
+<path class="edge" d="M 720 65 C 765 65, 1235 605, 1280 605" />
+<path class="edge" d="M 720 65 C 765 65, 1235 695, 1280 695" />
+<path class="edge" d="M 720 65 C 765 65, 1235 785, 1280 785" />
+<path class="edge" d="M 970 335 C 1015 335, 735 605, 780 605" />
+<path class="edge" d="M 970 335 C 1015 335, 735 695, 780 695" />
+<path class="edge" d="M 970 335 C 1015 335, 735 785, 780 785" />
+<path class="edge" d="M 970 335 C 1015 335, 1235 695, 1280 695" />
+<path class="edge" d="M 970 425 C 1015 425, 735 605, 780 605" />
+<path class="edge" d="M 970 425 C 1015 425, 735 695, 780 695" />
+<path class="edge" d="M 970 425 C 1015 425, 735 785, 780 785" />
+<path class="edge" d="M 970 425 C 1015 425, 1235 695, 1280 695" />
+<path class="edge" d="M 970 515 C 1015 515, 735 605, 780 605" />
+<path class="edge" d="M 970 515 C 1015 515, 735 695, 780 695" />
+<path class="edge" d="M 970 515 C 1015 515, 735 785, 780 785" />
+<path class="edge" d="M 970 515 C 1015 515, 1235 695, 1280 695" />
+<path class="edge" d="M 970 605 C 1015 605, 735 785, 780 785" />
+<path class="edge" d="M 220 65 C 265 65, 235 65, 280 65" />
+<path class="edge" d="M 220 65 C 265 65, 235 155, 280 155" />
+<path class="edge" d="M 220 65 C 265 65, 735 155, 780 155" />
+<path class="edge" d="M 220 65 C 265 65, 235 245, 280 245" />
+<path class="edge" d="M 220 65 C 265 65, 485 65, 530 65" />
+<path class="edge" d="M 220 65 C 265 65, 735 335, 780 335" />
+<path class="edge" d="M 220 65 C 265 65, 735 425, 780 425" />
+<path class="edge" d="M 220 65 C 265 65, 735 515, 780 515" />
+<path class="edge" d="M 220 65 C 265 65, 485 155, 530 155" />
+<path class="edge" d="M 220 65 C 265 65, 1235 785, 1280 785" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 245, 1280 245" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 425, 1280 425" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 515, 1280 515" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 605, 1280 605" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 695, 1280 695" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 785, 1280 785" />
+<path class="edge" d="M 970 785 C 1015 785, 735 245, 780 245" />
+<path class="edge" d="M 970 785 C 1015 785, 735 785, 780 785" />
+<path class="edge" d="M 970 785 C 1015 785, 1235 155, 1280 155" />
+<path class="edge" d="M 970 785 C 1015 785, 1235 335, 1280 335" />
+<path class="edge" d="M 720 155 C 765 155, 735 155, 780 155" />
+<path class="edge" d="M 720 155 C 765 155, 735 335, 780 335" />
+<path class="edge" d="M 720 155 C 765 155, 735 425, 780 425" />
+<path class="edge" d="M 720 155 C 765 155, 735 515, 780 515" />
+<path class="edge" d="M 720 155 C 765 155, 1235 245, 1280 245" />
+<path class="edge" d="M 720 155 C 765 155, 1235 425, 1280 425" />
+<path class="edge" d="M 720 155 C 765 155, 1235 515, 1280 515" />
+<path class="edge" d="M 720 155 C 765 155, 1235 605, 1280 605" />
+<path class="edge" d="M 720 155 C 765 155, 1235 695, 1280 695" />
+<path class="edge" d="M 720 155 C 765 155, 1235 785, 1280 785" />
+<path class="edge" d="M 1470 155 C 1515 155, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 155 C 1515 155, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 245 C 1515 245, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 245 C 1515 245, 1235 245, 1280 245" />
+<path class="edge" d="M 1470 245 C 1515 245, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 335 C 1515 335, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 335 C 1515 335, 1235 245, 1280 245" />
+<path class="edge" d="M 1470 335 C 1515 335, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 425 C 1515 425, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 425 C 1515 425, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 515 C 1515 515, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 515 C 1515 515, 1235 245, 1280 245" />
+<path class="edge" d="M 1470 515 C 1515 515, 1235 425, 1280 425" />
+<path class="edge" d="M 1470 515 C 1515 515, 1235 605, 1280 605" />
+<path class="edge" d="M 1470 515 C 1515 515, 1235 785, 1280 785" />
+<path class="edge" d="M 1470 605 C 1515 605, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 605 C 1515 605, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 695 C 1515 695, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 695 C 1515 695, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 785 C 1515 785, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 785 C 1515 785, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 785 C 1515 785, 1235 785, 1280 785" />
+<g class="node" transform="translate(30,35)"><title>Synthetic start node for graph visualization.</title><rect width="190" height="60" rx="8" fill="#ffe2e2" stroke="#b91c1c"/><text x="12" y="24" class="node-title">START</text><text x="12" y="45" class="node-meta">synthetic / control</text></g>
+<g class="node" transform="translate(280,35)"><title>Compatibility alias for LinearFill; no positivity shift.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">FlairPreprocess</text><text x="12" y="45" class="node-meta">package / cleaning</text></g>
+<g class="node" transform="translate(280,125)"><title>Fill NaN/inf history values by forward fill.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">ForwardFill</text><text x="12" y="45" class="node-meta">package / cleaning</text></g>
+<g class="node" transform="translate(280,215)"><title>Fill NaN/inf history values by linear interpolation.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">LinearFill</text><text x="12" y="45" class="node-meta">package / cleaning</text></g>
+<g class="node" transform="translate(530,35)"><title>Scale by mean absolute value of history; no centering.</title><rect width="190" height="60" rx="8" fill="#fff1c2" stroke="#b45309"/><text x="12" y="24" class="node-title">MeanAbsScaling</text><text x="12" y="45" class="node-meta">package / transform</text></g>
+<g class="node" transform="translate(530,125)"><title>Instance Z-Normalization: centers and scales each sample by history mean/std.</title><rect width="190" height="60" rx="8" fill="#fff1c2" stroke="#b45309"/><text x="12" y="24" class="node-title">ZNormalization</text><text x="12" y="45" class="node-meta">package / transform</text></g>
+<g class="node" transform="translate(780,35)"><title>Bootstrap level residuals and coherent phase noise into forecast samples.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">FlairSamplePaths</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,125)"><title>Fixed low-frequency FFT features for tabular models.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">FourierFeatures</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,215)"><title>Box-Cox transform FLAIR levels and center by the last level.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">LevelBoxCoxCenter</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,305)"><title>FLAIR BIC: primary (rank-1) + coarser secondaries -&gt; param:periods.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodDetect</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,395)"><title>FLAIR BIC primary + coarser secondaries (explicit name) -&gt; param:periods.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodDetectBIC</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,485)"><title>Periodogram: fundamental primary + coarser secondaries -&gt; param:periods.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodDetectSpectral</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,575)"><title>One-hot encode positions within the selected period.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodPhaseOneHot</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,665)"><title>Per-detected-period sin/cos channels (history + known future, no_bundle) plus a bundle-safe per-series projection (Fourier amplitudes at h/p + seasonal_strength).</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">SeasonalFeatures</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,755)"><title>FLAIR fold: call 0 = full shape over the primary period + level; each later call = one more level modulation (Shape2, Shape3, ...) at a coarser period. Replaces PeriodFold/ShapeLevel/SecondaryLevelSeasonality.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">SeasonalFold</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(1280,35)"><title>FLAIR-style soft-averaged Ridge over compressed level innovations.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">FlairRidgeLevel</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,125)"><title>Gradient-boosted period-level forecaster + FLAIR shape expansion.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">gb_level_forecast</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,215)"><title>RBF KernelRidge with median-heuristic lengthscale and leave-one-out predictions.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">kernel_rbf</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,305)"><title>Compact Box-Cox soft-averaged ridge over period levels + shape expansion.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">level_shape_ridge</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,395)"><title>LightGBM LGBMRegressor on active tabular model_input.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">lightgbm_tabular</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,485)"><title>Analog forecast: copy the continuation of the past window with the highest |correlation| to the recent window, affine-rescaled.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">parrot</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,575)"><title>RandomForestRegressor on active tabular model_input.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">rf_tabular</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,665)"><title>Per-date regression: value &lt;- known-future covariates + index.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">step_regression</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,755)"><title>Gradient boosting on the auto-built feature bundle.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">versatile_gb</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1780,35)"><title>Terminal node allowed after a model has produced a prediction.</title><rect width="190" height="60" rx="8" fill="#f0fdf4" stroke="#166534"/><text x="12" y="24" class="node-title">STOP</text><text x="12" y="45" class="node-meta">synthetic / terminal</text></g>
+</svg>
+    </section>
+    <section>
+      <h2>Full Graph</h2>
+      <p>Complete view with all cataloged tokens.</p>
+      <svg class="graph" viewBox="0 0 2040 875" role="img" aria-label="Full Token Graph">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+</marker>
+</defs>
+<path class="edge" d="M 470 65 C 515 65, 735 335, 780 335" />
+<path class="edge" d="M 470 65 C 515 65, 735 425, 780 425" />
+<path class="edge" d="M 470 65 C 515 65, 735 515, 780 515" />
+<path class="edge" d="M 1470 65 C 1515 65, 735 65, 780 65" />
+<path class="edge" d="M 1470 65 C 1515 65, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 65 C 1515 65, 1235 515, 1280 515" />
+<path class="edge" d="M 970 65 C 1015 65, 1735 65, 1780 65" />
+<path class="edge" d="M 470 155 C 515 155, 735 155, 780 155" />
+<path class="edge" d="M 470 155 C 515 155, 485 65, 530 65" />
+<path class="edge" d="M 470 155 C 515 155, 735 335, 780 335" />
+<path class="edge" d="M 470 155 C 515 155, 735 425, 780 425" />
+<path class="edge" d="M 470 155 C 515 155, 735 515, 780 515" />
+<path class="edge" d="M 470 155 C 515 155, 485 155, 530 155" />
+<path class="edge" d="M 470 155 C 515 155, 1235 245, 1280 245" />
+<path class="edge" d="M 470 155 C 515 155, 1235 425, 1280 425" />
+<path class="edge" d="M 470 155 C 515 155, 1235 515, 1280 515" />
+<path class="edge" d="M 470 155 C 515 155, 1235 605, 1280 605" />
+<path class="edge" d="M 470 155 C 515 155, 1235 785, 1280 785" />
+<path class="edge" d="M 970 155 C 1015 155, 735 155, 780 155" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 245, 1280 245" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 425, 1280 425" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 515, 1280 515" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 605, 1280 605" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 695, 1280 695" />
+<path class="edge" d="M 970 155 C 1015 155, 1235 785, 1280 785" />
+<path class="edge" d="M 970 245 C 1015 245, 1235 65, 1280 65" />
+<path class="edge" d="M 470 245 C 515 245, 735 155, 780 155" />
+<path class="edge" d="M 470 245 C 515 245, 485 65, 530 65" />
+<path class="edge" d="M 470 245 C 515 245, 735 335, 780 335" />
+<path class="edge" d="M 470 245 C 515 245, 735 425, 780 425" />
+<path class="edge" d="M 470 245 C 515 245, 735 515, 780 515" />
+<path class="edge" d="M 470 245 C 515 245, 485 155, 530 155" />
+<path class="edge" d="M 470 245 C 515 245, 1235 245, 1280 245" />
+<path class="edge" d="M 470 245 C 515 245, 1235 425, 1280 425" />
+<path class="edge" d="M 470 245 C 515 245, 1235 515, 1280 515" />
+<path class="edge" d="M 470 245 C 515 245, 1235 605, 1280 605" />
+<path class="edge" d="M 470 245 C 515 245, 1235 785, 1280 785" />
+<path class="edge" d="M 720 65 C 765 65, 735 155, 780 155" />
+<path class="edge" d="M 720 65 C 765 65, 735 335, 780 335" />
+<path class="edge" d="M 720 65 C 765 65, 735 425, 780 425" />
+<path class="edge" d="M 720 65 C 765 65, 735 515, 780 515" />
+<path class="edge" d="M 720 65 C 765 65, 1235 245, 1280 245" />
+<path class="edge" d="M 720 65 C 765 65, 1235 425, 1280 425" />
+<path class="edge" d="M 720 65 C 765 65, 1235 515, 1280 515" />
+<path class="edge" d="M 720 65 C 765 65, 1235 605, 1280 605" />
+<path class="edge" d="M 720 65 C 765 65, 1235 695, 1280 695" />
+<path class="edge" d="M 720 65 C 765 65, 1235 785, 1280 785" />
+<path class="edge" d="M 970 335 C 1015 335, 735 605, 780 605" />
+<path class="edge" d="M 970 335 C 1015 335, 735 695, 780 695" />
+<path class="edge" d="M 970 335 C 1015 335, 735 785, 780 785" />
+<path class="edge" d="M 970 335 C 1015 335, 1235 695, 1280 695" />
+<path class="edge" d="M 970 425 C 1015 425, 735 605, 780 605" />
+<path class="edge" d="M 970 425 C 1015 425, 735 695, 780 695" />
+<path class="edge" d="M 970 425 C 1015 425, 735 785, 780 785" />
+<path class="edge" d="M 970 425 C 1015 425, 1235 695, 1280 695" />
+<path class="edge" d="M 970 515 C 1015 515, 735 605, 780 605" />
+<path class="edge" d="M 970 515 C 1015 515, 735 695, 780 695" />
+<path class="edge" d="M 970 515 C 1015 515, 735 785, 780 785" />
+<path class="edge" d="M 970 515 C 1015 515, 1235 695, 1280 695" />
+<path class="edge" d="M 970 605 C 1015 605, 735 785, 780 785" />
+<path class="edge" d="M 220 65 C 265 65, 235 65, 280 65" />
+<path class="edge" d="M 220 65 C 265 65, 235 155, 280 155" />
+<path class="edge" d="M 220 65 C 265 65, 735 155, 780 155" />
+<path class="edge" d="M 220 65 C 265 65, 235 245, 280 245" />
+<path class="edge" d="M 220 65 C 265 65, 485 65, 530 65" />
+<path class="edge" d="M 220 65 C 265 65, 735 335, 780 335" />
+<path class="edge" d="M 220 65 C 265 65, 735 425, 780 425" />
+<path class="edge" d="M 220 65 C 265 65, 735 515, 780 515" />
+<path class="edge" d="M 220 65 C 265 65, 485 155, 530 155" />
+<path class="edge" d="M 220 65 C 265 65, 1235 785, 1280 785" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 245, 1280 245" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 425, 1280 425" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 515, 1280 515" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 605, 1280 605" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 695, 1280 695" />
+<path class="edge" d="M 970 695 C 1015 695, 1235 785, 1280 785" />
+<path class="edge" d="M 970 785 C 1015 785, 735 245, 780 245" />
+<path class="edge" d="M 970 785 C 1015 785, 735 785, 780 785" />
+<path class="edge" d="M 970 785 C 1015 785, 1235 155, 1280 155" />
+<path class="edge" d="M 970 785 C 1015 785, 1235 335, 1280 335" />
+<path class="edge" d="M 720 155 C 765 155, 735 155, 780 155" />
+<path class="edge" d="M 720 155 C 765 155, 735 335, 780 335" />
+<path class="edge" d="M 720 155 C 765 155, 735 425, 780 425" />
+<path class="edge" d="M 720 155 C 765 155, 735 515, 780 515" />
+<path class="edge" d="M 720 155 C 765 155, 1235 245, 1280 245" />
+<path class="edge" d="M 720 155 C 765 155, 1235 425, 1280 425" />
+<path class="edge" d="M 720 155 C 765 155, 1235 515, 1280 515" />
+<path class="edge" d="M 720 155 C 765 155, 1235 605, 1280 605" />
+<path class="edge" d="M 720 155 C 765 155, 1235 695, 1280 695" />
+<path class="edge" d="M 720 155 C 765 155, 1235 785, 1280 785" />
+<path class="edge" d="M 1470 155 C 1515 155, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 155 C 1515 155, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 245 C 1515 245, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 245 C 1515 245, 1235 245, 1280 245" />
+<path class="edge" d="M 1470 245 C 1515 245, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 335 C 1515 335, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 335 C 1515 335, 1235 245, 1280 245" />
+<path class="edge" d="M 1470 335 C 1515 335, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 425 C 1515 425, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 425 C 1515 425, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 515 C 1515 515, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 515 C 1515 515, 1235 245, 1280 245" />
+<path class="edge" d="M 1470 515 C 1515 515, 1235 425, 1280 425" />
+<path class="edge" d="M 1470 515 C 1515 515, 1235 605, 1280 605" />
+<path class="edge" d="M 1470 515 C 1515 515, 1235 785, 1280 785" />
+<path class="edge" d="M 1470 605 C 1515 605, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 605 C 1515 605, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 695 C 1515 695, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 695 C 1515 695, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 785 C 1515 785, 1735 65, 1780 65" />
+<path class="edge" d="M 1470 785 C 1515 785, 1235 515, 1280 515" />
+<path class="edge" d="M 1470 785 C 1515 785, 1235 785, 1280 785" />
+<g class="node" transform="translate(30,35)"><title>Synthetic start node for graph visualization.</title><rect width="190" height="60" rx="8" fill="#ffe2e2" stroke="#b91c1c"/><text x="12" y="24" class="node-title">START</text><text x="12" y="45" class="node-meta">synthetic / control</text></g>
+<g class="node" transform="translate(280,35)"><title>Compatibility alias for LinearFill; no positivity shift.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">FlairPreprocess</text><text x="12" y="45" class="node-meta">package / cleaning</text></g>
+<g class="node" transform="translate(280,125)"><title>Fill NaN/inf history values by forward fill.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">ForwardFill</text><text x="12" y="45" class="node-meta">package / cleaning</text></g>
+<g class="node" transform="translate(280,215)"><title>Fill NaN/inf history values by linear interpolation.</title><rect width="190" height="60" rx="8" fill="#dff0ff" stroke="#2563eb"/><text x="12" y="24" class="node-title">LinearFill</text><text x="12" y="45" class="node-meta">package / cleaning</text></g>
+<g class="node" transform="translate(530,35)"><title>Scale by mean absolute value of history; no centering.</title><rect width="190" height="60" rx="8" fill="#fff1c2" stroke="#b45309"/><text x="12" y="24" class="node-title">MeanAbsScaling</text><text x="12" y="45" class="node-meta">package / transform</text></g>
+<g class="node" transform="translate(530,125)"><title>Instance Z-Normalization: centers and scales each sample by history mean/std.</title><rect width="190" height="60" rx="8" fill="#fff1c2" stroke="#b45309"/><text x="12" y="24" class="node-title">ZNormalization</text><text x="12" y="45" class="node-meta">package / transform</text></g>
+<g class="node" transform="translate(780,35)"><title>Bootstrap level residuals and coherent phase noise into forecast samples.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">FlairSamplePaths</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,125)"><title>Fixed low-frequency FFT features for tabular models.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">FourierFeatures</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,215)"><title>Box-Cox transform FLAIR levels and center by the last level.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">LevelBoxCoxCenter</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,305)"><title>FLAIR BIC: primary (rank-1) + coarser secondaries -&gt; param:periods.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodDetect</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,395)"><title>FLAIR BIC primary + coarser secondaries (explicit name) -&gt; param:periods.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodDetectBIC</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,485)"><title>Periodogram: fundamental primary + coarser secondaries -&gt; param:periods.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodDetectSpectral</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,575)"><title>One-hot encode positions within the selected period.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">PeriodPhaseOneHot</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,665)"><title>Per-detected-period sin/cos channels (history + known future, no_bundle) plus a bundle-safe per-series projection (Fourier amplitudes at h/p + seasonal_strength).</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">SeasonalFeatures</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(780,755)"><title>FLAIR fold: call 0 = full shape over the primary period + level; each later call = one more level modulation (Shape2, Shape3, ...) at a coarser period. Replaces PeriodFold/ShapeLevel/SecondaryLevelSeasonality.</title><rect width="190" height="60" rx="8" fill="#d8f7ef" stroke="#047857"/><text x="12" y="24" class="node-title">SeasonalFold</text><text x="12" y="45" class="node-meta">package / feature</text></g>
+<g class="node" transform="translate(1280,35)"><title>FLAIR-style soft-averaged Ridge over compressed level innovations.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">FlairRidgeLevel</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,125)"><title>Gradient-boosted period-level forecaster + FLAIR shape expansion.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">gb_level_forecast</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,215)"><title>RBF KernelRidge with median-heuristic lengthscale and leave-one-out predictions.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">kernel_rbf</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,305)"><title>Compact Box-Cox soft-averaged ridge over period levels + shape expansion.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">level_shape_ridge</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,395)"><title>LightGBM LGBMRegressor on active tabular model_input.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">lightgbm_tabular</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,485)"><title>Analog forecast: copy the continuation of the past window with the highest |correlation| to the recent window, affine-rescaled.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">parrot</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,575)"><title>RandomForestRegressor on active tabular model_input.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">rf_tabular</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,665)"><title>Per-date regression: value &lt;- known-future covariates + index.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">step_regression</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1280,755)"><title>Gradient boosting on the auto-built feature bundle.</title><rect width="190" height="60" rx="8" fill="#ffe6cf" stroke="#ea580c"/><text x="12" y="24" class="node-title">versatile_gb</text><text x="12" y="45" class="node-meta">package / model</text></g>
+<g class="node" transform="translate(1780,35)"><title>Terminal node allowed after a model has produced a prediction.</title><rect width="190" height="60" rx="8" fill="#f0fdf4" stroke="#166534"/><text x="12" y="24" class="node-title">STOP</text><text x="12" y="45" class="node-meta">synthetic / terminal</text></g>
+</svg>
+    </section>
+    <section>
+      <h2>Token Matrix</h2>
+      <table><thead><tr><th>Token</th><th>Status</th><th>Class</th><th>Core</th><th>Parents</th><th>Next</th><th>Description</th></tr></thead><tbody><tr><td><code>START</code></td><td>synthetic</td><td>control</td><td>yes</td><td></td><td>FlairPreprocess, ForwardFill, FourierFeatures, LinearFill, MeanAbsScaling, PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral, ZNormalization, versatile_gb</td><td>Synthetic start node for graph visualization.</td></tr>
+<tr><td><code>FlairPreprocess</code></td><td>package</td><td>cleaning</td><td>yes</td><td>START</td><td>PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral</td><td>Compatibility alias for LinearFill; no positivity shift.</td></tr>
+<tr><td><code>ForwardFill</code></td><td>package</td><td>cleaning</td><td>yes</td><td>START</td><td>FourierFeatures, MeanAbsScaling, PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral, ZNormalization, kernel_rbf, lightgbm_tabular, parrot, rf_tabular, versatile_gb</td><td>Fill NaN/inf history values by forward fill.</td></tr>
+<tr><td><code>LinearFill</code></td><td>package</td><td>cleaning</td><td>yes</td><td>START</td><td>FourierFeatures, MeanAbsScaling, PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral, ZNormalization, kernel_rbf, lightgbm_tabular, parrot, rf_tabular, versatile_gb</td><td>Fill NaN/inf history values by linear interpolation.</td></tr>
+<tr><td><code>MeanAbsScaling</code></td><td>package</td><td>transform</td><td>yes</td><td>ForwardFill, LinearFill, START</td><td>FourierFeatures, PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral, kernel_rbf, lightgbm_tabular, parrot, rf_tabular, step_regression, versatile_gb</td><td>Scale by mean absolute value of history; no centering.</td></tr>
+<tr><td><code>ZNormalization</code></td><td>package</td><td>transform</td><td>yes</td><td>ForwardFill, LinearFill, START</td><td>FourierFeatures, PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral, kernel_rbf, lightgbm_tabular, parrot, rf_tabular, step_regression, versatile_gb</td><td>Instance Z-Normalization: centers and scales each sample by history mean/std.</td></tr>
+<tr><td><code>FlairSamplePaths</code></td><td>package</td><td>feature</td><td>yes</td><td>FlairRidgeLevel</td><td>STOP</td><td>Bootstrap level residuals and coherent phase noise into forecast samples.</td></tr>
+<tr><td><code>FourierFeatures</code></td><td>package</td><td>feature</td><td>yes</td><td>ForwardFill, FourierFeatures, LinearFill, MeanAbsScaling, START, ZNormalization</td><td>FourierFeatures, kernel_rbf, lightgbm_tabular, parrot, rf_tabular, step_regression, versatile_gb</td><td>Fixed low-frequency FFT features for tabular models.</td></tr>
+<tr><td><code>LevelBoxCoxCenter</code></td><td>package</td><td>feature</td><td>yes</td><td>SeasonalFold</td><td>FlairRidgeLevel</td><td>Box-Cox transform FLAIR levels and center by the last level.</td></tr>
+<tr><td><code>PeriodDetect</code></td><td>package</td><td>feature</td><td>yes</td><td>FlairPreprocess, ForwardFill, LinearFill, MeanAbsScaling, START, ZNormalization</td><td>PeriodPhaseOneHot, SeasonalFeatures, SeasonalFold, step_regression</td><td>FLAIR BIC: primary (rank-1) + coarser secondaries -&gt; param:periods.</td></tr>
+<tr><td><code>PeriodDetectBIC</code></td><td>package</td><td>feature</td><td>yes</td><td>FlairPreprocess, ForwardFill, LinearFill, MeanAbsScaling, START, ZNormalization</td><td>PeriodPhaseOneHot, SeasonalFeatures, SeasonalFold, step_regression</td><td>FLAIR BIC primary + coarser secondaries (explicit name) -&gt; param:periods.</td></tr>
+<tr><td><code>PeriodDetectSpectral</code></td><td>package</td><td>feature</td><td>yes</td><td>FlairPreprocess, ForwardFill, LinearFill, MeanAbsScaling, START, ZNormalization</td><td>PeriodPhaseOneHot, SeasonalFeatures, SeasonalFold, step_regression</td><td>Periodogram: fundamental primary + coarser secondaries -&gt; param:periods.</td></tr>
+<tr><td><code>PeriodPhaseOneHot</code></td><td>package</td><td>feature</td><td>yes</td><td>PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral</td><td>SeasonalFold</td><td>One-hot encode positions within the selected period.</td></tr>
+<tr><td><code>SeasonalFeatures</code></td><td>package</td><td>feature</td><td>yes</td><td>PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral</td><td>kernel_rbf, lightgbm_tabular, parrot, rf_tabular, step_regression, versatile_gb</td><td>Per-detected-period sin/cos channels (history + known future, no_bundle) plus a bundle-safe per-series projection (Fourier amplitudes at h/p + seasonal_strength).</td></tr>
+<tr><td><code>SeasonalFold</code></td><td>package</td><td>feature</td><td>yes</td><td>PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral, PeriodPhaseOneHot, SeasonalFold</td><td>LevelBoxCoxCenter, SeasonalFold, gb_level_forecast, level_shape_ridge</td><td>FLAIR fold: call 0 = full shape over the primary period + level; each later call = one more level modulation (Shape2, Shape3, ...) at a coarser period. Replaces PeriodFold/ShapeLevel/SecondaryLevelSeasonality.</td></tr>
+<tr><td><code>FlairRidgeLevel</code></td><td>package</td><td>model</td><td>yes</td><td>LevelBoxCoxCenter</td><td>FlairSamplePaths, STOP, parrot</td><td>FLAIR-style soft-averaged Ridge over compressed level innovations.</td></tr>
+<tr><td><code>gb_level_forecast</code></td><td>package</td><td>model</td><td>yes</td><td>SeasonalFold</td><td>STOP, parrot</td><td>Gradient-boosted period-level forecaster + FLAIR shape expansion.</td></tr>
+<tr><td><code>kernel_rbf</code></td><td>package</td><td>model</td><td>yes</td><td>ForwardFill, FourierFeatures, LinearFill, MeanAbsScaling, SeasonalFeatures, ZNormalization, kernel_rbf, level_shape_ridge, parrot</td><td>STOP, kernel_rbf, parrot</td><td>RBF KernelRidge with median-heuristic lengthscale and leave-one-out predictions.</td></tr>
+<tr><td><code>level_shape_ridge</code></td><td>package</td><td>model</td><td>yes</td><td>SeasonalFold</td><td>STOP, kernel_rbf, parrot</td><td>Compact Box-Cox soft-averaged ridge over period levels + shape expansion.</td></tr>
+<tr><td><code>lightgbm_tabular</code></td><td>package</td><td>model</td><td>yes</td><td>ForwardFill, FourierFeatures, LinearFill, MeanAbsScaling, SeasonalFeatures, ZNormalization, parrot</td><td>STOP, parrot</td><td>LightGBM LGBMRegressor on active tabular model_input.</td></tr>
+<tr><td><code>parrot</code></td><td>package</td><td>model</td><td>yes</td><td>FlairRidgeLevel, ForwardFill, FourierFeatures, LinearFill, MeanAbsScaling, SeasonalFeatures, ZNormalization, gb_level_forecast, kernel_rbf, level_shape_ridge, lightgbm_tabular, rf_tabular, step_regression, versatile_gb</td><td>STOP, kernel_rbf, lightgbm_tabular, rf_tabular, versatile_gb</td><td>Analog forecast: copy the continuation of the past window with the highest |correlation| to the recent window, affine-rescaled.</td></tr>
+<tr><td><code>rf_tabular</code></td><td>package</td><td>model</td><td>yes</td><td>ForwardFill, FourierFeatures, LinearFill, MeanAbsScaling, SeasonalFeatures, ZNormalization, parrot</td><td>STOP, parrot</td><td>RandomForestRegressor on active tabular model_input.</td></tr>
+<tr><td><code>step_regression</code></td><td>package</td><td>model</td><td>yes</td><td>FourierFeatures, MeanAbsScaling, PeriodDetect, PeriodDetectBIC, PeriodDetectSpectral, SeasonalFeatures, ZNormalization</td><td>STOP, parrot</td><td>Per-date regression: value &lt;- known-future covariates + index.</td></tr>
+<tr><td><code>versatile_gb</code></td><td>package</td><td>model</td><td>yes</td><td>ForwardFill, FourierFeatures, LinearFill, MeanAbsScaling, START, SeasonalFeatures, ZNormalization, parrot, versatile_gb</td><td>STOP, parrot, versatile_gb</td><td>Gradient boosting on the auto-built feature bundle.</td></tr>
+<tr><td><code>STOP</code></td><td>synthetic</td><td>terminal</td><td>yes</td><td>FlairRidgeLevel, FlairSamplePaths, gb_level_forecast, kernel_rbf, level_shape_ridge, lightgbm_tabular, parrot, rf_tabular, step_regression, versatile_gb</td><td></td><td>Terminal node allowed after a model has produced a prediction.</td></tr></tbody></table>
+    </section>
+  </main>
+</body>
+</html>

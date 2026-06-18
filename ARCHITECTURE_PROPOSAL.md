@@ -126,12 +126,15 @@ should use the signal-board bundle path.
 Default package registry:
 
 ```text
+LinearFill
+ForwardFill
 ZNormalization
 MeanAbsScaling
 FourierFeatures
 kernel_rbf
 rf_tabular
 lightgbm_tabular
+parrot
 ```
 
 FLAIR opt-in registry:
@@ -139,10 +142,10 @@ FLAIR opt-in registry:
 ```text
 FlairPreprocess
 PeriodDetect
+PeriodDetectSpectral
+PeriodDetectBIC
 PeriodPhaseOneHot
-PeriodFold
-ShapeLevel
-SecondaryLevelSeasonality
+SeasonalFold
 level_shape_ridge
 LevelBoxCoxCenter
 FlairRidgeLevel
@@ -165,6 +168,8 @@ Seasonal opt-in registry:
 
 ```text
 PeriodDetect
+PeriodDetectSpectral
+PeriodDetectBIC
 SeasonalFeatures
 step_regression
 ```
@@ -172,7 +177,7 @@ step_regression
 With all registries enabled:
 
 ```text
-Grammar(20 tokens, 57 edges)
+Grammar(23 tokens, 112 edges)
 ```
 
 ## Still Proposal / Next Architecture

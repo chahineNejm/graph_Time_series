@@ -21,9 +21,10 @@ class MeanAbsScalingToken(TransformToken):
         return super().check_specific_conditions(state)
 
     def apply(self, state: "State") -> "State":
-        scale = np.mean(np.abs(state.original_history), axis=-1, keepdims=True) + 1e-8
+        hist = np.asarray(state.features["raw_history"], dtype=np.float32)
+        scale = np.mean(np.abs(hist), axis=-1, keepdims=True) + 1e-8
 
-        scaled_history = state.original_history / scale
+        scaled_history = hist / scale
         scaled_future = state.target_base() / scale
         state.add_historical_feature("scaled_history", scaled_history)
 
@@ -41,7 +42,7 @@ class MeanAbsScalingToken(TransformToken):
 
         self._log_execution(
             state,
-            reads={"raw_history": state.original_history.shape},
+            reads={"raw_history": hist.shape},
             writes={
                 "scaled_history": scaled_history.shape,
                 "active_target_base": state.active_target_base.shape,
@@ -62,10 +63,11 @@ class ZNormalizationToken(TransformToken):
         return super().check_specific_conditions(state)
 
     def apply(self, state: "State") -> "State":
-        mu = np.mean(state.original_history, axis=-1, keepdims=True)
-        sigma = np.std(state.original_history, axis=-1, keepdims=True) + 1e-8
+        hist = np.asarray(state.features["raw_history"], dtype=np.float32)
+        mu = np.mean(hist, axis=-1, keepdims=True)
+        sigma = np.std(hist, axis=-1, keepdims=True) + 1e-8
 
-        norm_history = (state.original_history - mu) / sigma
+        norm_history = (hist - mu) / sigma
         norm_future = (state.target_base() - mu) / sigma
         state.add_historical_feature("scaled_history", norm_history)
 
@@ -83,7 +85,7 @@ class ZNormalizationToken(TransformToken):
 
         self._log_execution(
             state,
-            reads={"raw_history": state.original_history.shape},
+            reads={"raw_history": hist.shape},
             writes={
                 "scaled_history": norm_history.shape,
                 "active_target_base": state.active_target_base.shape,

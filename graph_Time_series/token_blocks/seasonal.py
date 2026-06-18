@@ -22,75 +22,184 @@ if TYPE_CHECKING:
     from ..state import State
 
 
-class PeriodDetectToken(FeatureToken):
-    """Detect periods using FLAIR's selection logic, published as param:periods.
+class _PeriodDetectBase(FeatureToken):
+    """Shared machinery for period-chain detectors (PeriodDetect / PeriodDetectBIC).
 
-    Mirrors ``PeriodSelectionToken``: candidate periods come from a fixed
-    frequency table (``FREQ_PERIODS``), each is scored with FLAIR's rank-1
-    SVD/BIC fold score (``_period_bic``), the min-BIC candidate is the primary
-    period, and its integer multiples (that still have enough complete cycles)
-    are the secondary periods. ``periods = [primary] + secondary``.
+    Scores candidate periods from a fixed frequency table, selects the distinct
+    seasonal scales, and reduces them to an ascending divisibility chain -- the
+    queue that ``SeasonalFold`` consumes one fold at a time. Subclasses differ
+    only in the scoring/selection (``_select``): periodogram power vs rank-1 BIC.
+    Both guard on ``"periods" not in metadata``, so they are mutually exclusive:
+    the grammar can offer both and only the first to run takes effect.
     """
 
-    name = "PeriodDetect"
     token_class = "feature"
     reads = ("raw_history",)
     writes = ("periods",)
-    description = "FLAIR-style BIC period selection (freq candidates) -> param:periods."
     max_uses = 1
     provides = (Port(sem="param:periods", alignment="static", space="any"),)
-
-    def __init__(self, freq: str = "H", max_series: int = 8,
-                 min_complete: int = 3, source_feature: str = "scaled_history"):
-        self.freq = freq
-        self.max_series = int(max_series)
-        self.min_complete = int(min_complete)
-        self.source_feature = source_feature
+    freq = "H"
+    max_series = 8
+    min_complete = 3
+    source_feature = "scaled_history"
+    max_periods = 4
 
     def check_specific_conditions(self, state: "State") -> bool:
         return "periods" not in state.metadata
 
     def _history(self, state: "State") -> np.ndarray:
-        # Prefer a FLAIR-cleaned history if present, else the configured source.
-        for name in ("flair_history", self.source_feature):
+        for name in ("clean_history", "flair_history", self.source_feature):
             for store in ("historical_features", "features"):
                 d = getattr(state, store)
                 if name in d:
                     return np.asarray(d[name], dtype=np.float64)
         return np.asarray(state.features["raw_history"], dtype=np.float64)
 
+    def _select(self, cands, subset):
+        """Return (dominant_period, strong_periods, diag_metadata)."""
+        raise NotImplementedError
+
     def apply(self, state: "State") -> "State":
-        from .flair import FREQ_PERIODS, _period_bic
+        from .flair import FREQ_PERIODS
 
         hist = self._history(state)
         n_steps = hist.shape[1]
-
-        candidates = [
-            p for p in FREQ_PERIODS.get(self.freq.upper(), [1])
-            if p > 0 and n_steps // p >= self.min_complete
-        ]
-        candidates = sorted(set([1] + candidates))
         subset = hist[: min(self.max_series, hist.shape[0])]
-
-        scores = {int(p): float(np.mean([_period_bic(row, p) for row in subset]))
-                  for p in candidates}
-        primary = min(scores, key=scores.get)
-        secondary = [int(p) for p in candidates
-                     if p > primary and primary > 1 and p % primary == 0]
-        periods = [int(primary)] + secondary
+        cal = sorted(set(FREQ_PERIODS.get(self.freq.upper(), [])))
+        cands = [p for p in cal if p > 1 and n_steps // p >= self.min_complete]
+        if not cands:
+            dominant, periods, diag = 0, [], {}
+        else:
+            dominant, significant, diag = self._select(cands, subset)
+            periods = self._flair_periods(dominant, significant, cal, n_steps)
 
         state.put_param("periods", periods, source_token=self.name)
-        state.metadata["period"] = int(primary)              # back-compat single period
-        state.metadata["periods"] = periods
-        state.metadata["period_scores"] = scores
-        state.metadata["flair_secondary_periods"] = secondary
+        state.metadata["period"] = int(dominant)            # primary period (full shape)
+        state.metadata["periods"] = periods                 # [primary] + coarser secondaries
+        state.metadata.update(diag)
         state.flags["periods_detected"] = True
         self._log_execution(
             state,
             reads={"history": hist.shape},
-            writes={"periods": periods, "period_scores": scores},
+            writes={"periods": periods, "dominant": dominant},
         )
         return state
+
+    def _flair_periods(self, primary, significant, cal, n_steps):
+        """FLAIR ordering: primary first, then COARSER multiples of it that the
+        detector found significant (each modulates the Level via Shape_k). The
+        harmonic gate in SeasonalFold neutralises a spurious secondary, so this
+        stays safe even if an extra period slips through."""
+        P = int(primary)
+        nc = n_steps // P if P >= 1 else 0
+        # Secondaries = COARSER exact multiples of the primary with enough Level
+        # cycles. We do NOT filter them by the raw-series score (a coarse period
+        # like an annual cycle is undetectable on the raw fold -- too few cycles).
+        # SeasonalFold's harmonic gate decides per-secondary ON THE LEVEL, so a
+        # multiple with no real Level pattern produces a flat (no-op) Shape_k.
+        secondary = sorted(
+            c for c in cal
+            if c > P and P >= 1 and c % P == 0 and nc // (c // P) >= 2
+        )
+        # No count cap: the pool of exact coarser multiples is naturally small,
+        # and SeasonalFold picks adaptively from it (only real Level patterns
+        # fold; spurious multiples are skipped), so 'max_periods' would only risk
+        # dropping the meaningful coarse period (e.g. annual).
+        return [P] + secondary
+
+    @staticmethod
+    def _extrema(cands, scores, maximize, pad, keep):
+        """Local extrema of the score curve (baseline-padded ends) passing ``keep``."""
+        cands = sorted(cands)
+        out = []
+        for i, p in enumerate(cands):
+            left = scores[cands[i - 1]] if i > 0 else pad
+            right = scores[cands[i + 1]] if i + 1 < len(cands) else pad
+            is_ext = (scores[p] >= left and scores[p] >= right) if maximize \
+                else (scores[p] <= left and scores[p] <= right)
+            if is_ext and keep(p):
+                out.append(int(p))
+        return out
+
+class PeriodDetectToken(_PeriodDetectBase):
+    """FLAIR-faithful primary + coarser secondaries via rank-1 SVD/BIC.
+
+    BIC on the SVD spectrum picks the primary period P -- the one whose fold is
+    most rank-1, typically the LARGE period that captures the full repeating
+    unit (e.g. a whole week), giving a rich full Shape. Publishes
+    ``periods = [P] + [coarser multiples]`` that beat the no-period baseline by
+    ``margin``. ``SeasonalFold`` folds the primary fully (full Shape over P),
+    then peels each coarser period off the Level as Shape2, Shape3, ... This is
+    the default detector and matches the FLAIR paper's MDL period selection.
+    """
+
+    name = "PeriodDetect"
+    description = "FLAIR BIC: primary (rank-1) + coarser secondaries -> param:periods."
+
+    def __init__(self, freq: str = "H", max_series: int = 8, min_complete: int = 3,
+                 source_feature: str = "scaled_history", margin: float = 0.15,
+                 max_periods: int = 4):
+        self.freq = freq
+        self.max_series = int(max_series)
+        self.min_complete = int(min_complete)
+        self.source_feature = source_feature
+        self.margin = float(margin)              # required improvement, frac of |baseline|
+        self.max_periods = int(max_periods)
+
+    def _select(self, cands, subset):
+        from .flair import _period_bic
+        base = float(np.mean([_period_bic(row, 1) for row in subset]))
+        scores = {int(p): float(np.mean([_period_bic(row, p) for row in subset])) for p in cands}
+        dominant = int(min(scores, key=scores.get))
+        thresh = self.margin * abs(base)
+        significant = self._extrema(cands, scores, maximize=False, pad=base,
+                                    keep=lambda p: (base - scores[p]) > thresh)
+        return dominant, significant, {"period_scores": {**scores, 1: base},
+                                       "period_baseline_bic": base, "period_selector": "bic"}
+
+
+class PeriodDetectBICToken(PeriodDetectToken):
+    """Explicit-name BIC/FLAIR detector. Identical to ``PeriodDetect`` (which is
+    already the BIC selector); kept as a distinct name for back-compatibility and
+    for sequences that want to name the selector explicitly."""
+
+    name = "PeriodDetectBIC"
+    description = "FLAIR BIC primary + coarser secondaries (explicit name) -> param:periods."
+
+
+class PeriodDetectSpectralToken(_PeriodDetectBase):
+    """Periodogram alternative: primary = fundamental, + coarser secondaries.
+
+    Each candidate ``p`` is scored by the fraction of spectral power at its
+    fundamental frequency ``1/p``. The primary is the period with the most
+    power (the genuine fundamental, since a multiple ``k*p`` is a subharmonic
+    with ~no power); coarser multiples above ``power_threshold`` become the
+    secondary Level-modulation periods. NOTE: for FLAIR-style forecasting the
+    BIC detector (``PeriodDetect``) is usually preferable -- it picks the large
+    rank-1 period for a richer full Shape, whereas the fundamental can be small.
+    """
+
+    name = "PeriodDetectSpectral"
+    description = "Periodogram: fundamental primary + coarser secondaries -> param:periods."
+
+    def __init__(self, freq: str = "H", max_series: int = 8, min_complete: int = 3,
+                 source_feature: str = "scaled_history", power_threshold: float = 0.05,
+                 band: int = 1, max_periods: int = 4):
+        self.freq = freq
+        self.max_series = int(max_series)
+        self.min_complete = int(min_complete)
+        self.source_feature = source_feature
+        self.power_threshold = float(power_threshold)
+        self.band = int(band)
+        self.max_periods = int(max_periods)
+
+    def _select(self, cands, subset):
+        from .flair import _period_power
+        scores = {int(p): float(np.mean([_period_power(row, p, self.band) for row in subset]))
+                  for p in cands}
+        dominant = int(max(scores, key=scores.get))
+        significant = [int(p) for p in cands if scores[p] > self.power_threshold]
+        return dominant, significant, {"period_power": scores, "period_selector": "periodogram"}
 
 
 class SeasonalFeaturesToken(FeatureToken):

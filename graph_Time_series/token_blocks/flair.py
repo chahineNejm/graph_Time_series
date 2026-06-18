@@ -11,18 +11,20 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..token import CleaningToken, FeatureToken, ModelToken
+from ..token import FeatureToken, ModelToken
+from ..signal import Port
+from .imputation import LinearFillToken, linear_fill_1d
 
 if TYPE_CHECKING:
     from ..state import State
 
 
 FREQ_PERIODS = {
-    "H": [6, 8, 12, 24, 48, 72, 168, 336,720],
-    "HOURLY": [6, 8, 12, 24, 48, 72, 168, 336,720],
+    "H": [6, 8, 12, 24, 72, 168, 336, 720],
+    "HOURLY": [6, 8, 12, 24, 72, 168, 336, 720],
 
-    "D": [2, 3, 4, 5, 7, 14, 28, 30, 31, 90, 182, 365],
-    "DAILY": [2, 3, 4, 5, 7, 14, 28, 30, 31, 90, 182, 365],
+    "D": [2, 3, 4, 5, 7, 14, 28, 30, 31, 90, 182, 364],
+    "DAILY": [2, 3, 4, 5, 7, 14, 28, 30, 31, 90, 182, 364],
 
     "W": [4, 13, 26, 52],
     "WEEKLY": [4, 13, 26, 52],
@@ -36,103 +38,135 @@ FREQ_PERIODS = {
 _EPS = 1e-8
 
 
-class FlairPreprocessToken(CleaningToken):
-    """Interpolate missing history values and shift each series positive."""
+class FlairPreprocessToken(LinearFillToken):
+    """Backward-compatible alias for generic linear filling."""
 
     name = "FlairPreprocess"
-    reads = ("raw_history",)
-    writes = ("flair_history", "flair_shift")
-    description = "FLAIR preprocessing: finite interpolation plus positivity shift."
-
-    def __init__(self, eps: float = 1e-6):
-        self.eps = eps
-
-    def apply(self, state: "State") -> "State":
-        raw = np.asarray(state.features["raw_history"], dtype=np.float64)
-        cleaned = np.empty_like(raw, dtype=np.float64)
-        shifts = np.zeros(raw.shape[0], dtype=np.float64)
-
-        for i, row in enumerate(raw):
-            y = _interp_finite_1d(row)
-            shift = max(0.0, self.eps - float(np.min(y)))
-            cleaned[i] = y + shift
-            shifts[i] = shift
-
-        cleaned32 = cleaned.astype(np.float32)
-        state.add_historical_feature("flair_history", cleaned32)
-        state.metadata["flair_shift"] = shifts.astype(np.float32)
-        state.flags["flair_preprocessed"] = True
-        state.register_artifact(
-            "flair_history",
-            store="historical_features",
-            kind="sequence",
-            role="clean_history",
-            source_token=self.name,
-            tags=("flair", "preprocess"),
-        )
-
-        # Register the positivity shift as an invertible transform. FLAIR builds
-        # its forecast in this shifted space; registering the inverse here means
-        # State.get_final_prediction() subtracts the shift automatically, so no
-        # downstream model token has to remember to undo it.
-        shift_col = shifts.reshape(-1, 1).astype(np.float64)
-
-        def _unshift(pred, _s=shift_col):
-            return np.asarray(pred, dtype=np.float64) - _s
-
-        state.register_transform(
-            name="flair_shift",
-            inverse_fn=_unshift,
-            params={"shift_shape": shifts.shape, "kind": "additive_positivity_shift"},
-            affects="target",
-        )
-        self._log_execution(
-            state,
-            reads={"raw_history": raw.shape},
-            writes={"flair_history": cleaned32.shape, "flair_shift": shifts.shape},
-        )
-        return state
+    description = "Compatibility alias for LinearFill; no positivity shift."
 
 
-class PeriodFoldToken(FeatureToken):
-    """Fold preprocessed history into phase x complete-period matrices.
+class SeasonalFoldToken(FeatureToken):
+    """FLAIR-faithful seasonal decomposition, extended past FLAIR's single Shape2.
 
-    Optionally denoises the per-cycle level totals with a rank-1 SVD energy
-    shrinkage (formerly the separate ``LevelShrinkage`` token; merged here).
+    Call once for a plain FLAIR fold; call again per coarser period for
+    ``Shape3, Shape4, ...`` -- as many as there are secondary periods.
 
-    Shrinkage rationale: a clean periodic signal makes the folded
-    (phase x cycle) matrix essentially rank-1, so ``s0^2`` is the dominant cycle
-    energy and ``s1^2, s2^2, ...`` are noise. The factor
+    * call 0 (primary fold): fold the active clean/raw history by the primary period ``P``
+      (``periods[0]``, the BIC rank-1 period) into a FULL within-period shape
+      (``P`` proportions, summing to 1) plus a per-P-cycle ``level`` (totals).
+      The full shape captures all structure inside one P-cycle -- it is NOT a
+      separable product, so nothing is approximated by step functions.
+    * call k >= 1 (Shape_{k+1}): estimate a secondary periodic pattern in the
+      (already-deseasonalized) LEVEL at ``cp = periods[k] // P`` -- FLAIR's
+      ``_compute_shape2``: per-position mean, a BIC-gated first-harmonic-vs-flat
+      prior, and empirical-Bayes shrinkage ``w = nc2/(nc2+cp)``. Divide it out of
+      the level and accumulate it into the forecast-side level correction
+      ``flair_level_future_shape2``. The primary period and full shape are
+      unchanged.
 
-        f = clip( max(s0^2 - mean(s1^2..), 0) / s0^2 , min_factor, 1 )
+    Reconstruction (in the model heads):
+        y_hat[t] = Level_reseasonalized[t // P] * Shape[t % P]
+    where ``Level_reseasonalized`` re-applies every Shape_k. The Ridge forecasts
+    only the smooth, fully-deseasonalized level (one value per P-cycle).
 
-    is the fraction of the leading component that is real signal, and the levels
-    are scaled by it (Wiener / James-Stein style).
-
-    NOTE (theory): on STRONG/clean seasonality this is a no-op (f -> 1), so it
-    only helps when many noisy cycles are dominated by one periodic component.
-    Leave ``shrink_level=False`` (un-shrunk) when the series is genuinely
-    multi-component (two periodicities, amplitude modulation, within-cycle
-    trend) -- those higher singular values are real signal, not noise -- or when
-    an unbiased / calibrated level magnitude matters downstream.
+    ``periods = [P_primary] + [coarser secondaries]`` comes from PeriodDetect.
+    Optional rank-1 SVD level shrinkage (``shrink_level``) denoises the level.
     """
 
-    name = "PeriodFold"
-    reads = ("flair_history", "period")
-    writes = ("period_matrix", "level_series")
-    description = "Fold FLAIR history into period phases + level totals (optional SVD level shrink)."
+    name = "SeasonalFold"
+    token_class = "feature"
+    reads = ("raw_history",)
+    writes = ("period_matrix", "level_series", "shape_vector")
+    description = (
+        "FLAIR fold: call 0 = full shape over the primary period + level; each "
+        "later call = one more level modulation (Shape2, Shape3, ...) at a "
+        "coarser period. Replaces PeriodFold/ShapeLevel/SecondaryLevelSeasonality."
+    )
+    max_uses = 6
+    requires = (Port(sem="param:periods", alignment="static", space="any"),)
 
-    def __init__(self, shrink_level: bool = True, min_factor: float = 0.05):
+    def __init__(self, shrink_level: bool = True, min_factor: float = 0.05,
+                 shape_k: int = 2, min_complete: int = 2, harmonic_prior: bool = True,
+                 secondary_min_strength: float = 0.05):
         self.shrink_level = bool(shrink_level)
         self.min_factor = float(min_factor)
+        self.shape_k = int(shape_k)
+        self.min_complete = int(min_complete)
+        self.harmonic_prior = bool(harmonic_prior)
+        self.secondary_min_strength = float(secondary_min_strength)
+
+    def _depth(self, state: "State") -> int:
+        return state.token_sequence.count(self.name)
+
+    def _periods(self, state: "State") -> list:
+        periods = state.metadata.get("periods")
+        if not periods:
+            p = int(state.metadata.get("period", 0))
+            periods = [p] if p > 0 else []
+        return [int(p) for p in periods]
 
     def check_specific_conditions(self, state: "State") -> bool:
         if not super().check_specific_conditions(state):
             return False
-        period = int(state.metadata.get("period", 0))
-        hist = _flair_history(state)
-        return period > 0 and hist.shape[1] // period >= 1
+        periods = self._periods(state)
+        depth = self._depth(state)
+        if depth >= len(periods):
+            return False
+        if depth == 0:
+            hist = _flair_history(state)
+            return periods[0] > 0 and hist.shape[1] // periods[0] >= self.min_complete
+        if "flair_level_work" not in state.historical_features:
+            return False
+        # A further fold applies only if some UNUSED coarser period shows a real
+        # (harmonic-gated) modulation of the current Level above the strength
+        # floor. Spurious multiples (flat Shape) are skipped, so no no-op folds.
+        return self._best_secondary(state) is not None
 
+    def apply(self, state: "State") -> "State":
+        depth = self._depth(state)
+        periods = self._periods(state)
+        if depth == 0:
+            return self._fold_primary(state, int(periods[0]))
+        P = int(periods[0])
+        sel = self._best_secondary(state)
+        if sel is None:                    # guarded by can_apply, defensive only
+            return state
+        cp = sel[1]
+        return self._shape_k(state, P, cp, depth + 1)
+
+    def _best_secondary(self, state: "State"):
+        """Among UNUSED coarser candidate periods, return (period, cp) whose
+        harmonic-gated Level modulation is strongest, or None if none clears
+        ``secondary_min_strength``. The Level is tested directly (a coarse period
+        like an annual cycle is undetectable on the raw fold, but shows clearly
+        in the per-cycle Level)."""
+        periods = self._periods(state)
+        if len(periods) < 2:
+            return None
+        P = int(periods[0])
+        if "flair_level_work" not in state.historical_features:
+            return None
+        level = np.asarray(state.historical_features["flair_level_work"], dtype=np.float64)
+        n_complete = level.shape[1]
+        Lmean = level.mean(axis=0)
+        used = set(int(c) for c in state.metadata.get("flair_cross_periods", []))
+        best, best_strength = None, self.secondary_min_strength
+        for sec in periods[1:]:
+            sec = int(sec)
+            if sec <= P:
+                continue
+            cp = sec // P
+            if cp < 2 or cp in used or n_complete // cp < 2:
+                continue
+            S2 = self._estimate_shape2(Lmean, cp, n_complete)
+            if S2 is None:
+                continue
+            strength = float(np.max(np.abs(S2 - 1.0)))
+            if strength > best_strength:
+                best, best_strength = (sec, cp), strength
+        return best
+
+    # -- primary fold: full within-period shape + level ------------------
     def _level_shrink_factors(self, matrix: np.ndarray) -> np.ndarray:
         factors = np.ones(matrix.shape[0], dtype=np.float64)
         for i in range(matrix.shape[0]):
@@ -144,163 +178,131 @@ class PeriodFoldToken(FeatureToken):
             factors[i] = np.clip(signal / float(s[0] ** 2), self.min_factor, 1.0)
         return factors
 
-    def apply(self, state: "State") -> "State":
+    def _fold_primary(self, state: "State", P: int) -> "State":
         hist = _flair_history(state)
-        period = int(state.metadata["period"])
-        n_complete = hist.shape[1] // period
-        usable = n_complete * period
-        matrix = hist[:, -usable:].reshape(hist.shape[0], n_complete, period)
-        matrix = matrix.transpose(0, 2, 1).astype(np.float32)
-        level = matrix.sum(axis=1).astype(np.float32)
+        n_s = hist.shape[0]
+        n_complete = hist.shape[1] // P
+        usable = n_complete * P
+        matrix = hist[:, -usable:].reshape(n_s, n_complete, P).transpose(0, 2, 1).astype(np.float32)  # (n,P,nc)
+        level = matrix.sum(axis=1).astype(np.float32)                                                  # (n,nc)
+
+        mat64 = matrix.astype(np.float64)
+        K = min(max(self.shape_k, 1), n_complete)
+        recent = mat64[:, :, -K:]
+        totals = recent.sum(axis=1, keepdims=True)
+        props = np.where(totals > _EPS, recent / np.maximum(totals, _EPS), 1.0 / max(P, 1))
+        shape = props.mean(axis=2)
+        shape = np.maximum(shape, _EPS)
+        shape = (shape / np.maximum(shape.sum(axis=1, keepdims=True), _EPS)).astype(np.float32)        # (n,P)
 
         state.add_historical_feature("period_matrix", matrix)
-        state.add_historical_feature("level_series", level)
         state.add_historical_feature("flair_period_matrix", matrix)
+        state.add_historical_feature("level_series", level)
         state.add_historical_feature("flair_level_raw", level)
+        state.add_historical_feature("shape_vector", shape)
+        state.add_historical_feature("flair_shape", shape)
+        state.metadata["period"] = int(P)
         state.metadata["n_complete_periods"] = int(n_complete)
-        state.register_artifact(
-            "period_matrix",
-            store="historical_features",
-            kind="period_matrix",
-            source_token=self.name,
-            tags=("flair", "periodic"),
-        )
-        state.register_artifact(
-            "level_series",
-            store="historical_features",
-            kind="level_series",
-            source_token=self.name,
-            tags=("flair", "level"),
-        )
+        state.metadata["shape_k"] = int(K)
+        state.register_artifact("period_matrix", store="historical_features",
+                                kind="period_matrix", source_token=self.name, tags=("flair", "periodic"))
+        state.register_artifact("level_series", store="historical_features",
+                                kind="level_series", source_token=self.name, tags=("flair", "level"))
+        state.register_artifact("shape_vector", store="historical_features",
+                                kind="period_shape", source_token=self.name, tags=("flair", "shape"))
 
-        writes = {"period_matrix": matrix.shape, "level_series": level.shape}
+        work = level
         if self.shrink_level:
-            factors = self._level_shrink_factors(matrix.astype(np.float64))
+            factors = self._level_shrink_factors(mat64)
             denoised = (level.astype(np.float64) * factors[:, None]).astype(np.float32)
             state.add_historical_feature("flair_level_denoised", denoised)
             state.metadata["flair_level_shrinkage"] = factors.astype(np.float32)
-            state.register_artifact(
-                "flair_level_denoised",
-                store="historical_features",
-                kind="level_series",
-                source_token=self.name,
-                tags=("flair", "level", "denoised"),
-            )
-            writes["flair_level_denoised"] = denoised.shape
+            state.register_artifact("flair_level_denoised", store="historical_features",
+                                    kind="level_series", source_token=self.name,
+                                    tags=("flair", "level", "denoised"))
+            work = denoised
 
+        state.add_historical_feature("flair_level_work", work.astype(np.float32))
+        state.register_artifact("flair_level_work", store="historical_features",
+                                kind="level_series", source_token=self.name, tags=("flair", "level", "work"))
+        m = int(np.ceil(state.horizon / max(P, 1)))
+        state.features["flair_level_future_shape2"] = np.ones((n_s, m), dtype=np.float32)
+        state.metadata["flair_cross_period"] = 1
+        state.metadata["flair_cross_periods"] = []
         self._log_execution(
-            state,
-            reads={"flair_history": hist.shape, "period": period},
-            writes=writes,
-        )
+            state, reads={"flair_history": hist.shape, "period": P},
+            writes={"period_matrix": matrix.shape, "level_series": level.shape, "shape_vector": shape.shape})
         return state
 
+    # -- Shape_{k}: secondary level modulation (FLAIR _compute_shape2) ----
+    def _estimate_shape2(self, L: np.ndarray, cp: int, n_complete: int) -> np.ndarray | None:
+        nc2 = n_complete // cp
+        if nc2 < 2:
+            return None
+        pos = np.arange(n_complete) % cp
+        raw = np.array([L[pos == d].mean() if np.any(pos == d) else 1.0 for d in range(cp)], dtype=np.float64)
+        rmean = raw.mean()
+        if rmean < _EPS:
+            return None
+        raw = raw / rmean
+        if self.harmonic_prior:
+            t = np.arange(cp, dtype=np.float64)
+            cos_b = np.cos(2 * np.pi * t / cp)
+            sin_b = np.sin(2 * np.pi * t / cp)
+            c = raw - 1.0
+            a = 2.0 * np.mean(c * cos_b)
+            b = 2.0 * np.mean(c * sin_b)
+            harm = 1.0 + a * cos_b + b * sin_b
+            rss_flat = float(np.sum(c ** 2))
+            rss_harm = float(np.sum((raw - harm) ** 2))
+            _LOG = 1e-12
+            bic_flat = cp * np.log(max(rss_flat / cp, _LOG))
+            bic_harm = cp * np.log(max(rss_harm / cp, _LOG)) + 2 * np.log(cp)
+            prior = harm if bic_harm < bic_flat else np.ones(cp)
+        else:
+            prior = np.ones(cp)
+        w = nc2 / (nc2 + cp)
+        S2 = w * raw + (1.0 - w) * prior
+        S2 = np.maximum(S2, _EPS)
+        return S2 / S2.mean()
 
-class ShapeLevelToken(FeatureToken):
-    """Estimate a frozen within-period shape from recent periods."""
+    def _shape_k(self, state: "State", P: int, cp: int, k: int) -> "State":
+        level = np.asarray(state.historical_features["flair_level_work"], dtype=np.float64)
+        n_s, n_complete = level.shape
+        m = int(np.ceil(state.horizon / max(P, 1)))
+        pos = np.arange(n_complete) % cp
+        fut_pos = (n_complete + np.arange(m)) % cp
 
-    name = "ShapeLevel"
-    reads = ("period_matrix", "level_series")
-    writes = ("shape_vector", "flair_shape_history")
-    description = "Estimate FLAIR within-period proportions from recent periods."
+        shape2 = np.ones((n_s, cp), dtype=np.float64)
+        level_work = level.copy()
+        for i in range(n_s):
+            S2 = self._estimate_shape2(level[i], cp, n_complete)
+            if S2 is None:
+                continue
+            shape2[i] = S2
+            level_work[i] = level[i] / S2[pos]
 
-    def __init__(self, shape_k: int = 2):
-        self.shape_k = shape_k
+        future_factor = shape2[:, fut_pos]
+        prev = np.asarray(state.features.get("flair_level_future_shape2", np.ones((n_s, m))), dtype=np.float64)
+        if prev.shape != future_factor.shape:
+            prev = np.ones_like(future_factor)
+        future_shape2 = (prev * future_factor).astype(np.float32)
 
-    def apply(self, state: "State") -> "State":
-        matrix = np.asarray(state.historical_features["period_matrix"], dtype=np.float64)
-        period = matrix.shape[1]
-        n_complete = matrix.shape[2]
-        k = min(max(int(self.shape_k), 1), n_complete)
-        totals = matrix.sum(axis=1, keepdims=True)
-        uniform = np.full_like(matrix, 1.0 / max(period, 1), dtype=np.float64)
-        props = np.where(np.abs(totals) > _EPS, matrix / np.maximum(totals, _EPS), uniform)
-        shape = props[:, :, -k:].mean(axis=2)
-        shape = np.maximum(shape, _EPS)
-        shape = shape / np.maximum(shape.sum(axis=1, keepdims=True), _EPS)
-
-        shape32 = shape.astype(np.float32)
-        props32 = props.astype(np.float32)
-        state.add_historical_feature("shape_vector", shape32)
-        state.add_historical_feature("flair_shape", shape32)
-        state.add_historical_feature("flair_shape_history", props32)
-        state.metadata["shape_k"] = int(k)
-        state.register_artifact(
-            "shape_vector",
-            store="historical_features",
-            kind="period_shape",
-            source_token=self.name,
-            tags=("flair", "shape"),
-        )
-        self._log_execution(
-            state,
-            reads={"period_matrix": matrix.shape},
-            writes={"shape_vector": shape32.shape, "flair_shape_history": props32.shape},
-        )
-        return state
-
-
-class SecondaryLevelSeasonalityToken(FeatureToken):
-    """Estimate secondary seasonality on the compressed level series."""
-
-    name = "SecondaryLevelSeasonality"
-    reads = ("level_series", "period")
-    writes = ("flair_shape2", "flair_level_work")
-    description = "Estimate secondary FLAIR seasonality over period-level totals."
-
-    def __init__(self, min_complete: int = 2):
-        self.min_complete = min_complete
-
-    def apply(self, state: "State") -> "State":
-        level = _level_for_flair(state)
-        period = int(state.metadata["period"])
-        n_samples, n_complete = level.shape
-        horizon = state.horizon
-        m = int(np.ceil(horizon / max(period, 1)))
-
-        cross_periods = _cross_periods(state, period, n_complete, self.min_complete)
-        cp = max(cross_periods) if cross_periods else 1
-        shape2 = np.ones((n_samples, cp), dtype=np.float64)
-        level_work = level.astype(np.float64).copy()
-
-        if cp > 1:
-            positions = np.arange(n_complete) % cp
-            for i in range(n_samples):
-                mean_level = max(float(np.mean(level[i])), _EPS)
-                raw = np.ones(cp, dtype=np.float64)
-                for r in range(cp):
-                    vals = level[i, positions == r]
-                    if vals.size:
-                        raw[r] = float(np.mean(vals)) / mean_level
-                raw = raw / max(float(np.mean(raw)), _EPS)
-                n_groups = max(n_complete // cp, 1)
-                weight = n_groups / (n_groups + cp)
-                shape2[i] = weight * raw + (1.0 - weight)
-                level_work[i] = level[i] / np.maximum(shape2[i, positions], _EPS)
-
-        future_positions = (n_complete + np.arange(m)) % cp
-        future_shape2 = shape2[:, future_positions].astype(np.float32)
-        state.add_historical_feature("flair_shape2", shape2.astype(np.float32))
         state.add_historical_feature("flair_level_work", level_work.astype(np.float32))
+        state.add_historical_feature("flair_shape%d" % k, shape2.astype(np.float32))
+        if k == 2:
+            state.add_historical_feature("flair_shape2", shape2.astype(np.float32))
         state.features["flair_level_future_shape2"] = future_shape2
-        state.metadata["flair_cross_period"] = int(cp)
-        state.metadata["flair_cross_periods"] = [int(x) for x in cross_periods]
-        state.register_artifact(
-            "flair_level_work",
-            store="historical_features",
-            kind="level_series",
-            source_token=self.name,
-            tags=("flair", "level", "secondary"),
-        )
+        cps = list(state.metadata.get("flair_cross_periods", []))
+        cps.append(int(cp))
+        state.metadata["flair_cross_periods"] = cps
+        state.metadata["flair_cross_period"] = int(max(cps))
+        state.register_artifact("flair_level_work", store="historical_features",
+                                kind="level_series", source_token=self.name,
+                                tags=("flair", "level", "deseasonalized"))
         self._log_execution(
-            state,
-            reads={"level_series": level.shape, "period": period},
-            writes={
-                "flair_shape2": shape2.shape,
-                "flair_level_work": level_work.shape,
-                "flair_level_future_shape2": future_shape2.shape,
-            },
-        )
+            state, reads={"flair_level_work": level.shape, "cp": cp, "shape_index": k},
+            writes={"flair_shape%d" % k: shape2.shape, "flair_level_future_shape2": future_shape2.shape})
         return state
 
 
@@ -707,6 +709,8 @@ class FlairSamplePathsToken(FeatureToken):
 
 
 def _flair_history(state: "State") -> np.ndarray:
+    if "clean_history" in state.historical_features:
+        return np.asarray(state.historical_features["clean_history"], dtype=np.float64)
     if "flair_history" in state.historical_features:
         return np.asarray(state.historical_features["flair_history"], dtype=np.float64)
     return np.asarray(state.features["raw_history"], dtype=np.float64)
@@ -719,14 +723,7 @@ def _level_for_flair(state: "State") -> np.ndarray:
 
 
 def _interp_finite_1d(y: np.ndarray) -> np.ndarray:
-    y = np.asarray(y, dtype=np.float64)
-    good = np.isfinite(y)
-    if np.all(good):
-        return y.copy()
-    if not np.any(good):
-        return np.zeros_like(y, dtype=np.float64)
-    x = np.arange(y.size)
-    return np.interp(x, x[good], y[good]).astype(np.float64)
+    return linear_fill_1d(y)
 
 
 def _period_bic(y: np.ndarray, period: int) -> float:
@@ -747,17 +744,30 @@ def _period_bic(y: np.ndarray, period: int) -> float:
     ) * np.log(max(usable, 2))
 
 
-def _cross_periods(
-    state: "State", period: int, n_complete: int, min_complete: int
-) -> list[int]:
-    values = []
-    for secondary in state.metadata.get("flair_secondary_periods", []):
-        if secondary > period and secondary % period == 0:
-            cp = secondary // period
-            if cp >= 2 and n_complete // cp >= min_complete:
-                values.append(int(cp))
-    return sorted(set(values))
 
+def _period_power(y: np.ndarray, period: int, band: int = 1) -> float:
+    """Fraction of total spectral power at the fundamental frequency 1/period.
+
+    Periodogram-based period score: high only when ``period`` is a true period.
+    A multiple k*period maps to a subharmonic frequency 1/(k*period) with no
+    power, so -- unlike the rank-1 BIC fold -- it does not reward multiples of
+    the fundamental. Higher is better.
+    """
+    y = _interp_finite_1d(y)
+    y = y - float(np.mean(y))
+    T = y.size
+    if T < 4 or period <= 1:
+        return 0.0
+    F = np.abs(np.fft.rfft(y)) ** 2
+    total = float(F[1:].sum())                       # drop DC bin
+    if total <= 0.0:
+        return 0.0
+    k = int(round(T / period))
+    if k <= 0 or k >= F.size:
+        return 0.0
+    lo = max(1, k - band)
+    hi = min(F.size, k + band + 1)
+    return float(F[lo:hi].sum() / total)
 
 def _boxcox(y: np.ndarray, lam: float) -> np.ndarray:
     y = np.maximum(np.asarray(y, dtype=np.float64), _EPS)

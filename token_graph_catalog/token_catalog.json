@@ -2,8 +2,9 @@
   "schema_version": 1,
   "project": "graph_Time_series",
   "notes": [
-    "Edit this file when tokens or valid transitions change.",
-    "Use core=false for generic binders, aliases, and noisy experimental adapters."
+    "Generated from the live package registry in graph_Time_series.token_blocks.",
+    "Grammar(23 tokens, 112 edges)",
+    "Regenerate after token registrations or valid transitions change."
   ],
   "tokens": [
     {
@@ -16,14 +17,16 @@
       "writes": [],
       "parents": [],
       "next": [
-        "DataAugmentation",
-        "ContextWindow",
         "FlairPreprocess",
-        "PeriodSelection",
-        "ZNormalization",
+        "ForwardFill",
+        "FourierFeatures",
+        "LinearFill",
         "MeanAbsScaling",
-        "BindRawHistory",
-        "FourierFeatures"
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral",
+        "ZNormalization",
+        "versatile_gb"
       ]
     },
     {
@@ -31,94 +34,81 @@
       "status": "package",
       "class": "cleaning",
       "core": true,
-      "description": "Experimental FLAIR preprocessing: interpolate history and shift each series positive.",
+      "description": "Compatibility alias for LinearFill; no positivity shift.",
       "reads": [
-        "features.raw_history"
+        "raw_history"
       ],
       "writes": [
-        "historical_features.flair_history",
-        "metadata.flair_shift"
+        "clean_history",
+        "raw_history"
       ],
       "parents": [
         "START"
       ],
       "next": [
-        "PeriodSelection"
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral"
       ]
     },
     {
-      "id": "DataAugmentation",
-      "status": "notebook",
-      "class": "cleaning",
-      "core": true,
-      "description": "Notebook prototype that jitters and smooths history for train-side experiments.",
-      "reads": [
-        "features.raw_history"
-      ],
-      "writes": [
-        "features.raw_history",
-        "historical_features.augmented_history"
-      ],
-      "parents": [
-        "START"
-      ],
-      "next": [
-        "ContextWindow",
-        "ZNormalization",
-        "MeanAbsScaling"
-      ]
-    },
-    {
-      "id": "ContextWindow",
-      "status": "notebook",
-      "class": "cleaning",
-      "core": true,
-      "description": "Keep the latest context window and write context_history.",
-      "reads": [
-        "features.raw_history"
-      ],
-      "writes": [
-        "features.raw_history",
-        "historical_features.context_history"
-      ],
-      "parents": [
-        "START",
-        "DataAugmentation"
-      ],
-      "next": [
-        "ZNormalization",
-        "MeanAbsScaling",
-        "PeriodSelection",
-        "FourierFeatures"
-      ]
-    },
-    {
-      "id": "ZNormalization",
+      "id": "ForwardFill",
       "status": "package",
-      "class": "transform",
+      "class": "cleaning",
       "core": true,
-      "description": "Normalize each series by its history and transform the active target space.",
+      "description": "Fill NaN/inf history values by forward fill.",
       "reads": [
-        "features.raw_history"
+        "raw_history"
       ],
       "writes": [
-        "historical_features.scaled_history",
-        "active_target_base",
-        "transform_stack"
+        "clean_history",
+        "raw_history"
       ],
       "parents": [
-        "START",
-        "ContextWindow",
-        "DataAugmentation"
+        "START"
       ],
       "next": [
-        "BindScaledHistory",
-        "BindAllSafeTabular",
-        "StackScaledContext",
+        "FourierFeatures",
+        "MeanAbsScaling",
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral",
+        "ZNormalization",
         "kernel_rbf",
-        "kernel_rbf_fast",
-        "kernel_rbf_loo",
-        "FourierFeatures"
+        "lightgbm_tabular",
+        "parrot",
+        "rf_tabular",
+        "versatile_gb"
+      ]
+    },
+    {
+      "id": "LinearFill",
+      "status": "package",
+      "class": "cleaning",
+      "core": true,
+      "description": "Fill NaN/inf history values by linear interpolation.",
+      "reads": [
+        "raw_history"
+      ],
+      "writes": [
+        "clean_history",
+        "raw_history"
+      ],
+      "parents": [
+        "START"
+      ],
+      "next": [
+        "FourierFeatures",
+        "MeanAbsScaling",
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral",
+        "ZNormalization",
+        "kernel_rbf",
+        "lightgbm_tabular",
+        "parrot",
+        "rf_tabular",
+        "versatile_gb"
       ]
     },
     {
@@ -126,28 +116,82 @@
       "status": "package",
       "class": "transform",
       "core": true,
-      "description": "Scale each series by mean absolute history value without centering.",
+      "description": "Scale by mean absolute value of history; no centering.",
       "reads": [
-        "features.raw_history"
+        "raw_history"
       ],
       "writes": [
-        "historical_features.scaled_history",
-        "active_target_base",
-        "transform_stack"
+        "scaled_history",
+        "active_target_base"
       ],
       "parents": [
-        "START",
-        "ContextWindow",
-        "DataAugmentation"
+        "ForwardFill",
+        "LinearFill",
+        "START"
       ],
       "next": [
-        "BindScaledHistory",
-        "BindAllSafeTabular",
-        "StackScaledContext",
+        "FourierFeatures",
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral",
         "kernel_rbf",
-        "kernel_rbf_fast",
-        "kernel_rbf_loo",
-        "FourierFeatures"
+        "lightgbm_tabular",
+        "parrot",
+        "rf_tabular",
+        "step_regression",
+        "versatile_gb"
+      ]
+    },
+    {
+      "id": "ZNormalization",
+      "status": "package",
+      "class": "transform",
+      "core": true,
+      "description": "Instance Z-Normalization: centers and scales each sample by history mean/std.",
+      "reads": [
+        "raw_history"
+      ],
+      "writes": [
+        "scaled_history",
+        "active_target_base"
+      ],
+      "parents": [
+        "ForwardFill",
+        "LinearFill",
+        "START"
+      ],
+      "next": [
+        "FourierFeatures",
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral",
+        "kernel_rbf",
+        "lightgbm_tabular",
+        "parrot",
+        "rf_tabular",
+        "step_regression",
+        "versatile_gb"
+      ]
+    },
+    {
+      "id": "FlairSamplePaths",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "Bootstrap level residuals and coherent phase noise into forecast samples.",
+      "reads": [
+        "flair_level_innov",
+        "shape_vector"
+      ],
+      "writes": [
+        "flair_samples",
+        "flair_sample_mean"
+      ],
+      "parents": [
+        "FlairRidgeLevel"
+      ],
+      "next": [
+        "STOP"
       ]
     },
     {
@@ -155,167 +199,27 @@
       "status": "package",
       "class": "feature",
       "core": true,
-      "description": "Create fixed-width FFT tabular features from history.",
-      "reads": [
-        "historical_features.scaled_history or features.raw_history"
-      ],
+      "description": "Fixed low-frequency FFT features for tabular models.",
+      "reads": [],
       "writes": [
-        "historical_features.fourier_features",
-        "metadata.fourier_features"
+        "fourier_features"
       ],
       "parents": [
-        "START",
-        "ZNormalization",
+        "ForwardFill",
+        "FourierFeatures",
+        "LinearFill",
         "MeanAbsScaling",
-        "ContextWindow"
-      ],
-      "next": [
-        "BindFourierFeatures",
-        "BindAllSafeTabular",
-        "StackFeatureBundleToken",
-        "StackFourierScaled"
-      ]
-    },
-    {
-      "id": "PeriodSelection",
-      "status": "package + notebook",
-      "class": "feature",
-      "core": true,
-      "description": "Select a period from frequency candidates and store it in metadata.period.",
-      "reads": [
-        "historical_features.flair_history or features.raw_history"
-      ],
-      "writes": [
-        "metadata.period",
-        "metadata.period_scores",
-        "flags.period_selected"
-      ],
-      "parents": [
         "START",
-        "ContextWindow",
-        "FlairPreprocess"
+        "ZNormalization"
       ],
       "next": [
-        "PeriodPhaseOneHot",
-        "PeriodFold"
-      ]
-    },
-    {
-      "id": "PeriodPhaseOneHot",
-      "status": "package",
-      "class": "feature",
-      "core": true,
-      "description": "Encode phase IDs and one-hot positions inside the selected period.",
-      "reads": [
-        "features.raw_history",
-        "metadata.period"
-      ],
-      "writes": [
-        "historical_features.history_period_phase_id",
-        "historical_features.history_period_phase_onehot",
-        "future_features.future_period_phase_id",
-        "future_features.future_period_phase_onehot"
-      ],
-      "parents": [
-        "PeriodSelection"
-      ],
-      "next": [
-        "PeriodFold",
-        "BindAllSafeTabular",
-        "StackFeatureBundleToken"
-      ]
-    },
-    {
-      "id": "PeriodFold",
-      "status": "package + notebook",
-      "class": "feature",
-      "core": true,
-      "description": "Fold history into period phases and compute level_series.",
-      "reads": [
-        "historical_features.flair_history or features.raw_history",
-        "metadata.period"
-      ],
-      "writes": [
-        "historical_features.period_matrix",
-        "historical_features.level_series",
-        "historical_features.flair_level_raw"
-      ],
-      "parents": [
-        "PeriodSelection",
-        "PeriodPhaseOneHot"
-      ],
-      "next": [
-        "LevelShrinkage",
-        "ShapeLevel",
-        "BindAllSafeTabular",
-        "StackFeatureBundleToken"
-      ]
-    },
-    {
-      "id": "ShapeLevel",
-      "status": "package + notebook",
-      "class": "feature",
-      "core": true,
-      "description": "Estimate a within-period shape vector from recent folded periods.",
-      "reads": [
-        "historical_features.period_matrix",
-        "historical_features.level_series"
-      ],
-      "writes": [
-        "historical_features.shape_vector"
-      ],
-      "parents": [
-        "PeriodFold"
-      ],
-      "next": [
-        "SecondaryLevelSeasonality",
-        "shape_naive",
-        "level_kernel_rbf",
-        "BindAllSafeTabular",
-        "StackFeatureBundleToken"
-      ]
-    },
-    {
-      "id": "LevelShrinkage",
-      "status": "package",
-      "class": "feature",
-      "core": true,
-      "description": "Experimental FLAIR level denoising with a rank-1 SVD shrinkage factor.",
-      "reads": [
-        "historical_features.period_matrix",
-        "historical_features.level_series"
-      ],
-      "writes": [
-        "historical_features.flair_level_denoised",
-        "metadata.flair_level_shrinkage"
-      ],
-      "parents": [
-        "PeriodFold"
-      ],
-      "next": [
-        "ShapeLevel"
-      ]
-    },
-    {
-      "id": "SecondaryLevelSeasonality",
-      "status": "package",
-      "class": "feature",
-      "core": true,
-      "description": "Experimental FLAIR secondary seasonality over compressed level totals.",
-      "reads": [
-        "historical_features.level_series or flair_level_denoised",
-        "metadata.period"
-      ],
-      "writes": [
-        "historical_features.flair_shape2",
-        "historical_features.flair_level_work",
-        "features.flair_level_future_shape2"
-      ],
-      "parents": [
-        "ShapeLevel"
-      ],
-      "next": [
-        "LevelBoxCoxCenter"
+        "FourierFeatures",
+        "kernel_rbf",
+        "lightgbm_tabular",
+        "parrot",
+        "rf_tabular",
+        "step_regression",
+        "versatile_gb"
       ]
     },
     {
@@ -323,208 +227,226 @@
       "status": "package",
       "class": "feature",
       "core": true,
-      "description": "Experimental FLAIR Box-Cox transform and innovation centering over level totals.",
+      "description": "Box-Cox transform FLAIR levels and center by the last level.",
       "reads": [
-        "historical_features.flair_level_work"
+        "flair_level_work"
       ],
       "writes": [
-        "historical_features.flair_level_bc",
-        "historical_features.flair_level_innov",
-        "metadata.flair_boxcox"
+        "flair_level_innov",
+        "flair_boxcox"
       ],
       "parents": [
-        "SecondaryLevelSeasonality"
+        "SeasonalFold"
       ],
       "next": [
         "FlairRidgeLevel"
       ]
     },
     {
-      "id": "BindScaledHistory",
+      "id": "PeriodDetect",
       "status": "package",
-      "class": "binding",
+      "class": "feature",
       "core": true,
-      "description": "Bind scaled_history as the active sequence_flat model_input.",
+      "description": "FLAIR BIC: primary (rank-1) + coarser secondaries -> param:periods.",
       "reads": [
-        "historical_features.scaled_history"
+        "raw_history"
       ],
       "writes": [
-        "historical_features.model_input",
-        "metadata.active_input_bundle"
+        "periods"
       ],
       "parents": [
-        "ZNormalization",
+        "FlairPreprocess",
+        "ForwardFill",
+        "LinearFill",
         "MeanAbsScaling",
-        "kernel_rbf"
-      ],
-      "next": [
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "kernel_rbf_loo"
-      ]
-    },
-    {
-      "id": "BindAllSafeTabular",
-      "status": "package",
-      "class": "binding",
-      "core": false,
-      "description": "Broad binder that flattens all finite historical artifacts into one tabular model_input.",
-      "reads": [
-        "historical_features.*"
-      ],
-      "writes": [
-        "historical_features.model_input",
-        "metadata.active_input_bundle"
-      ],
-      "parents": [
-        "ZNormalization",
-        "MeanAbsScaling",
-        "PeriodPhaseOneHot",
-        "PeriodFold",
-        "ShapeLevel",
-        "FlairRidgeLevel",
-        "BindScaledHistory",
-        "kernel_rbf",
-        "FourierFeatures"
-      ],
-      "next": [
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "kernel_rbf_loo",
-        "rf_tabular",
-        "lightgbm_tabular"
-      ]
-    },
-    {
-      "id": "BindFeatureToken",
-      "status": "package",
-      "class": "binding",
-      "core": false,
-      "description": "Generic single-artifact binder factory used to create named binders.",
-      "reads": [
-        "configured artifact"
-      ],
-      "writes": [
-        "historical_features.model_input",
-        "metadata.active_input_bundle"
-      ],
-      "parents": [],
-      "next": []
-    },
-    {
-      "id": "BindFourierFeatures",
-      "status": "notebook",
-      "class": "binding",
-      "core": true,
-      "description": "Notebook-configured BindFeatureToken for fourier_features.",
-      "reads": [
-        "historical_features.fourier_features"
-      ],
-      "writes": [
-        "historical_features.model_input",
-        "metadata.active_input_bundle"
-      ],
-      "parents": [
-        "FourierFeatures"
-      ],
-      "next": [
-        "rf_tabular",
-        "lightgbm_tabular"
-      ]
-    },
-    {
-      "id": "StackFeatureBundleToken",
-      "status": "package",
-      "class": "binding",
-      "core": false,
-      "description": "Generic factory that flattens and concatenates configured artifacts into one tabular bundle.",
-      "reads": [
-        "configured artifacts"
-      ],
-      "writes": [
-        "historical_features.model_input",
-        "metadata.active_input_bundle"
-      ],
-      "parents": [
-        "PeriodPhaseOneHot",
-        "PeriodFold",
-        "ShapeLevel",
-        "FourierFeatures"
-      ],
-      "next": [
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "kernel_rbf_loo",
-        "rf_tabular",
-        "lightgbm_tabular"
-      ]
-    },
-    {
-      "id": "BindRawHistory",
-      "status": "notebook",
-      "class": "binding",
-      "core": false,
-      "description": "Notebook-configured BindFeatureToken for raw_history.",
-      "reads": [
-        "features.raw_history"
-      ],
-      "writes": [
-        "historical_features.model_input",
-        "metadata.active_input_bundle"
-      ],
-      "parents": [
         "START",
-        "ContextWindow"
+        "ZNormalization"
       ],
       "next": [
-        "kernel_rbf_fast",
-        "kernel_rbf"
+        "PeriodPhaseOneHot",
+        "SeasonalFeatures",
+        "SeasonalFold",
+        "step_regression"
       ]
     },
     {
-      "id": "StackScaledContext",
-      "status": "notebook",
-      "class": "binding",
-      "core": false,
-      "description": "Notebook-configured StackFeatureBundleToken for scaled_history plus context_history.",
+      "id": "PeriodDetectBIC",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "FLAIR BIC primary + coarser secondaries (explicit name) -> param:periods.",
       "reads": [
-        "historical_features.scaled_history",
-        "historical_features.context_history"
+        "raw_history"
       ],
       "writes": [
-        "historical_features.model_input",
-        "metadata.active_input_bundle"
+        "periods"
       ],
       "parents": [
-        "ZNormalization",
-        "MeanAbsScaling"
+        "FlairPreprocess",
+        "ForwardFill",
+        "LinearFill",
+        "MeanAbsScaling",
+        "START",
+        "ZNormalization"
       ],
       "next": [
-        "kernel_rbf_fast",
+        "PeriodPhaseOneHot",
+        "SeasonalFeatures",
+        "SeasonalFold",
+        "step_regression"
+      ]
+    },
+    {
+      "id": "PeriodDetectSpectral",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "Periodogram: fundamental primary + coarser secondaries -> param:periods.",
+      "reads": [
+        "raw_history"
+      ],
+      "writes": [
+        "periods"
+      ],
+      "parents": [
+        "FlairPreprocess",
+        "ForwardFill",
+        "LinearFill",
+        "MeanAbsScaling",
+        "START",
+        "ZNormalization"
+      ],
+      "next": [
+        "PeriodPhaseOneHot",
+        "SeasonalFeatures",
+        "SeasonalFold",
+        "step_regression"
+      ]
+    },
+    {
+      "id": "PeriodPhaseOneHot",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "One-hot encode positions within the selected period.",
+      "reads": [
+        "raw_history",
+        "period"
+      ],
+      "writes": [
+        "history_period_phase_id",
+        "history_period_phase_onehot",
+        "future_period_phase_id",
+        "future_period_phase_onehot"
+      ],
+      "parents": [
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral"
+      ],
+      "next": [
+        "SeasonalFold"
+      ]
+    },
+    {
+      "id": "SeasonalFeatures",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "Per-detected-period sin/cos channels (history + known future, no_bundle) plus a bundle-safe per-series projection (Fourier amplitudes at h/p + seasonal_strength).",
+      "reads": [
+        "raw_history"
+      ],
+      "writes": [
+        "seasonal_features",
+        "future_seasonal_features"
+      ],
+      "parents": [
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral"
+      ],
+      "next": [
         "kernel_rbf",
-        "kernel_rbf_loo"
+        "lightgbm_tabular",
+        "parrot",
+        "rf_tabular",
+        "step_regression",
+        "versatile_gb"
       ]
     },
     {
-      "id": "StackFourierScaled",
-      "status": "notebook",
-      "class": "binding",
-      "core": false,
-      "description": "Notebook-configured stack of fourier_features plus scaled_history.",
+      "id": "SeasonalFold",
+      "status": "package",
+      "class": "feature",
+      "core": true,
+      "description": "FLAIR fold: call 0 = full shape over the primary period + level; each later call = one more level modulation (Shape2, Shape3, ...) at a coarser period. Replaces PeriodFold/ShapeLevel/SecondaryLevelSeasonality.",
       "reads": [
-        "historical_features.fourier_features",
-        "historical_features.scaled_history"
+        "raw_history"
       ],
       "writes": [
-        "historical_features.model_input",
-        "metadata.active_input_bundle"
+        "period_matrix",
+        "level_series",
+        "shape_vector"
       ],
       "parents": [
-        "FourierFeatures"
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral",
+        "PeriodPhaseOneHot",
+        "SeasonalFold"
       ],
       "next": [
-        "rf_tabular",
-        "lightgbm_tabular"
+        "LevelBoxCoxCenter",
+        "SeasonalFold",
+        "gb_level_forecast",
+        "level_shape_ridge"
+      ]
+    },
+    {
+      "id": "FlairRidgeLevel",
+      "status": "package",
+      "class": "model",
+      "core": true,
+      "description": "FLAIR-style soft-averaged Ridge over compressed level innovations.",
+      "reads": [
+        "flair_level_innov",
+        "shape_vector"
+      ],
+      "writes": [
+        "prediction_stack",
+        "flair_point_forecast"
+      ],
+      "parents": [
+        "LevelBoxCoxCenter"
+      ],
+      "next": [
+        "FlairSamplePaths",
+        "STOP",
+        "parrot"
+      ]
+    },
+    {
+      "id": "gb_level_forecast",
+      "status": "package",
+      "class": "model",
+      "core": true,
+      "description": "Gradient-boosted period-level forecaster + FLAIR shape expansion.",
+      "reads": [
+        "level_series",
+        "shape_vector",
+        "period"
+      ],
+      "writes": [
+        "prediction_stack",
+        "gb_level_point"
+      ],
+      "parents": [
+        "SeasonalFold"
+      ],
+      "next": [
+        "STOP",
+        "parrot"
       ]
     },
     {
@@ -532,130 +454,49 @@
       "status": "package",
       "class": "model",
       "core": true,
-      "description": "Package RBF KernelRidge model with leave-one-out predictions inside the current state.",
-      "reads": [
-        "historical_features.model_input or scaled_history",
-        "current_target"
-      ],
+      "description": "RBF KernelRidge with median-heuristic lengthscale and leave-one-out predictions.",
+      "reads": [],
       "writes": [
-        "prediction_stack",
-        "features.current_residual"
+        "prediction_stack"
       ],
       "parents": [
-        "ZNormalization",
+        "ForwardFill",
+        "FourierFeatures",
+        "LinearFill",
         "MeanAbsScaling",
-        "BindScaledHistory",
-        "BindAllSafeTabular",
-        "BindRawHistory",
-        "StackFeatureBundleToken",
-        "StackScaledContext",
-        "kernel_rbf_fast",
-        "shape_naive",
-        "level_kernel_rbf",
-        "kernel_rbf_loo"
+        "SeasonalFeatures",
+        "ZNormalization",
+        "kernel_rbf",
+        "level_shape_ridge",
+        "parrot"
       ],
       "next": [
-        "BindScaledHistory",
-        "BindAllSafeTabular",
+        "STOP",
         "kernel_rbf",
-        "kernel_rbf_fast",
-        "shape_naive",
-        "level_kernel_rbf",
-        "kernel_rbf_loo",
-        "STOP"
+        "parrot"
       ]
     },
     {
-      "id": "kernel_rbf_fast",
-      "status": "notebook",
-      "class": "model",
-      "core": true,
-      "description": "Notebook fast RBF diagnostic token; direct use is in-sample.",
-      "reads": [
-        "historical_features.model_input or scaled_history",
-        "current_target"
-      ],
-      "writes": [
-        "prediction_stack",
-        "features.current_residual"
-      ],
-      "parents": [
-        "ZNormalization",
-        "MeanAbsScaling",
-        "BindScaledHistory",
-        "BindAllSafeTabular",
-        "BindRawHistory",
-        "StackFeatureBundleToken",
-        "StackScaledContext",
-        "kernel_rbf",
-        "shape_naive",
-        "level_kernel_rbf",
-        "kernel_rbf_loo"
-      ],
-      "next": [
-        "kernel_rbf",
-        "shape_naive",
-        "level_kernel_rbf",
-        "kernel_rbf_loo",
-        "STOP"
-      ]
-    },
-    {
-      "id": "kernel_rbf_loo",
-      "status": "notebook",
-      "class": "model",
-      "core": false,
-      "description": "Notebook registry alias for the package KernelRBFToken.",
-      "reads": [
-        "historical_features.model_input or scaled_history",
-        "current_target"
-      ],
-      "writes": [
-        "prediction_stack",
-        "features.current_residual"
-      ],
-      "parents": [
-        "ZNormalization",
-        "MeanAbsScaling",
-        "BindScaledHistory",
-        "BindAllSafeTabular",
-        "StackFeatureBundleToken",
-        "StackScaledContext",
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "shape_naive",
-        "level_kernel_rbf"
-      ],
-      "next": [
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "shape_naive",
-        "level_kernel_rbf",
-        "STOP"
-      ]
-    },
-    {
-      "id": "rf_tabular",
+      "id": "level_shape_ridge",
       "status": "package",
       "class": "model",
       "core": true,
-      "description": "RandomForestRegressor on active tabular model_input.",
+      "description": "Compact Box-Cox soft-averaged ridge over period levels + shape expansion.",
       "reads": [
-        "historical_features.model_input",
-        "current_target"
+        "level_series",
+        "shape_vector",
+        "period"
       ],
       "writes": [
-        "prediction_stack",
-        "features.current_residual"
+        "prediction_stack"
       ],
       "parents": [
-        "BindFourierFeatures",
-        "BindAllSafeTabular",
-        "StackFeatureBundleToken",
-        "StackFourierScaled"
+        "SeasonalFold"
       ],
       "next": [
-        "STOP"
+        "STOP",
+        "kernel_rbf",
+        "parrot"
       ]
     },
     {
@@ -664,151 +505,152 @@
       "class": "model",
       "core": true,
       "description": "LightGBM LGBMRegressor on active tabular model_input.",
-      "reads": [
-        "historical_features.model_input",
-        "current_target"
-      ],
+      "reads": [],
       "writes": [
-        "prediction_stack",
-        "features.current_residual"
+        "prediction_stack"
       ],
       "parents": [
-        "BindFourierFeatures",
-        "BindAllSafeTabular",
-        "StackFeatureBundleToken",
-        "StackFourierScaled"
+        "ForwardFill",
+        "FourierFeatures",
+        "LinearFill",
+        "MeanAbsScaling",
+        "SeasonalFeatures",
+        "ZNormalization",
+        "parrot"
       ],
       "next": [
-        "STOP"
+        "STOP",
+        "parrot"
       ]
     },
     {
-      "id": "shape_naive",
-      "status": "notebook",
-      "class": "model",
-      "core": true,
-      "description": "Repeat last level through the shape vector.",
-      "reads": [
-        "historical_features.shape_vector",
-        "historical_features.level_series"
-      ],
-      "writes": [
-        "prediction_stack",
-        "features.current_residual"
-      ],
-      "parents": [
-        "ShapeLevel",
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "level_kernel_rbf",
-        "kernel_rbf_loo"
-      ],
-      "next": [
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "level_kernel_rbf",
-        "kernel_rbf_loo",
-        "STOP"
-      ]
-    },
-    {
-      "id": "level_kernel_rbf",
-      "status": "notebook",
-      "class": "model",
-      "core": true,
-      "description": "Fit an RBF model on level_series and expand through shape_vector.",
-      "reads": [
-        "historical_features.level_series",
-        "historical_features.shape_vector",
-        "current_target"
-      ],
-      "writes": [
-        "prediction_stack",
-        "features.current_residual"
-      ],
-      "parents": [
-        "ShapeLevel",
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "shape_naive",
-        "kernel_rbf_loo"
-      ],
-      "next": [
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "shape_naive",
-        "kernel_rbf_loo",
-        "STOP"
-      ]
-    },
-    {
-      "id": "FlairRidgeLevel",
+      "id": "parrot",
       "status": "package",
       "class": "model",
       "core": true,
-      "description": "Experimental FLAIR soft-averaged Ridge over level innovations, expanded through shape.",
-      "reads": [
-        "historical_features.flair_level_innov",
-        "historical_features.shape_vector"
-      ],
+      "description": "Analog forecast: copy the continuation of the past window with the highest |correlation| to the recent window, affine-rescaled.",
+      "reads": [],
       "writes": [
-        "prediction_stack",
-        "features.flair_point_forecast",
-        "features.current_residual"
+        "prediction_stack"
       ],
       "parents": [
-        "LevelBoxCoxCenter"
+        "FlairRidgeLevel",
+        "ForwardFill",
+        "FourierFeatures",
+        "LinearFill",
+        "MeanAbsScaling",
+        "SeasonalFeatures",
+        "ZNormalization",
+        "gb_level_forecast",
+        "kernel_rbf",
+        "level_shape_ridge",
+        "lightgbm_tabular",
+        "rf_tabular",
+        "step_regression",
+        "versatile_gb"
       ],
       "next": [
-        "FlairSamplePaths",
-        "BindAllSafeTabular",
-        "STOP"
+        "STOP",
+        "kernel_rbf",
+        "lightgbm_tabular",
+        "rf_tabular",
+        "versatile_gb"
       ]
     },
     {
-      "id": "FlairSamplePaths",
+      "id": "rf_tabular",
       "status": "package",
-      "class": "feature",
+      "class": "model",
       "core": true,
-      "description": "Experimental FLAIR stochastic samples from level bootstrap and coherent phase noise.",
-      "reads": [
-        "features.flair_ridge_beta",
-        "historical_features.period_matrix",
-        "historical_features.shape_vector"
-      ],
+      "description": "RandomForestRegressor on active tabular model_input.",
+      "reads": [],
       "writes": [
-        "features.flair_samples",
-        "features.flair_sample_mean"
+        "prediction_stack"
       ],
       "parents": [
-        "FlairRidgeLevel"
+        "ForwardFill",
+        "FourierFeatures",
+        "LinearFill",
+        "MeanAbsScaling",
+        "SeasonalFeatures",
+        "ZNormalization",
+        "parrot"
       ],
       "next": [
-        "STOP"
+        "STOP",
+        "parrot"
+      ]
+    },
+    {
+      "id": "step_regression",
+      "status": "package",
+      "class": "model",
+      "core": true,
+      "description": "Per-date regression: value <- known-future covariates + index.",
+      "reads": [],
+      "writes": [
+        "prediction_stack"
+      ],
+      "parents": [
+        "FourierFeatures",
+        "MeanAbsScaling",
+        "PeriodDetect",
+        "PeriodDetectBIC",
+        "PeriodDetectSpectral",
+        "SeasonalFeatures",
+        "ZNormalization"
+      ],
+      "next": [
+        "STOP",
+        "parrot"
+      ]
+    },
+    {
+      "id": "versatile_gb",
+      "status": "package",
+      "class": "model",
+      "core": true,
+      "description": "Gradient boosting on the auto-built feature bundle.",
+      "reads": [],
+      "writes": [
+        "prediction_stack"
+      ],
+      "parents": [
+        "ForwardFill",
+        "FourierFeatures",
+        "LinearFill",
+        "MeanAbsScaling",
+        "START",
+        "SeasonalFeatures",
+        "ZNormalization",
+        "parrot",
+        "versatile_gb"
+      ],
+      "next": [
+        "STOP",
+        "parrot",
+        "versatile_gb"
       ]
     },
     {
       "id": "STOP",
       "status": "synthetic",
-      "class": "control",
+      "class": "terminal",
       "core": true,
-      "description": "Synthetic stop node for graph visualization.",
-      "reads": [
-        "prediction_stack"
-      ],
-      "writes": [
-        "features.final_forecast"
-      ],
+      "description": "Terminal node allowed after a model has produced a prediction.",
+      "reads": [],
+      "writes": [],
       "parents": [
-        "kernel_rbf",
-        "kernel_rbf_fast",
-        "kernel_rbf_loo",
-        "shape_naive",
-        "level_kernel_rbf",
         "FlairRidgeLevel",
         "FlairSamplePaths",
+        "gb_level_forecast",
+        "kernel_rbf",
+        "level_shape_ridge",
+        "lightgbm_tabular",
+        "parrot",
         "rf_tabular",
-        "lightgbm_tabular"
+        "step_regression",
+        "versatile_gb"
       ],
       "next": []
     }

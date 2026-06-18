@@ -1,4 +1,4 @@
-# Token Reference
+﻿# Token Reference
 
 This is the living index of implemented tokens. It should stay aligned with the
 package code and the current signal-board architecture.
@@ -83,12 +83,15 @@ search moves that narrow/tag the auto-bundle, not as required plumbing.
 Registered by `register_default_tokens(grammar)`:
 
 ```text
+LinearFill
+ForwardFill
 ZNormalization
 MeanAbsScaling
 FourierFeatures
 kernel_rbf
 rf_tabular
 lightgbm_tabular
+parrot
 ```
 
 ### FLAIR
@@ -97,11 +100,12 @@ Registered by `register_flair_tokens(grammar)`:
 
 ```text
 FlairPreprocess
-PeriodSelection
+PeriodDetect
+PeriodDetectSpectral
+PeriodDetectBIC
 PeriodPhaseOneHot
-PeriodFold
-ShapeLevel
-SecondaryLevelSeasonality
+SeasonalFold
+level_shape_ridge
 LevelBoxCoxCenter
 FlairRidgeLevel
 FlairSamplePaths
@@ -112,8 +116,6 @@ FlairSamplePaths
 Registered by `register_versatile_tokens(grammar)`:
 
 ```text
-DayOfWeekFeature
-versatile_rf
 versatile_gb
 ```
 
@@ -125,13 +127,107 @@ Registered by `register_flair_gb_swap(grammar)`:
 gb_level_forecast
 ```
 
+### Seasonal
+
+Registered by `register_seasonal_tokens(grammar)`:
+
+```text
+PeriodDetect
+PeriodDetectSpectral
+PeriodDetectBIC
+SeasonalFeatures
+step_regression
+```
+
 With all registries enabled:
 
 ```text
-Grammar(20 tokens, 58 edges)
+Grammar(23 tokens, 112 edges)
 ```
 
 ## Package Tokens
+
+### `LinearFill`
+
+Status: `package`
+
+Class: `CleaningToken`
+
+File: `graph_Time_series/token_blocks/imputation.py`
+
+Purpose: fill NaN/inf history values by linear interpolation.
+
+Reads:
+
+- `raw_history`
+
+Writes:
+
+- active `features["raw_history"]`
+- `historical_features["clean_history"]`
+- `flags["history_filled"]`
+
+Hyperparameters:
+
+- no constructor hyperparameters
+
+State effect:
+
+```text
+raw_history with gaps -> interpolated raw_history + clean_history
+```
+
+Common next tokens:
+
+- `ZNormalization`
+- `MeanAbsScaling`
+- `FourierFeatures`
+- `kernel_rbf`
+- `rf_tabular`
+- `lightgbm_tabular`
+- `PeriodDetect`
+
+### `ForwardFill`
+
+Status: `package`
+
+Class: `CleaningToken`
+
+File: `graph_Time_series/token_blocks/imputation.py`
+
+Purpose: fill NaN/inf history values by carrying the latest finite value forward.
+
+Reads:
+
+- `raw_history`
+
+Writes:
+
+- active `features["raw_history"]`
+- `historical_features["clean_history"]`
+- `flags["history_filled"]`
+
+Hyperparameters:
+
+- no constructor hyperparameters
+
+State effect:
+
+```text
+leading gaps -> first finite value
+later gaps -> previous finite value
+all-missing rows -> zeros
+```
+
+Common next tokens:
+
+- `ZNormalization`
+- `MeanAbsScaling`
+- `FourierFeatures`
+- `kernel_rbf`
+- `rf_tabular`
+- `lightgbm_tabular`
+- `PeriodDetect`
 
 ### `ZNormalization`
 
@@ -174,8 +270,6 @@ Common next tokens:
 - `kernel_rbf`
 - `rf_tabular`
 - `lightgbm_tabular`
-- `DayOfWeekFeature`
-- `versatile_rf`
 - `versatile_gb`
 
 ### `MeanAbsScaling`
@@ -219,8 +313,6 @@ Common next tokens:
 - `kernel_rbf`
 - `rf_tabular`
 - `lightgbm_tabular`
-- `DayOfWeekFeature`
-- `versatile_rf`
 - `versatile_gb`
 
 ### `FourierFeatures`
@@ -264,9 +356,7 @@ Common next tokens:
 - `kernel_rbf`
 - `rf_tabular`
 - `lightgbm_tabular`
-- `versatile_rf`
 - `versatile_gb`
-- `DayOfWeekFeature`
 
 ### `kernel_rbf`
 
@@ -309,6 +399,7 @@ current_target becomes residual
 Common next tokens:
 
 - `kernel_rbf`
+- `parrot`
 - `STOP`
 
 ### `rf_tabular`
@@ -352,6 +443,7 @@ feature bundle -> RandomForestRegressor -> residual prediction
 
 Common next tokens:
 
+- `parrot`
 - `STOP`
 
 ### `lightgbm_tabular`
@@ -398,6 +490,52 @@ Implementation note:
 
 Common next tokens:
 
+- `parrot`
+- `STOP`
+
+### `parrot`
+
+Status: `package`
+
+Class: `ModelToken`
+
+File: `graph_Time_series/token_blocks/parrot.py`
+
+Purpose: within-series analog / nearest-neighbour forecaster.
+
+Reads:
+
+- preferred `scaled_history`
+- fallback `clean_history`
+- fallback active `features["raw_history"]`
+- `current_target` through the residual stack
+
+Writes:
+
+- `prediction_stack[-1]`
+- updated `current_target` / `current_residual`
+
+Hyperparameters:
+
+- `source_feature=None` for automatic source selection
+- fixed analog window length: forecast horizon
+- fixed neighbours: `1`
+- match score: absolute Pearson correlation
+
+State effect:
+
+```text
+active history sequence -> best past analog continuation
+prediction -> state.push_prediction(...)
+current_target becomes residual for later models
+```
+
+Common next tokens:
+
+- `kernel_rbf`
+- `rf_tabular`
+- `lightgbm_tabular`
+- `versatile_gb`
 - `STOP`
 
 ### `PeriodPhaseOneHot`
@@ -442,7 +580,7 @@ optional history-side one-hot feature
 
 Common next tokens:
 
-- `PeriodFold`
+- `SeasonalFold`
 
 ## FLAIR Tokens
 
@@ -456,7 +594,7 @@ Status: `package`
 
 Class: `CleaningToken`
 
-Purpose: interpolate finite values and shift each series positive.
+Purpose: backward-compatible alias for `LinearFill`.
 
 Reads:
 
@@ -464,161 +602,201 @@ Reads:
 
 Writes:
 
-- `historical_features["flair_history"]`
-- `metadata["flair_shift"]`
-- positivity-shift transform
-- `flags["flair_preprocessed"]`
+- active `features["raw_history"]`
+- `historical_features["clean_history"]`
+- `flags["history_filled"]`
 
 Hyperparameters:
 
-- `eps=1e-6`
+- no constructor hyperparameters
+
+State effect:
+
+```text
+same as LinearFill; no positivity shift
+```
 
 Next:
 
-- `PeriodSelection`
+- `PeriodDetect`
 
-### `PeriodSelection`
+### `PeriodDetect`
 
 Status: `package`
 
 Class: `FeatureToken`
 
-Purpose: select a global FLAIR period using candidate period BIC/SVD scores.
+Purpose: default FLAIR-style BIC period detector.
 
 Reads:
 
-- `flair_history`
+- preferred `clean_history`
+- fallback `flair_history`, `scaled_history`, then `raw_history`
 
 Writes:
 
-- `metadata["period"]`
+- `metadata["periods"]`
+- compatibility scalar `metadata["period"]`
 - `metadata["period_scores"]`
-- `metadata["flair_secondary_periods"]`
-- `flags["period_selected"]`
+- `metadata["period_baseline_bic"]`
+- `metadata["period_selector"] = "bic"`
+- `flags["periods_detected"]`
 
 Hyperparameters:
 
 - `freq="H"`
 - `max_series=8`
 - `min_complete=3`
+- `source_feature="scaled_history"`
+- `margin=0.15`
+- `max_periods=4`
 
 Next:
 
 - `PeriodPhaseOneHot`
-- `PeriodFold`
+- `SeasonalFold`
 
-### `PeriodFold`
+### `PeriodDetectSpectral`
 
 Status: `package`
 
 Class: `FeatureToken`
 
-Purpose: fold preprocessed history into phase-by-period matrices, and
-(optionally, ON BY DEFAULT) denoise the per-cycle level totals with a rank-1 SVD
-energy shrinkage. The former `LevelShrinkage` token has been MERGED into this one.
+Purpose: detect a period chain by periodogram power.
 
 Reads:
 
-- `flair_history`
-- `period`
+- preferred `clean_history`
+- fallback `flair_history`, `scaled_history`, then `raw_history`
 
 Writes:
 
-- `historical_features["period_matrix"]`
-- `historical_features["level_series"]`
-- compatibility aliases `flair_period_matrix`, `flair_level_raw`
-- `metadata["n_complete_periods"]`
+- `metadata["periods"]`
+- compatibility scalar `metadata["period"]`
+- `metadata["period_power"]`
+- `metadata["period_selector"] = "periodogram"`
+- `flags["periods_detected"]`
+
+Hyperparameters:
+
+- `freq="H"`
+- `max_series=8`
+- `min_complete=3`
+- `source_feature="scaled_history"`
+- `power_threshold=0.05`
+- `band=1`
+- `max_periods=4`
+
+Next:
+
+- `PeriodPhaseOneHot`
+- `SeasonalFold`
+- `SeasonalFeatures`
+
+### `PeriodDetectBIC`
+
+Status: `package`
+
+Class: `FeatureToken`
+
+Purpose: detect a nested period chain by rank-1 fold/BIC score.
+
+Reads:
+
+- preferred `clean_history`
+- fallback `flair_history`, `scaled_history`, then `raw_history`
+
+Writes:
+
+- `metadata["periods"]`
+- compatibility scalar `metadata["period"]`
+- `metadata["period_scores"]`
+- `metadata["period_baseline_bic"]`
+- `metadata["period_selector"] = "bic"`
+- `flags["periods_detected"]`
+
+Hyperparameters:
+
+- `freq="H"`
+- `max_series=8`
+- `min_complete=3`
+- `source_feature="scaled_history"`
+- `margin=0.15`
+- `max_periods=4`
+
+Next:
+
+- `PeriodPhaseOneHot`
+- `SeasonalFold`
+
+### `SeasonalFold`
+
+Status: `package`
+
+Class: `FeatureToken`
+
+Purpose: one seasonal fold per call. Each `apply` does **exactly one** fold (it
+is NOT internally recursive); calling the token again via the grammar self-loop
+pops the **next** period from `PeriodDetect`'s list and folds the running
+amplitude, like a queue. It replaces the former `PeriodFold` -> `ShapeLevel` ->
+`SecondaryLevelSeasonality` sequence with a single primitive,
+`fold(series, p) -> shape (proportions, sum to 1) + per-cycle amplitude`.
+
+- the first call folds `clean_history` when present, otherwise active
+  `raw_history`, by the dominant period `periods[0]`;
+- each later call folds the amplitude left by the previous call by the next
+  nested ratio `periods[d] // P_prev`, accumulating the separable shape in one
+  multiply.
+
+Called once it is a plain seasonal decomposition; called again it peels the
+next nested period. After d+1 folds the total period is `P` and the
+decomposition collapses to the standard head interface:
+
+- `level_series` = per-P-cycle amplitude (sum over the P phases),
+- `shape_vector` = SEPARABLE shape over P phases = outer product of the
+  per-level shapes, `eff[t] = prod_d shape_d[(t // periods[d-1]) % fold_p_d]`,
+- `metadata["period"] = P`.
+
+So `level_shape_ridge`, `LevelBoxCoxCenter -> FlairRidgeLevel` and
+`gb_level_forecast` (which reconstruct `level[t//P] * shape[t%P]`) work
+unchanged -- they forecast only the innermost amplitude and re-drape the
+separable shape. The old `future_shape2` / `flair_cross_period` secondary
+machinery is no longer used (seeded to identity for compatibility).
+
+Reads:
+
+- `clean_history` when present, otherwise active `raw_history`
+- `param:periods` (required port; from `PeriodDetect`)
+
+Writes:
+
+- `historical_features["period_matrix"]` (history folded by the total period P),
+  `["level_series"]`, `["shape_vector"]`, `flair_level_work`,
+  compatibility aliases `flair_period_matrix`, `flair_level_raw`, `flair_shape`
+- `metadata["period"]` (= P), `["n_complete_periods"]`, `["shape_k"]`,
+  `["seasonal_fold_depth"]`, `["seasonal_fold_periods"]`
 - when `shrink_level=True`: `historical_features["flair_level_denoised"]`,
   `metadata["flair_level_shrinkage"]`
 
 Hyperparameters:
 
-- `shrink_level=True` (apply the level shrinkage; set `False` for un-shrunk levels)
-- `min_factor=0.05` (floor on the shrinkage factor)
+- `shrink_level=True`, `min_factor=0.05` (rank-1 SVD level shrinkage on the
+  per-P-cycle amplitude)
+- `shape_k=2` (cycles averaged into each frozen shape)
+- `min_complete=2` (minimum complete P-cycles required to fold)
+- `max_uses=4`
 
-Level-shrinkage theory (literature note):
-
-A clean periodic signal makes the folded `(phase x cycle)` matrix essentially
-rank-1, so `s0^2` is the dominant cycle energy and `s1^2, s2^2, ...` are noise.
-The shrinkage factor
-
-    f = clip( max(s0^2 - mean(s1^2..), 0) / s0^2 , min_factor, 1 )
-
-is the fraction of the leading component that is real signal (Wiener /
-James-Stein style); the level totals are scaled by it.
-
-- On STRONG / clean seasonality the factor is `f -> 1`, so shrinkage is a no-op
-  (a perfectly repeated cycle gives singular values `[s0, 0, 0, ...]`, `f = 1`).
-- It HELPS only when many noisy cycles are dominated by one periodic component.
-- Leave it OFF (`shrink_level=False`) when the series is genuinely
-  multi-component (two periodicities, amplitude modulation, within-cycle trend)
-  -- those higher singular values are real signal, not noise -- or when an
-  unbiased / calibrated level magnitude matters downstream.
-
-Included by default because the FLAIR pipeline assumes denoised levels; the
-toggle preserves the un-shrunk variant without a separate token.
+Nesting requirement: a further fold is possible only when the next period is an
+integer multiple of the previous one (`periods[d] % periods[d-1] == 0`) with
+enough complete cycles. With a single detected period exactly one fold applies
+(one seasonality); a 2-fold sequence needs two nested periods.
 
 Next:
 
-- `ShapeLevel`
-
-### `ShapeLevel`
-
-Status: `package`
-
-Class: `FeatureToken`
-
-Purpose: estimate within-period shape proportions from recent complete periods.
-
-Reads:
-
-- `period_matrix`
-- `level_series`
-
-Writes:
-
-- `historical_features["shape_vector"]`
-- `historical_features["flair_shape"]`
-- `historical_features["flair_shape_history"]`
-- `metadata["shape_k"]`
-
-Hyperparameters:
-
-- `shape_k=2`
-
-Next:
-
-- `SecondaryLevelSeasonality`
-- `gb_level_forecast`
-
-### `SecondaryLevelSeasonality`
-
-Status: `package`
-
-Class: `FeatureToken`
-
-Purpose: estimate secondary seasonality on the compressed level series.
-
-Reads:
-
-- `level_series`
-- `period`
-
-Writes:
-
-- `historical_features["flair_shape2"]`
-- `historical_features["flair_level_work"]`
-- `features["flair_level_future_shape2"]`
-- `metadata["flair_cross_period"]`
-- `metadata["flair_cross_periods"]`
-
-Hyperparameters:
-
-- `min_complete=2`
-
-Next:
-
+- `SeasonalFold` (fold the next nested period)
+- `level_shape_ridge`
 - `LevelBoxCoxCenter`
+- `gb_level_forecast`
 
 ### `LevelBoxCoxCenter`
 
@@ -736,70 +914,6 @@ Next:
 These tokens demonstrate the signal-board design. They are opt-in through
 `register_versatile_tokens`.
 
-### `DayOfWeekFeature`
-
-Status: `package`
-
-Class: `FeatureToken`
-
-Purpose: add cyclical calendar-like covariates using position modulo a period.
-
-Reads:
-
-- `raw_history`
-
-Writes:
-
-- `historical_features["calendar_features"]`
-- `future_features["future_calendar_features"]`
-- `flags["calendar_encoded"]`
-
-Provides:
-
-- history `features`
-- future `features`
-
-Hyperparameters:
-
-- `period=7` in the class default
-- `period=24` in `register_versatile_tokens`
-
-Next:
-
-- `FourierFeatures`
-- `versatile_rf`
-- `versatile_gb`
-
-### `versatile_rf`
-
-Status: `package`
-
-Class: `ModelToken`
-
-Purpose: RandomForestRegressor over any auto-built feature bundle.
-
-Requires:
-
-- history `features(sample, feature)` in current space, with coercion enabled.
-
-Writes:
-
-- `prediction_stack[-1]`
-- `metadata["versatile_rf"]`
-
-Hyperparameters:
-
-- `n_estimators=80`
-- `max_depth=10`
-- `seed=0`
-- `select_tags=()`
-
-Next:
-
-- `versatile_rf`
-- `versatile_gb`
-- `STOP`
-
 ### `versatile_gb`
 
 Status: `package`
@@ -828,8 +942,8 @@ Hyperparameters:
 
 Next:
 
-- `versatile_rf`
 - `versatile_gb`
+- `parrot`
 - `STOP`
 
 ### `gb_level_forecast`
@@ -867,6 +981,7 @@ Hyperparameters:
 
 Next:
 
+- `parrot`
 - `STOP`
 
 ## Common Sequences
@@ -875,6 +990,8 @@ Default package:
 
 ```text
 ZNormalization -> kernel_rbf -> STOP
+ZNormalization -> parrot -> kernel_rbf -> STOP
+ZNormalization -> kernel_rbf -> parrot -> STOP
 MeanAbsScaling -> FourierFeatures -> rf_tabular -> STOP
 MeanAbsScaling -> FourierFeatures -> lightgbm_tabular -> STOP
 ZNormalization -> FourierFeatures -> kernel_rbf -> STOP
@@ -884,19 +1001,26 @@ Residual stacking:
 
 ```text
 ZNormalization -> kernel_rbf -> kernel_rbf -> STOP
-ZNormalization -> FourierFeatures -> versatile_rf -> versatile_gb -> STOP
+ZNormalization -> FourierFeatures -> versatile_gb -> versatile_gb -> STOP
 ```
 
 FLAIR:
 
 ```text
-FlairPreprocess
--> PeriodSelection
+LinearFill
+-> PeriodDetect
+-> SeasonalFold
+-> level_shape_ridge
+-> STOP
+```
+
+FLAIR verbose inspection path:
+
+```text
+LinearFill
+-> PeriodDetect
 -> PeriodPhaseOneHot
--> PeriodFold
--> LevelShrinkage
--> ShapeLevel
--> SecondaryLevelSeasonality
+-> SeasonalFold
 -> LevelBoxCoxCenter
 -> FlairRidgeLevel
 -> STOP
@@ -905,11 +1029,9 @@ FlairPreprocess
 FLAIR sample paths:
 
 ```text
-FlairPreprocess
--> PeriodSelection
--> PeriodFold
--> ShapeLevel
--> SecondaryLevelSeasonality
+LinearFill
+-> PeriodDetect
+-> SeasonalFold
 -> LevelBoxCoxCenter
 -> FlairRidgeLevel
 -> FlairSamplePaths
@@ -919,19 +1041,17 @@ FlairPreprocess
 FLAIR level-model swap:
 
 ```text
-FlairPreprocess
--> PeriodSelection
--> PeriodFold
--> LevelShrinkage
--> ShapeLevel
+LinearFill
+-> PeriodDetect
+-> SeasonalFold
 -> gb_level_forecast
 -> STOP
 ```
 
-Calendar plus tabular:
+Seasonal plus tabular:
 
 ```text
-ZNormalization -> DayOfWeekFeature -> FourierFeatures -> versatile_rf -> STOP
+ZNormalization -> PeriodDetect -> SeasonalFeatures -> rf_tabular -> STOP
 ```
 
 ## Notebook-Only / Prototype Space
@@ -949,4 +1069,3 @@ package tokens. Useful directions, not implemented as current package tokens:
 | Selector tokens | Optional feature-bundle narrowing by tags |
 
 Any promoted token should update this file, the README, and the graph catalog.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       

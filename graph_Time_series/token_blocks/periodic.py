@@ -188,7 +188,7 @@ class PeriodPhaseOneHotToken(FeatureToken):
                 return ((history_length + positions) % period).astype(self._id_dtype(period))
             return (positions % period).astype(self._id_dtype(period))
 
-        # Fold alignment matches PeriodFold: trailing complete periods define
+        # Fold alignment matches SeasonalFold: trailing complete periods define
         # the phase origin, so the first forecast step starts at phase zero.
         if is_future:
             return (positions % period).astype(self._id_dtype(period))

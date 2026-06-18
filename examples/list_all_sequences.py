@@ -11,7 +11,7 @@ The enumeration respects three structural rules on top of each token's own
      never ZNormalization AND MeanAbsScaling in the same pipeline).
   3. Within a phase, tokens follow a fixed canonical order, so we emit ONE
      representative per combination instead of every permutation. Real
-     dependencies (the FLAIR chain PeriodDetect -> PeriodFold -> ShapeLevel
+     dependencies (the FLAIR chain PeriodDetect -> SeasonalFold
      -> ...) are encoded in that canonical order and therefore preserved.
 
 Fast by design: model tokens are recorded as terminal steps without being
@@ -31,11 +31,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from graph_Time_series.state import State
 from graph_Time_series.token_blocks import (
     ZNormalizationToken, MeanAbsScalingToken, FourierFeaturesToken,
-    KernelRBFToken, RandomForestTabularToken,
-    VersatileGradientBoostingToken,
+    KernelRBFToken, RandomForestTabularToken, LightGBMTabularToken,
+    ForwardFillToken, LinearFillToken, VersatileGradientBoostingToken,
     GBLevelForecastToken, FlairPreprocessToken,
-    PeriodDetectToken, PeriodPhaseOneHotToken, PeriodFoldToken,
-    ShapeLevelToken, SecondaryLevelSeasonalityToken, LevelBoxCoxCenterToken,
+    ParrotToken, PeriodDetectToken, PeriodDetectBICToken,
+    PeriodDetectSpectralToken, PeriodPhaseOneHotToken, SeasonalFoldToken,
+    LevelBoxCoxCenterToken,
     LevelShapeRidgeToken, FlairRidgeLevelToken, FlairSamplePathsToken,
 )
 
@@ -43,16 +44,20 @@ from graph_Time_series.token_blocks import (
 TOKENS = {
     "ZNormalization": ZNormalizationToken(),
     "MeanAbsScaling": MeanAbsScalingToken(),
+    "LinearFill": LinearFillToken(),
+    "ForwardFill": ForwardFillToken(),
     "FourierFeatures": FourierFeaturesToken(n_harmonics=6),
     "kernel_rbf": KernelRBFToken(),
+    "parrot": ParrotToken(),
     "rf_tabular": RandomForestTabularToken(n_estimators=8),
+    "lightgbm_tabular": LightGBMTabularToken(n_estimators=8),
     "versatile_gb": VersatileGradientBoostingToken(max_iter=15),
     "FlairPreprocess": FlairPreprocessToken(),
     "PeriodDetect": PeriodDetectToken(freq="H"),
+    "PeriodDetectSpectral": PeriodDetectSpectralToken(freq="H"),
+    "PeriodDetectBIC": PeriodDetectBICToken(freq="H"),
     "PeriodPhaseOneHot": PeriodPhaseOneHotToken(),
-    "PeriodFold": PeriodFoldToken(),
-    "ShapeLevel": ShapeLevelToken(),
-    "SecondaryLevelSeasonality": SecondaryLevelSeasonalityToken(),
+    "SeasonalFold": SeasonalFoldToken(),
     "LevelBoxCoxCenter": LevelBoxCoxCenterToken(),
     "level_shape_ridge": LevelShapeRidgeToken(show_progress=False),
     "FlairRidgeLevel": FlairRidgeLevelToken(show_progress=False),
@@ -64,21 +69,24 @@ TOKENS = {
 # not listed falls back to the end of its phase.
 CANON_ORDER = [
     # cleaning
-    "FlairPreprocess",
+    "LinearFill", "ForwardFill", "FlairPreprocess",
     # scaling
     "ZNormalization", "MeanAbsScaling",
     # feature (FLAIR chain first, in dependency order, then generic features)
-    "PeriodDetect", "PeriodPhaseOneHot", "PeriodFold",
-    "ShapeLevel", "SecondaryLevelSeasonality", "LevelBoxCoxCenter",
+    "PeriodDetect", "PeriodDetectSpectral", "PeriodDetectBIC",
+    "PeriodPhaseOneHot", "SeasonalFold",
+    "LevelBoxCoxCenter",
     "FourierFeatures",
     # model
     "gb_level_forecast", "level_shape_ridge", "FlairRidgeLevel",
-    "kernel_rbf", "rf_tabular", "versatile_gb",
+    "parrot", "kernel_rbf", "rf_tabular", "lightgbm_tabular", "versatile_gb",
 ]
 
 # Mutually-exclusive groups: at most one token from each per pipeline.
 EXCLUSIVE_GROUPS = [
     {"ZNormalization", "MeanAbsScaling"},   # only one normalizer
+    {"LinearFill", "ForwardFill", "FlairPreprocess"},  # only one missing-value filler
+    {"PeriodDetect", "PeriodDetectSpectral", "PeriodDetectBIC"},  # one detector
 ]
 
 PHASE_RANK = {"cleaning": 0, "transform": 1, "feature": 2, "binding": 2,

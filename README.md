@@ -156,18 +156,24 @@ grammar = register_default_tokens(Grammar())
 Registered tokens:
 
 ```text
+LinearFill
+ForwardFill
 ZNormalization
 MeanAbsScaling
 FourierFeatures
 kernel_rbf
 rf_tabular
 lightgbm_tabular
+parrot
 ```
 
 Typical binder-free chains:
 
 ```text
+LinearFill -> ZNormalization -> kernel_rbf -> STOP
 ZNormalization -> kernel_rbf -> STOP
+ZNormalization -> parrot -> kernel_rbf -> STOP
+ZNormalization -> kernel_rbf -> parrot -> STOP
 MeanAbsScaling -> FourierFeatures -> rf_tabular -> STOP
 MeanAbsScaling -> FourierFeatures -> lightgbm_tabular -> STOP
 ZNormalization -> FourierFeatures -> kernel_rbf -> kernel_rbf -> STOP
@@ -186,10 +192,10 @@ Adds:
 ```text
 FlairPreprocess
 PeriodDetect
+PeriodDetectSpectral
+PeriodDetectBIC
 PeriodPhaseOneHot
-PeriodFold
-ShapeLevel
-SecondaryLevelSeasonality
+SeasonalFold
 level_shape_ridge
 LevelBoxCoxCenter
 FlairRidgeLevel
@@ -199,12 +205,10 @@ FlairSamplePaths
 Typical FLAIR point forecast:
 
 ```text
-FlairPreprocess
+LinearFill
 -> PeriodDetect
 -> PeriodPhaseOneHot
--> PeriodFold
--> ShapeLevel
--> SecondaryLevelSeasonality
+-> SeasonalFold
 -> level_shape_ridge
 -> STOP
 ```
@@ -212,12 +216,10 @@ FlairPreprocess
 Verbose FLAIR inspection path:
 
 ```text
-FlairPreprocess
+LinearFill
 -> PeriodDetect
 -> PeriodPhaseOneHot
--> PeriodFold
--> ShapeLevel
--> SecondaryLevelSeasonality
+-> SeasonalFold
 -> LevelBoxCoxCenter
 -> FlairRidgeLevel
 -> STOP
@@ -264,10 +266,24 @@ Adds:
 gb_level_forecast
 ```
 
-This is a drop-in model-side experiment after `ShapeLevel`: it predicts period
+This is a drop-in model-side experiment after `SeasonalFold`: it predicts period
 levels with gradient boosting and expands them through the learned shape.
 
 ## Implemented Package Tokens
+
+### Cleaning
+
+`LinearFill`
+
+- fills NaN/inf history values by linear interpolation;
+- writes `clean_history`;
+- refreshes the active `raw_history` view used by later tokens.
+
+`ForwardFill`
+
+- fills NaN/inf history values by carrying the latest finite value forward;
+- leading gaps use the first finite value;
+- writes the same minimal outputs as `LinearFill`.
 
 ### Transforms
 
@@ -303,11 +319,11 @@ levels with gradient boosting and expands them through the learned shape.
 
 FLAIR feature tokens:
 
-- `FlairPreprocess`
+- `LinearFill` or compatibility alias `FlairPreprocess`
 - `PeriodDetect`
-- `PeriodFold`
-- `ShapeLevel`
-- `SecondaryLevelSeasonality`
+- `PeriodDetectSpectral`
+- `PeriodDetectBIC`
+- `SeasonalFold`
 - `LevelBoxCoxCenter`
 - `FlairSamplePaths`
 
@@ -331,6 +347,14 @@ FLAIR feature tokens:
 - LightGBM `LGBMRegressor` wrapped in `MultiOutputRegressor`;
 - imports LightGBM lazily, so `lightgbm` must be installed only when this token
   is used.
+
+`parrot`
+
+- within-series analog / nearest-neighbour forecaster;
+- reads the active time series view: `scaled_history`, then `clean_history`,
+  then active `raw_history`;
+- pushes into the normal prediction stack, so later models fit the residual;
+- can also follow another model and add its own residual prediction.
 
 `level_shape_ridge`
 
@@ -386,19 +410,17 @@ Any long loop in the notebook should use `tqdm` from now on.
 
 ## Validation
 
-Read-only smoke command:
+Useful smoke checks:
 
 ```bash
-python tests/test_token_combinations.py
+python -m py_compile graph_Time_series/token_blocks/imputation.py graph_Time_series/token_blocks/flair.py graph_Time_series/token_blocks/seasonal.py graph_Time_series/token_blocks/normalization.py graph_Time_series/token_blocks/__init__.py examples/pipeline_inspect.py examples/list_all_sequences.py
+python -c "from graph_Time_series.grammar import Grammar; from graph_Time_series.token_blocks import register_default_tokens, register_flair_tokens, register_versatile_tokens, register_flair_gb_swap, register_seasonal_tokens; g=Grammar(); [globals()[name](g) for name in ['register_default_tokens','register_flair_tokens','register_versatile_tokens','register_flair_gb_swap','register_seasonal_tokens']]; print(g)"
 ```
 
-Current expected result:
+Current live registry:
 
 ```text
-7/7 named signature pipelines passed
-completed pipelines: 41
-failures: 0
-RESULT: ALL GREEN
+Grammar(23 tokens, 112 edges)
 ```
 
 In this Windows workspace, the `python` command may point to the WindowsApps

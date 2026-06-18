@@ -116,21 +116,24 @@ current package architecture.
 
 `register_default_tokens(grammar)`:
 
+- `LinearFill`
+- `ForwardFill`
 - `ZNormalization`
 - `MeanAbsScaling`
 - `FourierFeatures`
 - `kernel_rbf`
 - `rf_tabular`
 - `lightgbm_tabular`
+- `parrot`
 
 `register_flair_tokens(grammar)`:
 
 - `FlairPreprocess`
 - `PeriodDetect`
+- `PeriodDetectSpectral`
+- `PeriodDetectBIC`
 - `PeriodPhaseOneHot`
-- `PeriodFold`
-- `ShapeLevel`
-- `SecondaryLevelSeasonality`
+- `SeasonalFold`
 - `level_shape_ridge`
 - `LevelBoxCoxCenter`
 - `FlairRidgeLevel`
@@ -147,38 +150,30 @@ current package architecture.
 `register_seasonal_tokens(grammar)`:
 
 - `PeriodDetect`
+- `PeriodDetectSpectral`
+- `PeriodDetectBIC`
 - `SeasonalFeatures`
 - `step_regression`
 
 When all registries are enabled together, the grammar currently reports:
 
 ```text
-Grammar(20 tokens, 57 edges)
+Grammar(23 tokens, 112 edges)
 ```
 
 ## Demonstrated Combinations
 
-`tests/test_token_combinations.py` runs synthetic data through:
+The current checkout uses focused smoke runs and notebooks rather than the old
+`tests/test_token_combinations.py` file. Useful combinations to keep checking:
 
-- full FLAIR;
-- FLAIR with `gb_level_forecast` replacing the Ridge level forecaster;
-- compact `level_shape_ridge` using internal Box-Cox ridge with minimal state;
-- binder-free RF and gradient boosting variants;
-- package `rf_tabular` without binder tokens;
-- `kernel_rbf` without binder tokens;
-- time-bounded reachability enumeration.
+- `LinearFill -> ZNormalization -> kernel_rbf`;
+- `ForwardFill -> ZNormalization -> kernel_rbf`;
+- `LinearFill -> PeriodDetect -> SeasonalFold -> level_shape_ridge`;
+- `LinearFill -> FourierFeatures -> rf_tabular`;
+- `MeanAbsScaling -> FourierFeatures -> lightgbm_tabular`.
 
-Current expected output:
-
-```text
-6/6 named pipelines passed
-completed pipelines: 39
-failures: 0
-RESULT: ALL GREEN
-```
-
-The test can emit sklearn/joblib warnings about worker configuration. Those
-warnings are noisy but are not current correctness failures.
+`examples/troubleshoot_token_sequences.ipynb` is the practical inspection path
+for intermediate state changes and holdout predictions.
 
 ## Known Architectural Caveats
 

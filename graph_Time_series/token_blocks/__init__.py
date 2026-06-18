@@ -8,15 +8,15 @@ from .flair import (
     FlairSamplePathsToken,
     LevelBoxCoxCenterToken,
     LevelShapeRidgeToken,
-    PeriodFoldToken,
-    SecondaryLevelSeasonalityToken,
-    ShapeLevelToken,
+    SeasonalFoldToken,
 )
 from .fourier import FourierFeaturesToken
+from .imputation import ForwardFillToken, LinearFillToken
 from .kernel_rbf import KernelRBFToken
 from .normalization import MeanAbsScalingToken, ZNormalizationToken
+from .parrot import ParrotToken
 from .periodic import PeriodPhaseOneHotToken
-from .seasonal import PeriodDetectToken, SeasonalFeaturesToken
+from .seasonal import PeriodDetectToken, PeriodDetectBICToken, PeriodDetectSpectralToken, SeasonalFeaturesToken
 from .step_regression import StepRegressionToken, collect_step_covariates
 from .tabular_models import LightGBMTabularToken, RandomForestTabularToken
 from .versatile import (
@@ -33,33 +33,48 @@ def register_default_tokens(grammar):
     a model may follow any scaling/feature chain directly.
     """
     scalers = ["ZNormalization", "MeanAbsScaling"]
+    cleaners = ["LinearFill", "ForwardFill"]
     features = ["FourierFeatures"]
-    models = ["kernel_rbf", "rf_tabular", "lightgbm_tabular"]
+    models = ["kernel_rbf", "rf_tabular", "lightgbm_tabular", "parrot"]
+    non_parrot_models = ["kernel_rbf", "rf_tabular", "lightgbm_tabular"]
+    parrot_sources = scalers + features + non_parrot_models
 
-    grammar.register(ZNormalizationToken(), follows=["START"],
+    grammar.register(LinearFillToken(), follows=["START"],
+                     leads_to=scalers + features + models)
+    grammar.register(ForwardFillToken(), follows=["START"],
+                     leads_to=scalers + features + models)
+    grammar.register(ZNormalizationToken(), follows=["START"] + cleaners,
                      leads_to=features + models)
-    grammar.register(MeanAbsScalingToken(), follows=["START"],
+    grammar.register(MeanAbsScalingToken(), follows=["START"] + cleaners,
                      leads_to=features + models)
     grammar.register(FourierFeaturesToken(),
-                     follows=["START"] + scalers,
+                     follows=["START"] + cleaners + scalers,
                      leads_to=features + models)
     grammar.register(KernelRBFToken(),
-                     follows=scalers + features + ["kernel_rbf"],
-                     leads_to=["kernel_rbf", "STOP"])
+                     follows=scalers + features + ["kernel_rbf", "parrot"],
+                     leads_to=["kernel_rbf", "parrot", "STOP"])
     grammar.register(RandomForestTabularToken(),
-                     follows=scalers + features,
-                     leads_to=["STOP"])
+                     follows=scalers + features + ["parrot"],
+                     leads_to=["parrot", "STOP"])
     grammar.register(LightGBMTabularToken(),
-                     follows=scalers + features,
-                     leads_to=["STOP"])
+                     follows=scalers + features + ["parrot"],
+                     leads_to=["parrot", "STOP"])
+    grammar.register(ParrotToken(),
+                     follows=parrot_sources,
+                     leads_to=non_parrot_models + ["STOP"])
     return grammar
 
 
 def register_flair_tokens(grammar):
     """Register the experimental FLAIR-style branch.
 
-    This is separate from ``register_default_tokens`` so routine searches do not
-    become wider unless the caller explicitly opts in.
+    The seasonal decomposition is now a single repeatable ``SeasonalFold``
+    token (it replaced PeriodFold + ShapeLevel + SecondaryLevelSeasonality):
+    call it once per detected period. Two model heads consume its output -- the
+    compact ``level_shape_ridge`` (Box-Cox ridge folded into one token) and the
+    explicit ``LevelBoxCoxCenter`` -> ``FlairRidgeLevel`` -> ``FlairSamplePaths``
+    path. Kept separate from ``register_default_tokens`` so routine searches do
+    not widen unless the caller opts in.
     """
 
     grammar.register(
@@ -69,43 +84,43 @@ def register_flair_tokens(grammar):
     )
     grammar.register(
         PeriodDetectToken(),
-        follows=["FlairPreprocess"],
-        leads_to=["PeriodPhaseOneHot", "PeriodFold"],
+        follows=["FlairPreprocess", "LinearFill", "ForwardFill"],
+        leads_to=["PeriodPhaseOneHot", "SeasonalFold"],
+    )
+    grammar.register(
+        PeriodDetectSpectralToken(),
+        follows=["FlairPreprocess", "LinearFill", "ForwardFill"],
+        leads_to=["PeriodPhaseOneHot", "SeasonalFold"],
+    )
+    grammar.register(
+        PeriodDetectBICToken(),
+        follows=["FlairPreprocess", "LinearFill", "ForwardFill"],
+        leads_to=["PeriodPhaseOneHot", "SeasonalFold"],
     )
     grammar.register(
         PeriodPhaseOneHotToken(),
-        follows=["PeriodDetect"],
-        leads_to=["PeriodFold"],
+        follows=["PeriodDetect", "PeriodDetectSpectral", "PeriodDetectBIC"],
+        leads_to=["SeasonalFold"],
     )
     grammar.register(
-        PeriodFoldToken(),
-        follows=["PeriodDetect", "PeriodPhaseOneHot"],
-        leads_to=["ShapeLevel"],
-    )
-    grammar.register(
-        ShapeLevelToken(),
-        follows=["PeriodFold"],
-        leads_to=["SecondaryLevelSeasonality", "level_shape_ridge"],
-    )
-    grammar.register(
-        SecondaryLevelSeasonalityToken(),
-        follows=["ShapeLevel"],
-        leads_to=["LevelBoxCoxCenter", "level_shape_ridge"],
+        SeasonalFoldToken(),
+        follows=["PeriodDetect", "PeriodDetectSpectral", "PeriodDetectBIC", "PeriodPhaseOneHot", "SeasonalFold"],
+        leads_to=["SeasonalFold", "level_shape_ridge", "LevelBoxCoxCenter"],
     )
     grammar.register(
         LevelShapeRidgeToken(),
-        follows=["ShapeLevel", "SecondaryLevelSeasonality"],
-        leads_to=["kernel_rbf", "STOP"],
+        follows=["SeasonalFold"],
+        leads_to=["kernel_rbf", "parrot", "STOP"],
     )
     grammar.register(
         LevelBoxCoxCenterToken(),
-        follows=["SecondaryLevelSeasonality"],
+        follows=["SeasonalFold"],
         leads_to=["FlairRidgeLevel"],
     )
     grammar.register(
         FlairRidgeLevelToken(),
         follows=["LevelBoxCoxCenter"],
-        leads_to=["FlairSamplePaths", "STOP"],
+        leads_to=["FlairSamplePaths", "parrot", "STOP"],
     )
     grammar.register(
         FlairSamplePathsToken(),
@@ -122,12 +137,13 @@ def register_versatile_tokens(grammar):
     and can follow any cleaning/scaling/feature chain.
     """
     feature_sources = [
-        "START", "ZNormalization", "MeanAbsScaling", "FourierFeatures",
+        "START", "LinearFill", "ForwardFill",
+        "ZNormalization", "MeanAbsScaling", "FourierFeatures",
     ]
     grammar.register(
         VersatileGradientBoostingToken(),
-        follows=feature_sources + ["versatile_gb"],
-        leads_to=["STOP", "versatile_gb"],
+        follows=feature_sources + ["parrot", "versatile_gb"],
+        leads_to=["STOP", "parrot", "versatile_gb"],
     )
     return grammar
 
@@ -135,14 +151,14 @@ def register_versatile_tokens(grammar):
 def register_flair_gb_swap(grammar):
     """Register the gradient-boosted period-level forecaster as a FLAIR step.
 
-    Slots in after ShapeLevel exactly where FlairRidgeLevel would, showing a
-    FLAIR sub-step (predicting the period scale) being served by a different
-    learner.
+    Slots in after ``SeasonalFold`` exactly where ``level_shape_ridge`` would,
+    showing a FLAIR sub-step (predicting the period scale) served by a
+    different learner.
     """
     grammar.register(
         GBLevelForecastToken(),
-        follows=["ShapeLevel"],
-        leads_to=["STOP"],
+        follows=["SeasonalFold"],
+        leads_to=["parrot", "STOP"],
     )
     return grammar
 
@@ -151,29 +167,40 @@ def register_seasonal_tokens(grammar):
     """Period detector + seasonal sinusoid features (auto-bundle friendly)."""
     grammar.register(
         PeriodDetectToken(),
-        follows=["START", "ZNormalization", "MeanAbsScaling"],
+        follows=["START", "LinearFill", "ForwardFill", "ZNormalization", "MeanAbsScaling"],
+        leads_to=["SeasonalFeatures"],
+    )
+    grammar.register(
+        PeriodDetectSpectralToken(),
+        follows=["START", "LinearFill", "ForwardFill", "ZNormalization", "MeanAbsScaling"],
+        leads_to=["SeasonalFeatures"],
+    )
+    grammar.register(
+        PeriodDetectBICToken(),
+        follows=["START", "LinearFill", "ForwardFill", "ZNormalization", "MeanAbsScaling"],
         leads_to=["SeasonalFeatures"],
     )
     grammar.register(
         SeasonalFeaturesToken(),
-        follows=["PeriodDetect"],
-        leads_to=["kernel_rbf", "rf_tabular", "lightgbm_tabular",
+        follows=["PeriodDetect", "PeriodDetectSpectral", "PeriodDetectBIC"],
+        leads_to=["kernel_rbf", "rf_tabular", "lightgbm_tabular", "parrot",
                   "versatile_gb", "step_regression"],
     )
     grammar.register(
         StepRegressionToken(),
         follows=["ZNormalization", "MeanAbsScaling", "FourierFeatures",
-                 "SeasonalFeatures", "PeriodDetect"],
-        leads_to=["STOP"],
+                 "SeasonalFeatures", "PeriodDetect", "PeriodDetectSpectral", "PeriodDetectBIC"],
+        leads_to=["parrot", "STOP"],
     )
     return grammar
 
-
 __all__ = [
     "PeriodDetectToken",
+    "PeriodDetectSpectralToken",
+    "PeriodDetectBICToken",
     "SeasonalFeaturesToken",
     "StepRegressionToken",
-    "register_seasonal_tokens",
+    "collect_step_covariates",
     "GBLevelForecastToken",
     "VersatileGradientBoostingToken",
     "VersatileTabularToken",
@@ -186,14 +213,14 @@ __all__ = [
     "KernelRBFToken",
     "LevelBoxCoxCenterToken",
     "LevelShapeRidgeToken",
+    "SeasonalFoldToken",
     "LightGBMTabularToken",
     "MeanAbsScalingToken",
-    "PeriodFoldToken",
     "PeriodPhaseOneHotToken",
     "RandomForestTabularToken",
-    "SecondaryLevelSeasonalityToken",
-    "ShapeLevelToken",
+    "ParrotToken",
     "ZNormalizationToken",
     "register_default_tokens",
     "register_flair_tokens",
+    "register_seasonal_tokens",
 ]
