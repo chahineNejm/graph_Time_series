@@ -4,8 +4,9 @@ The simplest analog model: for each series, find the past window most strongly
 correlated (in absolute value) with the most recent window, and copy forward
 whatever followed it -- affine-rescaled to the current level.
 
-It is the rank-1 corner of the constructed-analog family
-``argmin_M ||query - X M||``: a single window, a scalar (affine) ``M``.
+``ParrotToken`` searches each series' own past (``within_series``);
+``ParrotDatasetToken`` searches the whole panel (``cross_series``) with an
+early-stop so the much larger search stays tractable.
 """
 
 from __future__ import annotations
@@ -143,5 +144,103 @@ class ParrotToken(ModelToken):
                 "prediction_stack[-1]": pred.shape,
                 "current_residual": state.current_target.shape,
             },
+        )
+        return state
+
+
+class ParrotDatasetToken(ParrotToken):
+    """Cross-series parrot: search EVERY series' past for the best analog.
+
+    Same as :class:`ParrotToken` but ``within_series`` -> ``cross_series``: each
+    series' query window is matched against the windows of the whole panel, so a
+    series with no good self-analog can borrow one from a sibling. The affine
+    rescale transplants the match onto the query's level/scale, so a window from
+    a different series at a different level is still usable.
+
+    The full cross-series scan is ``O(N^2 * T * H)``, so the search **stops early**
+    once a candidate clears ``min_corr`` and is capped at ``max_candidates`` scans
+    per series. Candidates are visited in a fixed shuffled order (seeded) while
+    the running best is kept, so even if nothing clears the bar the
+    best-seen-within-budget is used. The query's own most-recent window is never a
+    candidate (it has no in-history continuation).
+    """
+
+    learning_scope = "cross_series"
+    name = "parrot_dataset"
+    description = (
+        "Cross-series analog forecast: search the whole panel for the past window "
+        "most |correlation| with the query, stopping early once one is good enough."
+    )
+
+    def __init__(self, source_feature: str | None = None,
+                 min_corr: float | None = 0.97, max_candidates: int | None = 10000,
+                 seed: int = 0):
+        super().__init__(source_feature=source_feature)
+        self.min_corr = None if min_corr is None else float(min_corr)
+        self.max_candidates = None if max_candidates is None else int(max_candidates)
+        self.seed = int(seed)
+
+    def get_model(self) -> Any:
+        return {
+            "model": "parrot_dataset",
+            "match": "abs_pearson",
+            "window": "horizon",
+            "neighbours": 1,
+            "scope": "cross_series",
+            "min_corr": self.min_corr,
+            "max_candidates": self.max_candidates,
+            "source_feature": self.source_feature or "auto",
+        }
+
+    def _forecast_cross(self, query: np.ndarray, hist: np.ndarray, H: int,
+                        n_win: int, order: np.ndarray) -> np.ndarray:
+        thr, budget = self.min_corr, self.max_candidates
+        best_abs, bj, bk, scanned = -1.0, 0, 0, 0
+        for idx in order:
+            j = int(idx) // n_win
+            k = int(idx) % n_win
+            c = _pearson(query, hist[j, k:k + H])
+            scanned += 1
+            if abs(c) > best_abs:
+                best_abs, bj, bk = abs(c), j, k
+            if thr is not None and best_abs >= thr:
+                break
+            if budget is not None and scanned >= budget:
+                break
+        cand = hist[bj, bk:bk + H]
+        cont = hist[bj, bk + H:bk + 2 * H]
+        var = float(((cand - cand.mean()) ** 2).sum())
+        a = (float(((cand - cand.mean()) * (query - query.mean())).sum() / var)
+             if var > 1e-12 else 1.0)
+        b = float(query.mean() - a * cand.mean())
+        return a * cont + b
+
+    def apply(self, state: "State") -> "State":
+        hist, input_name = self._resolve_history(state)
+        H = int(state.horizon)
+        n, T = hist.shape
+        n_win = T - 2 * H + 1
+        pred = np.zeros((n, H), dtype=np.float32)
+
+        if n_win <= 0 or H < 1:
+            # too short to hold an analog anywhere: per-series persistence fallback
+            for i in range(n):
+                pred[i] = self._forecast_one(hist[i], H).astype(np.float32)
+        else:
+            rng = np.random.default_rng(self.seed)
+            order = rng.permutation(n * n_win)          # (series, start) flattened
+            for i in range(n):
+                pred[i] = self._forecast_cross(
+                    hist[i, -H:], hist, H, n_win, order).astype(np.float32)
+
+        state.push_prediction(pred, self.name)
+        self._log_execution(
+            state,
+            reads={
+                input_name: hist.shape,
+                "candidate_windows": int(max(n * n_win, 0)),
+                "current_target": state.current_target.shape,
+            },
+            writes={"prediction_stack[-1]": pred.shape},
         )
         return state

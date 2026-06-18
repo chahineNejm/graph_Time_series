@@ -14,7 +14,7 @@ from .fourier import FourierFeaturesToken
 from .imputation import ForwardFillToken, LinearFillToken
 from .kernel_rbf import KernelRBFToken
 from .normalization import MeanAbsScalingToken, ZNormalizationToken
-from .parrot import ParrotToken
+from .parrot import ParrotToken, ParrotDatasetToken
 from .periodic import PeriodPhaseOneHotToken
 from .seasonal import PeriodDetectToken, PeriodDetectBICToken, PeriodDetectSpectralToken, SeasonalFeaturesToken
 from .step_regression import StepRegressionToken, collect_step_covariates
@@ -35,7 +35,7 @@ def register_default_tokens(grammar):
     scalers = ["ZNormalization", "MeanAbsScaling"]
     cleaners = ["LinearFill", "ForwardFill"]
     features = ["FourierFeatures"]
-    models = ["kernel_rbf", "rf_tabular", "lightgbm_tabular", "parrot"]
+    models = ["kernel_rbf", "rf_tabular", "lightgbm_tabular", "parrot", "parrot_dataset"]
     non_parrot_models = ["kernel_rbf", "rf_tabular", "lightgbm_tabular"]
     parrot_sources = scalers + features + non_parrot_models
 
@@ -60,6 +60,9 @@ def register_default_tokens(grammar):
                      follows=scalers + features + ["parrot"],
                      leads_to=["parrot", "STOP"])
     grammar.register(ParrotToken(),
+                     follows=parrot_sources,
+                     leads_to=non_parrot_models + ["STOP"])
+    grammar.register(ParrotDatasetToken(),
                      follows=parrot_sources,
                      leads_to=non_parrot_models + ["STOP"])
     return grammar
@@ -219,6 +222,7 @@ __all__ = [
     "PeriodPhaseOneHotToken",
     "RandomForestTabularToken",
     "ParrotToken",
+    "ParrotDatasetToken",
     "ZNormalizationToken",
     "register_default_tokens",
     "register_flair_tokens",
