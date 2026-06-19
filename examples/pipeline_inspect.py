@@ -80,7 +80,12 @@ def make_token_factory(seasonal_period=48):
         "FourierFeatures": lambda: FourierFeaturesToken(n_harmonics=8),
         "kernel_rbf": lambda: KernelRBFToken(alpha=1e-2, median_subset=24, seed=0),
         "parrot": lambda: ParrotToken(),
-        "parrot_dataset": lambda: ParrotDatasetToken(min_corr=0.97, max_candidates=10000),
+        "parrot_dataset": lambda: ParrotDatasetToken(
+            min_corr=0.97,
+            max_candidates=10000,
+            show_progress=True,
+            progress_min_samples=16,
+        ),
         "rf_tabular": lambda: RandomForestTabularToken(n_estimators=80, max_depth=10, min_samples_leaf=2, seed=0, n_jobs=-1),
         "lightgbm_tabular": lambda: LightGBMTabularToken(n_estimators=160, learning_rate=0.05, num_leaves=31, seed=0, n_jobs=-1),
         "FlairPreprocess": lambda: FlairPreprocessToken(),

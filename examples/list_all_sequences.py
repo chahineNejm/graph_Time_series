@@ -34,7 +34,7 @@ from graph_Time_series.token_blocks import (
     KernelRBFToken, RandomForestTabularToken, LightGBMTabularToken,
     ForwardFillToken, LinearFillToken, VersatileGradientBoostingToken,
     GBLevelForecastToken, FlairPreprocessToken,
-    ParrotToken, PeriodDetectToken, PeriodDetectBICToken,
+    ParrotToken, ParrotDatasetToken, PeriodDetectToken, PeriodDetectBICToken,
     PeriodDetectSpectralToken, PeriodPhaseOneHotToken, SeasonalFoldToken,
     LevelBoxCoxCenterToken,
     LevelShapeRidgeToken, FlairRidgeLevelToken, FlairSamplePathsToken,
@@ -49,6 +49,7 @@ TOKENS = {
     "FourierFeatures": FourierFeaturesToken(n_harmonics=6),
     "kernel_rbf": KernelRBFToken(),
     "parrot": ParrotToken(),
+    "parrot_dataset": ParrotDatasetToken(max_candidates=1000),
     "rf_tabular": RandomForestTabularToken(n_estimators=8),
     "lightgbm_tabular": LightGBMTabularToken(n_estimators=8),
     "versatile_gb": VersatileGradientBoostingToken(max_iter=15),
@@ -79,7 +80,7 @@ CANON_ORDER = [
     "FourierFeatures",
     # model
     "gb_level_forecast", "level_shape_ridge", "FlairRidgeLevel",
-    "parrot", "kernel_rbf", "rf_tabular", "lightgbm_tabular", "versatile_gb",
+    "parrot", "parrot_dataset", "kernel_rbf", "rf_tabular", "lightgbm_tabular", "versatile_gb",
 ]
 
 # Mutually-exclusive groups: at most one token from each per pipeline.

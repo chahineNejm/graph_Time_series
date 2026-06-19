@@ -137,7 +137,7 @@ class PeriodDetectToken(_PeriodDetectBase):
     description = "FLAIR BIC: primary (rank-1) + coarser secondaries -> param:periods."
 
     def __init__(self, freq: str = "H", max_series: int = 8, min_complete: int = 3,
-                 source_feature: str = "scaled_history", margin: float = 0.15,
+                 source_feature: str = "scaled_history", margin: float = 0.1,
                  max_periods: int = 4):
         self.freq = freq
         self.max_series = int(max_series)

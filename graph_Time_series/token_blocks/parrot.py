@@ -5,8 +5,8 @@ correlated (in absolute value) with the most recent window, and copy forward
 whatever followed it -- affine-rescaled to the current level.
 
 ``ParrotToken`` searches each series' own past (``within_series``);
-``ParrotDatasetToken`` searches the whole panel (``cross_series``) with an
-early-stop so the much larger search stays tractable.
+``ParrotDatasetToken`` searches the whole panel (``cross_series``) with a
+budget-first sampler and early stop so the much larger search stays tractable.
 """
 
 from __future__ import annotations
@@ -157,12 +157,13 @@ class ParrotDatasetToken(ParrotToken):
     rescale transplants the match onto the query's level/scale, so a window from
     a different series at a different level is still usable.
 
-    The full cross-series scan is ``O(N^2 * T * H)``, so the search **stops early**
-    once a candidate clears ``min_corr`` and is capped at ``max_candidates`` scans
-    per series. Candidates are visited in a fixed shuffled order (seeded) while
-    the running best is kept, so even if nothing clears the bar the
-    best-seen-within-budget is used. The query's own most-recent window is never a
-    candidate (it has no in-history continuation).
+    The full cross-series scan is ``O(N^2 * T * H)``, so the search **never**
+    materializes the full candidate list by default. It samples up to
+    ``max_candidates`` candidate windows per query, optionally limits the number
+    of source series via ``max_series_candidates``, and stops early once a match
+    clears ``min_corr``. The running best is kept, so even if nothing clears the
+    bar the best-seen-within-budget is used. The query's own most-recent window
+    is never a candidate (it has no in-history continuation).
     """
 
     learning_scope = "cross_series"
@@ -174,11 +175,17 @@ class ParrotDatasetToken(ParrotToken):
 
     def __init__(self, source_feature: str | None = None,
                  min_corr: float | None = 0.97, max_candidates: int | None = 10000,
-                 seed: int = 0):
+                 max_series_candidates: int | None = None, seed: int = 0,
+                 show_progress: bool = False, progress_min_samples: int = 16):
         super().__init__(source_feature=source_feature)
         self.min_corr = None if min_corr is None else float(min_corr)
         self.max_candidates = None if max_candidates is None else int(max_candidates)
+        self.max_series_candidates = (
+            None if max_series_candidates is None else int(max_series_candidates)
+        )
         self.seed = int(seed)
+        self.show_progress = bool(show_progress)
+        self.progress_min_samples = int(progress_min_samples)
 
     def get_model(self) -> Any:
         return {
@@ -189,14 +196,15 @@ class ParrotDatasetToken(ParrotToken):
             "scope": "cross_series",
             "min_corr": self.min_corr,
             "max_candidates": self.max_candidates,
+            "max_series_candidates": self.max_series_candidates,
             "source_feature": self.source_feature or "auto",
         }
 
     def _forecast_cross(self, query: np.ndarray, hist: np.ndarray, H: int,
-                        n_win: int, order: np.ndarray) -> np.ndarray:
-        thr, budget = self.min_corr, self.max_candidates
+                        n_win: int, candidate_ids) -> np.ndarray:
+        thr = self.min_corr
         best_abs, bj, bk, scanned = -1.0, 0, 0, 0
-        for idx in order:
+        for idx in candidate_ids:
             j = int(idx) // n_win
             k = int(idx) % n_win
             c = _pearson(query, hist[j, k:k + H])
@@ -205,8 +213,6 @@ class ParrotDatasetToken(ParrotToken):
                 best_abs, bj, bk = abs(c), j, k
             if thr is not None and best_abs >= thr:
                 break
-            if budget is not None and scanned >= budget:
-                break
         cand = hist[bj, bk:bk + H]
         cont = hist[bj, bk + H:bk + 2 * H]
         var = float(((cand - cand.mean()) ** 2).sum())
@@ -214,6 +220,66 @@ class ParrotDatasetToken(ParrotToken):
              if var > 1e-12 else 1.0)
         b = float(query.mean() - a * cand.mean())
         return a * cont + b
+
+    def _source_series_ids(self, n: int, target_i: int,
+                           rng: np.random.Generator) -> np.ndarray:
+        cap = self.max_series_candidates
+        if cap is None or cap >= n:
+            return np.arange(n, dtype=np.int64)
+
+        cap = max(1, int(cap))
+        if cap == 1:
+            return np.asarray([target_i], dtype=np.int64)
+
+        others = np.concatenate(
+            (np.arange(0, target_i, dtype=np.int64),
+             np.arange(target_i + 1, n, dtype=np.int64))
+        )
+        take = min(cap - 1, others.size)
+        sampled = (
+            rng.choice(others, size=take, replace=False)
+            if take
+            else np.empty(0, dtype=np.int64)
+        )
+        return np.concatenate((np.asarray([target_i], dtype=np.int64), sampled))
+
+    def _sample_local_ids(self, total: int, budget: int,
+                          rng: np.random.Generator) -> np.ndarray:
+        """Sample unique local candidate ids without building ``permutation(total)``."""
+        budget = min(max(int(budget), 1), int(total))
+        if budget >= total:
+            return np.arange(total, dtype=np.int64)
+
+        seen: set[int] = set()
+        out: list[int] = []
+        while len(out) < budget:
+            need = budget - len(out)
+            batch_size = min(max(need * 2, 64), 100_000)
+            for value in rng.integers(0, total, size=batch_size, dtype=np.int64):
+                idx = int(value)
+                if idx in seen:
+                    continue
+                seen.add(idx)
+                out.append(idx)
+                if len(out) >= budget:
+                    break
+        return np.asarray(out, dtype=np.int64)
+
+    def _candidate_ids(self, n: int, n_win: int, target_i: int,
+                       rng: np.random.Generator):
+        series_ids = self._source_series_ids(n, target_i, rng)
+        total = int(series_ids.size * n_win)
+        budget = self.max_candidates
+        if budget is None:
+            local_ids = range(total)
+        elif budget >= total:
+            local_ids = rng.permutation(total)
+        else:
+            local_ids = self._sample_local_ids(total, int(budget), rng)
+
+        for local in local_ids:
+            local = int(local)
+            yield int(series_ids[local // n_win]) * n_win + (local % n_win)
 
     def apply(self, state: "State") -> "State":
         hist, input_name = self._resolve_history(state)
@@ -228,10 +294,17 @@ class ParrotDatasetToken(ParrotToken):
                 pred[i] = self._forecast_one(hist[i], H).astype(np.float32)
         else:
             rng = np.random.default_rng(self.seed)
-            order = rng.permutation(n * n_win)          # (series, start) flattened
-            for i in range(n):
+            iterator = range(n)
+            if self.show_progress and n >= self.progress_min_samples:
+                iterator = _maybe_tqdm(iterator, "parrot_dataset")
+            for i in iterator:
                 pred[i] = self._forecast_cross(
-                    hist[i, -H:], hist, H, n_win, order).astype(np.float32)
+                    hist[i, -H:],
+                    hist,
+                    H,
+                    n_win,
+                    self._candidate_ids(n, n_win, i, rng),
+                ).astype(np.float32)
 
         state.push_prediction(pred, self.name)
         self._log_execution(
@@ -239,8 +312,19 @@ class ParrotDatasetToken(ParrotToken):
             reads={
                 input_name: hist.shape,
                 "candidate_windows": int(max(n * n_win, 0)),
+                "max_candidates": self.max_candidates,
+                "max_series_candidates": self.max_series_candidates,
                 "current_target": state.current_target.shape,
             },
             writes={"prediction_stack[-1]": pred.shape},
         )
         return state
+
+
+def _maybe_tqdm(iterable, desc: str):
+    try:
+        from tqdm.auto import tqdm
+
+        return tqdm(iterable, desc=desc)
+    except Exception:
+        return iterable
