@@ -307,8 +307,9 @@ class SeasonalFoldToken(FeatureToken):
 
 
 class LevelBoxCoxCenterToken(FeatureToken):
-    """Apply a per-series Box-Cox transform to level totals and center at now."""
-
+    '''
+    this one got discarded in favor of doing the Box-Cox transform inside the Ridge token,
+    '''
     name = "LevelBoxCoxCenter"
     reads = ("flair_level_work",)
     writes = ("flair_level_innov", "flair_boxcox")
