@@ -37,10 +37,18 @@ Registry helpers:
 With all five enabled, the current graph is:
 
 ```text
-Grammar(23 tokens, 112 edges)
+Grammar(24 tokens, 124 edges)
 ```
 
 `token_catalog.json` and `outputs/` have been refreshed from that live grammar.
+
+Notebook-only unfinished tokens are intentionally not part of this graph yet:
+
+```text
+window_kernel
+affine_fold
+affine_forecast
+```
 
 ## Catalog Note
 

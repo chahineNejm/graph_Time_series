@@ -46,6 +46,9 @@ from graph_Time_series.token_blocks import (
 from graph_Time_series.token_blocks.affine_fold import (
     AffineSeasonalFoldToken, AffineLevelForecastToken, register_affine_tokens,
 )
+from graph_Time_series.token_blocks.window_kernel import (
+    WindowKernelToken, register_window_kernel,
+)
 
 __all__ = [
     "build_grammar", "make_token_factory", "instantiate_tokens", "token_table",
@@ -62,7 +65,7 @@ __all__ = [
 # --------------------------------------------------------------------------
 
 def build_grammar(include_flair=True, include_versatile=True, include_flair_gb=True,
-                  include_seasonal=True, include_affine=True):
+                  include_seasonal=True, include_affine=True, include_window_kernel=True):
     grammar = register_default_tokens(Grammar())
     if include_flair:
         grammar = register_flair_tokens(grammar)
@@ -74,6 +77,8 @@ def build_grammar(include_flair=True, include_versatile=True, include_flair_gb=T
         grammar = register_seasonal_tokens(grammar)
     if include_affine:
         grammar = register_affine_tokens(grammar)
+    if include_window_kernel:
+        grammar = register_window_kernel(grammar)
     return grammar
 
 
@@ -93,6 +98,10 @@ def make_token_factory(seasonal_period=48):
         ),
         "affine_fold": lambda: AffineSeasonalFoldToken(),
         "affine_forecast": lambda: AffineLevelForecastToken(),
+        "window_kernel": lambda: WindowKernelToken(
+            gamma="auto", target_meff=8.0, top_k_per_series=1,
+            max_series=32, space="value", seed=0,
+        ),
         "rf_tabular": lambda: RandomForestTabularToken(n_estimators=80, max_depth=10, min_samples_leaf=2, seed=0, n_jobs=-1),
         "lightgbm_tabular": lambda: LightGBMTabularToken(n_estimators=160, learning_rate=0.05, num_leaves=31, seed=0, n_jobs=-1),
         "FlairPreprocess": lambda: FlairPreprocessToken(),

@@ -92,6 +92,7 @@ kernel_rbf
 rf_tabular
 lightgbm_tabular
 parrot
+parrot_dataset
 ```
 
 ### FLAIR
@@ -142,8 +143,20 @@ step_regression
 With all registries enabled:
 
 ```text
-Grammar(23 tokens, 112 edges)
+Grammar(24 tokens, 124 edges)
 ```
+
+## Notebook-Only / Unfinished Tokens
+
+These tokens exist in code, but are not finished package tokens yet. They are
+loaded directly by `examples/pipeline_inspect.py` for troubleshooting and should
+not be treated as part of the stable registry until explicitly promoted.
+
+| Token | Status | Current note |
+| --- | --- | --- |
+| `window_kernel` | unfinished / notebook-only | Cross-series window analog model. Needs final decisions on graph edges, raw-vs-scaled input priority, and whether it can run directly from `START`. |
+| `affine_fold` | unfinished / notebook-only | Affine seasonal decomposition prototype. Works in the troubleshooting helper, but is not registered in the package graph. |
+| `affine_forecast` | unfinished / notebook-only | Forecast head for `affine_fold`. Should move together with `affine_fold` if promoted. |
 
 ## Package Tokens
 
@@ -536,6 +549,53 @@ Common next tokens:
 - `rf_tabular`
 - `lightgbm_tabular`
 - `versatile_gb`
+- `STOP`
+
+### `parrot_dataset`
+
+Status: `package`
+
+Class: `ModelToken`
+
+File: `graph_Time_series/token_blocks/parrot.py`
+
+Purpose: cross-series analog / nearest-neighbour forecaster over candidate
+windows.
+
+Reads:
+
+- preferred `scaled_history`
+- fallback `clean_history`
+- fallback active `features["raw_history"]`
+- `current_target` through the residual stack
+
+Writes:
+
+- `prediction_stack[-1]`
+- updated `current_target` / `current_residual`
+
+Hyperparameters:
+
+- `source_feature=None` for automatic source selection
+- `max_candidates=5000`
+- `max_series_candidates=None`
+- `show_progress=True`
+- fixed neighbours: `1`
+- match score: absolute Pearson correlation
+
+State effect:
+
+```text
+active history sequence + sampled cross-series windows -> best analog continuation
+prediction -> state.push_prediction(...)
+current_target becomes residual for later models
+```
+
+Common next tokens:
+
+- `kernel_rbf`
+- `rf_tabular`
+- `lightgbm_tabular`
 - `STOP`
 
 ### `PeriodPhaseOneHot`
@@ -992,6 +1052,7 @@ Default package:
 ZNormalization -> kernel_rbf -> STOP
 ZNormalization -> parrot -> kernel_rbf -> STOP
 ZNormalization -> kernel_rbf -> parrot -> STOP
+ZNormalization -> parrot_dataset -> kernel_rbf -> STOP
 MeanAbsScaling -> FourierFeatures -> rf_tabular -> STOP
 MeanAbsScaling -> FourierFeatures -> lightgbm_tabular -> STOP
 ZNormalization -> FourierFeatures -> kernel_rbf -> STOP

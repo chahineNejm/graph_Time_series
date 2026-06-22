@@ -165,6 +165,7 @@ kernel_rbf
 rf_tabular
 lightgbm_tabular
 parrot
+parrot_dataset
 ```
 
 Typical binder-free chains:
@@ -174,6 +175,7 @@ LinearFill -> ZNormalization -> kernel_rbf -> STOP
 ZNormalization -> kernel_rbf -> STOP
 ZNormalization -> parrot -> kernel_rbf -> STOP
 ZNormalization -> kernel_rbf -> parrot -> STOP
+ZNormalization -> parrot_dataset -> kernel_rbf -> STOP
 MeanAbsScaling -> FourierFeatures -> rf_tabular -> STOP
 MeanAbsScaling -> FourierFeatures -> lightgbm_tabular -> STOP
 ZNormalization -> FourierFeatures -> kernel_rbf -> kernel_rbf -> STOP
@@ -269,6 +271,27 @@ gb_level_forecast
 This is a drop-in model-side experiment after `SeasonalFold`: it predicts period
 levels with gradient boosting and expands them through the learned shape.
 
+### Notebook-Only / Unfinished Tokens
+
+These tokens are present in the working tree but are not stable package tokens
+yet. They are loaded directly by `examples/pipeline_inspect.py` for
+troubleshooting and should be promoted deliberately before they are included in
+the main registry or graph catalog:
+
+```text
+window_kernel
+affine_fold
+affine_forecast
+```
+
+Current flags:
+
+- `window_kernel`: cross-series window analog model; graph edges and input
+  priority still need final cleanup.
+- `affine_fold`: affine seasonal decomposition prototype; helper-only for now.
+- `affine_forecast`: forecast head for `affine_fold`; should move with it if
+  promoted.
+
 ## Implemented Package Tokens
 
 ### Cleaning
@@ -356,6 +379,12 @@ FLAIR feature tokens:
 - pushes into the normal prediction stack, so later models fit the residual;
 - can also follow another model and add its own residual prediction.
 
+`parrot_dataset`
+
+- cross-series analog / nearest-neighbour forecaster over candidate windows;
+- uses bounded candidate sampling for scalability;
+- pushes into the normal prediction stack.
+
 `level_shape_ridge`
 
 - compact period-level predictor;
@@ -420,7 +449,7 @@ python -c "from graph_Time_series.grammar import Grammar; from graph_Time_series
 Current live registry:
 
 ```text
-Grammar(23 tokens, 112 edges)
+Grammar(24 tokens, 124 edges)
 ```
 
 In this Windows workspace, the `python` command may point to the WindowsApps
