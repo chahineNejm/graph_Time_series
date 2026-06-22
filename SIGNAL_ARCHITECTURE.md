@@ -135,7 +135,6 @@ current package architecture.
 - `PeriodPhaseOneHot`
 - `SeasonalFold`
 - `level_shape_ridge`
-- `LevelBoxCoxCenter`
 - `FlairRidgeLevel`
 - `FlairSamplePaths`
 
@@ -158,7 +157,7 @@ current package architecture.
 When all registries are enabled together, the grammar currently reports:
 
 ```text
-Grammar(23 tokens, 112 edges)
+Grammar(23 tokens, 123 edges)
 ```
 
 ## Demonstrated Combinations

@@ -147,7 +147,6 @@ PeriodDetectBIC
 PeriodPhaseOneHot
 SeasonalFold
 level_shape_ridge
-LevelBoxCoxCenter
 FlairRidgeLevel
 FlairSamplePaths
 ```
@@ -177,7 +176,7 @@ step_regression
 With all registries enabled:
 
 ```text
-Grammar(23 tokens, 112 edges)
+Grammar(23 tokens, 123 edges)
 ```
 
 ## Still Proposal / Next Architecture

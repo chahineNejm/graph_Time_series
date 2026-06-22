@@ -3,7 +3,7 @@
   "project": "graph_Time_series",
   "notes": [
     "Generated from the live package registry in graph_Time_series.token_blocks.",
-    "Grammar(23 tokens, 112 edges)",
+    "Grammar(23 tokens, 123 edges)",
     "Regenerate after token registrations or valid transitions change."
   ],
   "tokens": [
@@ -77,6 +77,7 @@
         "kernel_rbf",
         "lightgbm_tabular",
         "parrot",
+        "parrot_dataset",
         "rf_tabular",
         "versatile_gb"
       ]
@@ -107,6 +108,7 @@
         "kernel_rbf",
         "lightgbm_tabular",
         "parrot",
+        "parrot_dataset",
         "rf_tabular",
         "versatile_gb"
       ]
@@ -137,6 +139,7 @@
         "kernel_rbf",
         "lightgbm_tabular",
         "parrot",
+        "parrot_dataset",
         "rf_tabular",
         "step_regression",
         "versatile_gb"
@@ -168,6 +171,7 @@
         "kernel_rbf",
         "lightgbm_tabular",
         "parrot",
+        "parrot_dataset",
         "rf_tabular",
         "step_regression",
         "versatile_gb"
@@ -180,8 +184,10 @@
       "core": true,
       "description": "Bootstrap level residuals and coherent phase noise into forecast samples.",
       "reads": [
-        "flair_level_innov",
-        "shape_vector"
+        "flair_level_work",
+        "shape_vector",
+        "flair_ridge_beta",
+        "FlairRidgeLevel"
       ],
       "writes": [
         "flair_samples",
@@ -217,29 +223,10 @@
         "kernel_rbf",
         "lightgbm_tabular",
         "parrot",
+        "parrot_dataset",
         "rf_tabular",
         "step_regression",
         "versatile_gb"
-      ]
-    },
-    {
-      "id": "LevelBoxCoxCenter",
-      "status": "package",
-      "class": "feature",
-      "core": true,
-      "description": "Box-Cox transform FLAIR levels and center by the last level.",
-      "reads": [
-        "flair_level_work"
-      ],
-      "writes": [
-        "flair_level_innov",
-        "flair_boxcox"
-      ],
-      "parents": [
-        "SeasonalFold"
-      ],
-      "next": [
-        "FlairRidgeLevel"
       ]
     },
     {
@@ -397,7 +384,7 @@
         "SeasonalFold"
       ],
       "next": [
-        "LevelBoxCoxCenter",
+        "FlairRidgeLevel",
         "SeasonalFold",
         "gb_level_forecast",
         "level_shape_ridge"
@@ -408,17 +395,18 @@
       "status": "package",
       "class": "model",
       "core": true,
-      "description": "FLAIR-style soft-averaged Ridge over compressed level innovations.",
+      "description": "FLAIR-style soft-averaged Ridge with internal Box-Cox level centering.",
       "reads": [
-        "flair_level_innov",
-        "shape_vector"
+        "flair_level_work",
+        "shape_vector",
+        "period"
       ],
       "writes": [
         "prediction_stack",
         "flair_point_forecast"
       ],
       "parents": [
-        "LevelBoxCoxCenter"
+        "SeasonalFold"
       ],
       "next": [
         "FlairSamplePaths",
@@ -468,12 +456,14 @@
         "ZNormalization",
         "kernel_rbf",
         "level_shape_ridge",
-        "parrot"
+        "parrot",
+        "parrot_dataset"
       ],
       "next": [
         "STOP",
         "kernel_rbf",
-        "parrot"
+        "parrot",
+        "parrot_dataset"
       ]
     },
     {
@@ -516,11 +506,13 @@
         "MeanAbsScaling",
         "SeasonalFeatures",
         "ZNormalization",
-        "parrot"
+        "parrot",
+        "parrot_dataset"
       ],
       "next": [
         "STOP",
-        "parrot"
+        "parrot",
+        "parrot_dataset"
       ]
     },
     {
@@ -558,6 +550,33 @@
       ]
     },
     {
+      "id": "parrot_dataset",
+      "status": "package",
+      "class": "model",
+      "core": true,
+      "description": "Cross-series analog forecast: search the whole panel for the past window most |correlation| with the query, stopping early once one is good enough.",
+      "reads": [],
+      "writes": [
+        "prediction_stack"
+      ],
+      "parents": [
+        "ForwardFill",
+        "FourierFeatures",
+        "LinearFill",
+        "MeanAbsScaling",
+        "ZNormalization",
+        "kernel_rbf",
+        "lightgbm_tabular",
+        "rf_tabular"
+      ],
+      "next": [
+        "STOP",
+        "kernel_rbf",
+        "lightgbm_tabular",
+        "rf_tabular"
+      ]
+    },
+    {
       "id": "rf_tabular",
       "status": "package",
       "class": "model",
@@ -574,11 +593,13 @@
         "MeanAbsScaling",
         "SeasonalFeatures",
         "ZNormalization",
-        "parrot"
+        "parrot",
+        "parrot_dataset"
       ],
       "next": [
         "STOP",
-        "parrot"
+        "parrot",
+        "parrot_dataset"
       ]
     },
     {
@@ -648,6 +669,7 @@
         "level_shape_ridge",
         "lightgbm_tabular",
         "parrot",
+        "parrot_dataset",
         "rf_tabular",
         "step_regression",
         "versatile_gb"

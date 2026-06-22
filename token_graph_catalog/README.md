@@ -37,7 +37,7 @@ Registry helpers:
 With all five enabled, the current graph is:
 
 ```text
-Grammar(24 tokens, 124 edges)
+Grammar(23 tokens, 123 edges)
 ```
 
 `token_catalog.json` and `outputs/` have been refreshed from that live grammar.

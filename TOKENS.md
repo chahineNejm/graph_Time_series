@@ -107,7 +107,6 @@ PeriodDetectBIC
 PeriodPhaseOneHot
 SeasonalFold
 level_shape_ridge
-LevelBoxCoxCenter
 FlairRidgeLevel
 FlairSamplePaths
 ```
@@ -143,7 +142,7 @@ step_regression
 With all registries enabled:
 
 ```text
-Grammar(24 tokens, 124 edges)
+Grammar(23 tokens, 123 edges)
 ```
 
 ## Notebook-Only / Unfinished Tokens
@@ -817,11 +816,10 @@ decomposition collapses to the standard head interface:
   per-level shapes, `eff[t] = prod_d shape_d[(t // periods[d-1]) % fold_p_d]`,
 - `metadata["period"] = P`.
 
-So `level_shape_ridge`, `LevelBoxCoxCenter -> FlairRidgeLevel` and
-`gb_level_forecast` (which reconstruct `level[t//P] * shape[t%P]`) work
-unchanged -- they forecast only the innermost amplitude and re-drape the
-separable shape. The old `future_shape2` / `flair_cross_period` secondary
-machinery is no longer used (seeded to identity for compatibility).
+So `level_shape_ridge`, `FlairRidgeLevel`, and `gb_level_forecast` reconstruct
+`level[t//P] * shape[t%P]`: they forecast only the innermost amplitude and
+re-drape the separable shape. Any Box-Cox centering is internal to the model
+token, not a standalone pipeline step.
 
 Reads:
 
@@ -855,36 +853,8 @@ Next:
 
 - `SeasonalFold` (fold the next nested period)
 - `level_shape_ridge`
-- `LevelBoxCoxCenter`
-- `gb_level_forecast`
-
-### `LevelBoxCoxCenter`
-
-Status: `package`
-
-Class: `FeatureToken`
-
-Purpose: apply per-series Box-Cox transform to FLAIR levels and center at the
-latest level.
-
-Reads:
-
-- `flair_level_work`
-
-Writes:
-
-- `historical_features["flair_level_bc"]`
-- `historical_features["flair_level_innov"]`
-- `metadata["flair_boxcox"]`
-
-Hyperparameters:
-
-- `n_lambda_grid=21`
-- `eps=1e-6`
-
-Next:
-
 - `FlairRidgeLevel`
+- `gb_level_forecast`
 
 ### `FlairRidgeLevel`
 
@@ -892,14 +862,13 @@ Status: `package`
 
 Class: `ModelToken`
 
-Purpose: forecast compressed FLAIR levels with soft-averaged Ridge, expand
-through shape, and push a point forecast.
+Purpose: forecast FLAIR period levels with soft-averaged Ridge, using internal
+Box-Cox centering, then expand through shape and push a point forecast.
 
 Reads:
 
-- `flair_level_innov`
+- `flair_level_work` or fallback level source
 - `shape_vector`
-- `flair_boxcox`
 - `period`
 - optional secondary shape data
 
@@ -917,13 +886,15 @@ Hyperparameters:
 - `alpha_log_min=-6.0`
 - `alpha_log_max=3.0`
 - `n_alphas=25`
+- `n_lambda_grid=21`
+- `eps=1e-6`
 - `show_progress=True`
 - `progress_min_samples=32`
 
 State effect:
 
 ```text
-level innovations -> Ridge forecast -> inverse Box-Cox -> shape expansion
+level -> internal Box-Cox centering -> Ridge forecast -> inverse transform -> shape expansion
 ```
 
 Next:
@@ -941,13 +912,14 @@ Purpose: generate FLAIR-style stochastic sample paths around the point forecast.
 
 Reads:
 
-- `flair_level_innov`
+- `flair_level_work` or fallback level source
 - `shape_vector`
 - `period_matrix`
 - `level_series`
 - `flair_ridge_beta`
 - `flair_ridge_phi`
 - `flair_ridge_residuals`
+- `metadata["FlairRidgeLevel"]` internal transform metadata
 
 Writes:
 
@@ -1082,7 +1054,6 @@ LinearFill
 -> PeriodDetect
 -> PeriodPhaseOneHot
 -> SeasonalFold
--> LevelBoxCoxCenter
 -> FlairRidgeLevel
 -> STOP
 ```
@@ -1093,7 +1064,6 @@ FLAIR sample paths:
 LinearFill
 -> PeriodDetect
 -> SeasonalFold
--> LevelBoxCoxCenter
 -> FlairRidgeLevel
 -> FlairSamplePaths
 -> STOP

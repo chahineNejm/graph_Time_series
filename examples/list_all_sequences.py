@@ -36,7 +36,6 @@ from graph_Time_series.token_blocks import (
     GBLevelForecastToken, FlairPreprocessToken,
     ParrotToken, ParrotDatasetToken, PeriodDetectToken, PeriodDetectBICToken,
     PeriodDetectSpectralToken, PeriodPhaseOneHotToken, SeasonalFoldToken,
-    LevelBoxCoxCenterToken,
     LevelShapeRidgeToken, FlairRidgeLevelToken, FlairSamplePathsToken,
 )
 
@@ -59,7 +58,6 @@ TOKENS = {
     "PeriodDetectBIC": PeriodDetectBICToken(freq="H"),
     "PeriodPhaseOneHot": PeriodPhaseOneHotToken(),
     "SeasonalFold": SeasonalFoldToken(),
-    "LevelBoxCoxCenter": LevelBoxCoxCenterToken(),
     "level_shape_ridge": LevelShapeRidgeToken(show_progress=False),
     "FlairRidgeLevel": FlairRidgeLevelToken(show_progress=False),
     "FlairSamplePaths": FlairSamplePathsToken(),
@@ -76,7 +74,6 @@ CANON_ORDER = [
     # feature (FLAIR chain first, in dependency order, then generic features)
     "PeriodDetect", "PeriodDetectSpectral", "PeriodDetectBIC",
     "PeriodPhaseOneHot", "SeasonalFold",
-    "LevelBoxCoxCenter",
     "FourierFeatures",
     # model
     "gb_level_forecast", "level_shape_ridge", "FlairRidgeLevel",

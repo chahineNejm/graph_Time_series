@@ -1,5 +1,4 @@
 tokens to add:
-tabular models : Random forest , boosted models (maybe lightGBM)
 complete the flair: and have full description, one of the pipeline should be able to completly replicate the flair
 go over kaggle stuff and download notebooks I like?
 CWT features as tokens (MULTIPLE VARIANTS)
@@ -9,11 +8,6 @@ DICTIONARY LEARNING TECHNIQUES: K-SVD and Online Dictionary Learning (MiniBatchD
   - multiple variants: different vocab size K, atom length L, sparsity level
   - two-phase design: DictionaryFit (train) + DictionaryEncode (inference)
   - look at this later
-
-Fourier feature token: will work on this
-  - sin/cos projections at detected period + harmonics
-  - reads metadata.period (already computed by PeriodSelection)
-  - smooth alternative to PeriodPhaseOneHot, much lower dimensionality
 
 Rolling stats token: needs more engineering
   - windowed mean, std, min, max, skewness at multiple scales

@@ -31,7 +31,7 @@ from graph_Time_series.grammar import Grammar
 from graph_Time_series.token_blocks import (
     FlairPreprocessToken, FlairRidgeLevelToken,
     FlairSamplePathsToken, FourierFeaturesToken, GBLevelForecastToken,
-    KernelRBFToken, LevelBoxCoxCenterToken, LevelShapeRidgeToken,
+    KernelRBFToken, LevelShapeRidgeToken,
     LightGBMTabularToken, MeanAbsScalingToken,
     PeriodPhaseOneHotToken, RandomForestTabularToken,
     SeasonalFoldToken, ParrotToken, ParrotDatasetToken,
@@ -107,7 +107,6 @@ def make_token_factory(seasonal_period=48):
         "FlairPreprocess": lambda: FlairPreprocessToken(),
         "PeriodPhaseOneHot": lambda: PeriodPhaseOneHotToken(),
         "SeasonalFold": lambda: SeasonalFoldToken(),
-        "LevelBoxCoxCenter": lambda: LevelBoxCoxCenterToken(),
         "level_shape_ridge": lambda: LevelShapeRidgeToken(show_progress=True, progress_min_samples=16),
         "FlairRidgeLevel": lambda: FlairRidgeLevelToken(show_progress=True, progress_min_samples=16),
         "FlairSamplePaths": lambda: FlairSamplePathsToken(n_paths=50, show_progress=True, progress_min_samples=8),

@@ -306,53 +306,6 @@ class SeasonalFoldToken(FeatureToken):
         return state
 
 
-class LevelBoxCoxCenterToken(FeatureToken):
-    '''
-    this one got discarded in favor of doing the Box-Cox transform inside the Ridge token,
-    '''
-    name = "LevelBoxCoxCenter"
-    reads = ("flair_level_work",)
-    writes = ("flair_level_innov", "flair_boxcox")
-    description = "Box-Cox transform FLAIR levels and center by the last level."
-
-    def __init__(self, n_lambda_grid: int = 21, eps: float = 1e-6):
-        self.n_lambda_grid = n_lambda_grid
-        self.eps = eps
-
-    def apply(self, state: "State") -> "State":
-        level = np.asarray(state.historical_features["flair_level_work"], dtype=np.float64)
-        n_samples, _ = level.shape
-        lambdas = np.ones(n_samples, dtype=np.float64)
-        offsets = np.zeros(n_samples, dtype=np.float64)
-        last_values = np.zeros(n_samples, dtype=np.float64)
-        bc = np.zeros_like(level, dtype=np.float64)
-
-        for i in range(n_samples):
-            offset = max(0.0, self.eps - float(np.min(level[i])))
-            y = level[i] + offset
-            lam = _boxcox_lambda_grid(y, self.n_lambda_grid)
-            z = _boxcox(y, lam)
-            offsets[i] = offset
-            lambdas[i] = lam
-            last_values[i] = z[-1]
-            bc[i] = z
-
-        innov = (bc - last_values[:, None]).astype(np.float32)
-        state.add_historical_feature("flair_level_bc", bc.astype(np.float32))
-        state.add_historical_feature("flair_level_innov", innov)
-        state.metadata["flair_boxcox"] = {
-            "lambda": lambdas.astype(np.float32),
-            "offset": offsets.astype(np.float32),
-            "last": last_values.astype(np.float32),
-        }
-        self._log_execution(
-            state,
-            reads={"flair_level_work": level.shape},
-            writes={"flair_level_innov": innov.shape, "flair_boxcox": n_samples},
-        )
-        return state
-
-
 class LevelShapeRidgeToken(ModelToken):
     learning_scope = "within_series"
     """Forecast period-level values with internal Box-Cox ridge, then expand."""
@@ -467,47 +420,71 @@ class LevelShapeRidgeToken(ModelToken):
 
 class FlairRidgeLevelToken(ModelToken):
     learning_scope = "within_series"  # per-series ridge AR on its own level
-    """Forecast compressed FLAIR levels, expand through shape, and push a point forecast."""
+    """Forecast internally transformed FLAIR levels, expand through shape, and push a point forecast."""
 
     name = "FlairRidgeLevel"
-    reads = ("flair_level_innov", "shape_vector")
+    reads = ("flair_level_work", "shape_vector", "period")
     writes = ("prediction_stack", "flair_point_forecast")
-    description = "FLAIR-style soft-averaged Ridge over compressed level innovations."
+    description = "FLAIR-style soft-averaged Ridge with internal Box-Cox level centering."
 
     def __init__(
         self,
         alpha_log_min: float = -6.0,
         alpha_log_max: float = 3.0,
         n_alphas: int = 25,
+        n_lambda_grid: int = 21,
+        eps: float = 1e-6,
+        level_sources: tuple[str, ...] = (
+            "flair_level_work",
+            "flair_level_denoised",
+            "level_series",
+        ),
         show_progress: bool = True,
         progress_min_samples: int = 32,
     ):
         self.alpha_log_min = alpha_log_min
         self.alpha_log_max = alpha_log_max
-        self.n_alphas = n_alphas
+        self.n_alphas = int(n_alphas)
+        self.n_lambda_grid = int(n_lambda_grid)
+        self.eps = float(eps)
+        self.level_sources = tuple(level_sources)
         self.show_progress = show_progress
-        self.progress_min_samples = progress_min_samples
+        self.progress_min_samples = int(progress_min_samples)
 
     def get_model(self) -> dict[str, Any]:
         return {
-            "model": "soft_averaged_ridge",
-            "space": "flair_level",
+            "model": "internal_boxcox_soft_averaged_ridge",
+            "space": "period_level",
             "n_alphas": self.n_alphas,
+            "n_lambda_grid": self.n_lambda_grid,
         }
 
     def check_specific_conditions(self, state: "State") -> bool:
         if not super().check_specific_conditions(state):
             return False
         non_flair = [t for t in state.transform_stack if t.name != "flair_shift"]
-        return state.n_models_applied == 0 and not non_flair
+        return (
+            state.n_models_applied == 0
+            and not non_flair
+            and "shape_vector" in state.historical_features
+            and self._level_name(state) is not None
+        )
+
+    def _level_name(self, state: "State") -> str | None:
+        for name in self.level_sources:
+            if name in state.historical_features:
+                return name
+        return None
 
     def apply(self, state: "State") -> "State":
-        level = np.asarray(state.historical_features["flair_level_innov"], dtype=np.float64)
+        level_name = self._level_name(state)
+        if level_name is None:
+            raise KeyError(
+                f"{self.name} requires one of {self.level_sources!r} in historical_features."
+            )
+
+        level_raw = np.asarray(state.historical_features[level_name], dtype=np.float64)
         shape = np.asarray(state.historical_features["shape_vector"], dtype=np.float64)
-        boxcox = state.metadata["flair_boxcox"]
-        lambdas = np.asarray(boxcox["lambda"], dtype=np.float64)
-        offsets = np.asarray(boxcox["offset"], dtype=np.float64)
-        last_values = np.asarray(boxcox["last"], dtype=np.float64)
         shift = np.asarray(state.metadata.get("flair_shift", 0.0), dtype=np.float64)
         if shift.ndim == 0:
             shift = np.full(state.n_samples, float(shift), dtype=np.float64)
@@ -526,6 +503,9 @@ class FlairRidgeLevelToken(ModelToken):
         level_innov_point = np.zeros((state.n_samples, m), dtype=np.float32)
         betas = np.zeros((state.n_samples, 4), dtype=np.float32)
         phis = np.zeros(state.n_samples, dtype=np.float32)
+        lambdas = np.ones(state.n_samples, dtype=np.float64)
+        offsets = np.zeros(state.n_samples, dtype=np.float64)
+        last_values = np.zeros(state.n_samples, dtype=np.float64)
         residuals: list[np.ndarray] = []
         alphas = np.logspace(self.alpha_log_min, self.alpha_log_max, self.n_alphas)
 
@@ -535,8 +515,15 @@ class FlairRidgeLevelToken(ModelToken):
             "FLAIR Ridge levels",
         )
         for i in iterator:
-            beta, resid, phi = _fit_level_ridge(level[i], cp, alphas)
-            innov_hat = _forecast_level_innov(level[i], beta, cp, phi, m)
+            offsets[i] = max(0.0, self.eps - float(np.min(level_raw[i])))
+            positive = level_raw[i] + offsets[i]
+            lambdas[i] = _boxcox_lambda_grid(positive, self.n_lambda_grid)
+            transformed = _boxcox(positive, float(lambdas[i]))
+            last_values[i] = float(transformed[-1])
+            level_innov = transformed - last_values[i]
+
+            beta, resid, phi = _fit_level_ridge(level_innov, cp, alphas)
+            innov_hat = _forecast_level_innov(level_innov, beta, cp, phi, m)
             level_hat = _boxcox_inv(innov_hat + last_values[i], lambdas[i]) - offsets[i]
             level_hat = level_hat * future_shape2[i, :m]
             expanded = _expand_levels(level_hat, shape[i], horizon)
@@ -559,7 +546,13 @@ class FlairRidgeLevelToken(ModelToken):
             "period": period,
             "cross_period": cp,
             "level_steps": m,
+            "level_source": level_name,
             "mode": "history_only_point_forecast",
+            "level_transform": {
+                "lambda": lambdas.astype(np.float32),
+                "offset": offsets.astype(np.float32),
+                "last": last_values.astype(np.float32),
+            },
         }
         state.register_artifact(
             "flair_point_forecast",
@@ -572,7 +565,7 @@ class FlairRidgeLevelToken(ModelToken):
         state.push_prediction(pred, self.name)
         self._log_execution(
             state,
-            reads={"flair_level_innov": level.shape, "shape_vector": shape.shape},
+            reads={level_name: level_raw.shape, "shape_vector": shape.shape},
             writes={
                 "prediction_stack[-1]": pred.shape,
                 "flair_point_forecast": pred.shape,
@@ -587,7 +580,7 @@ class FlairSamplePathsToken(FeatureToken):
     """Generate FLAIR-style stochastic samples around the point forecast."""
 
     name = "FlairSamplePaths"
-    reads = ("flair_level_innov", "shape_vector")
+    reads = ("flair_level_work", "shape_vector", "flair_ridge_beta", "FlairRidgeLevel")
     writes = ("flair_samples", "flair_sample_mean")
     description = "Bootstrap level residuals and coherent phase noise into forecast samples."
 
@@ -617,14 +610,16 @@ class FlairSamplePathsToken(FeatureToken):
         )
 
     def apply(self, state: "State") -> "State":
-        level = np.asarray(state.historical_features["flair_level_innov"], dtype=np.float64)
+        ridge_meta = state.metadata["FlairRidgeLevel"]
+        level_name = ridge_meta.get("level_source", "flair_level_work")
+        level_raw = np.asarray(state.historical_features[level_name], dtype=np.float64)
         shape = np.asarray(state.historical_features["shape_vector"], dtype=np.float64)
         matrix = np.asarray(state.historical_features["period_matrix"], dtype=np.float64)
         raw_level = np.asarray(state.historical_features["level_series"], dtype=np.float64)
-        boxcox = state.metadata["flair_boxcox"]
-        lambdas = np.asarray(boxcox["lambda"], dtype=np.float64)
-        offsets = np.asarray(boxcox["offset"], dtype=np.float64)
-        last_values = np.asarray(boxcox["last"], dtype=np.float64)
+        level_transform = ridge_meta["level_transform"]
+        lambdas = np.asarray(level_transform["lambda"], dtype=np.float64)
+        offsets = np.asarray(level_transform["offset"], dtype=np.float64)
+        last_values = np.asarray(level_transform["last"], dtype=np.float64)
         beta = np.asarray(state.features["flair_ridge_beta"], dtype=np.float64)
         phi = np.asarray(state.features["flair_ridge_phi"], dtype=np.float64)
         residuals = state.features["flair_ridge_residuals"]
@@ -654,12 +649,13 @@ class FlairSamplePathsToken(FeatureToken):
         phases = np.arange(horizon) % max(period, 1)
         steps = np.arange(horizon) // max(period, 1)
         for i in iterator:
+            level = _boxcox(level_raw[i] + offsets[i], float(lambdas[i])) - last_values[i]
             rel_noise = _relative_phase_noise(matrix[i], raw_level[i], shape[i])
             hist_min = float(np.min(state.original_history[i]))
             hist_max = float(np.max(state.original_history[i]))
             for k in range(n_paths):
                 innov = _forecast_level_innov(
-                    level[i],
+                    level,
                     beta[i, :],
                     cp,
                     float(phi[i]),
@@ -700,7 +696,7 @@ class FlairSamplePathsToken(FeatureToken):
         self._log_execution(
             state,
             reads={
-                "flair_level_innov": level.shape,
+                level_name: level_raw.shape,
                 "shape_vector": shape.shape,
                 "flair_ridge_beta": beta.shape,
             },

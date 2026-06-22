@@ -6,7 +6,6 @@ from .flair import (
     FlairPreprocessToken,
     FlairRidgeLevelToken,
     FlairSamplePathsToken,
-    LevelBoxCoxCenterToken,
     LevelShapeRidgeToken,
     SeasonalFoldToken,
 )
@@ -74,10 +73,10 @@ def register_flair_tokens(grammar):
     The seasonal decomposition is now a single repeatable ``SeasonalFold``
     token (it replaced PeriodFold + ShapeLevel + SecondaryLevelSeasonality):
     call it once per detected period. Two model heads consume its output -- the
-    compact ``level_shape_ridge`` (Box-Cox ridge folded into one token) and the
-    explicit ``LevelBoxCoxCenter`` -> ``FlairRidgeLevel`` -> ``FlairSamplePaths``
-    path. Kept separate from ``register_default_tokens`` so routine searches do
-    not widen unless the caller opts in.
+    compact ``level_shape_ridge`` and the diagnostic ``FlairRidgeLevel`` path
+    both keep the level transform inside the model token. Kept separate from
+    ``register_default_tokens`` so routine searches do not widen unless the
+    caller opts in.
     """
 
     grammar.register(
@@ -108,7 +107,7 @@ def register_flair_tokens(grammar):
     grammar.register(
         SeasonalFoldToken(),
         follows=["PeriodDetect", "PeriodDetectSpectral", "PeriodDetectBIC", "PeriodPhaseOneHot", "SeasonalFold"],
-        leads_to=["SeasonalFold", "level_shape_ridge", "LevelBoxCoxCenter"],
+        leads_to=["SeasonalFold", "level_shape_ridge", "FlairRidgeLevel"],
     )
     grammar.register(
         LevelShapeRidgeToken(),
@@ -116,13 +115,8 @@ def register_flair_tokens(grammar):
         leads_to=["kernel_rbf", "parrot", "STOP"],
     )
     grammar.register(
-        LevelBoxCoxCenterToken(),
-        follows=["SeasonalFold"],
-        leads_to=["FlairRidgeLevel"],
-    )
-    grammar.register(
         FlairRidgeLevelToken(),
-        follows=["LevelBoxCoxCenter"],
+        follows=["SeasonalFold"],
         leads_to=["FlairSamplePaths", "parrot", "STOP"],
     )
     grammar.register(
@@ -214,7 +208,6 @@ __all__ = [
     "FlairSamplePathsToken",
     "FourierFeaturesToken",
     "KernelRBFToken",
-    "LevelBoxCoxCenterToken",
     "LevelShapeRidgeToken",
     "SeasonalFoldToken",
     "LightGBMTabularToken",

@@ -199,7 +199,6 @@ PeriodDetectBIC
 PeriodPhaseOneHot
 SeasonalFold
 level_shape_ridge
-LevelBoxCoxCenter
 FlairRidgeLevel
 FlairSamplePaths
 ```
@@ -222,7 +221,6 @@ LinearFill
 -> PeriodDetect
 -> PeriodPhaseOneHot
 -> SeasonalFold
--> LevelBoxCoxCenter
 -> FlairRidgeLevel
 -> STOP
 ```
@@ -347,7 +345,6 @@ FLAIR feature tokens:
 - `PeriodDetectSpectral`
 - `PeriodDetectBIC`
 - `SeasonalFold`
-- `LevelBoxCoxCenter`
 - `FlairSamplePaths`
 
 ### Models
@@ -390,13 +387,13 @@ FLAIR feature tokens:
 - compact period-level predictor;
 - reads existing level/shape state;
 - handles Box-Cox positivity internally;
-- does not write Box-Cox arrays, ridge coefficients, or level forecasts into
+- does not write separate Box-Cox feature tokens, ridge coefficients, or level forecasts into
   `State`;
 - pushes only the final horizon forecast through the normal prediction stack.
 
 `FlairRidgeLevel`
 
-- FLAIR-style soft-averaged Ridge over compressed level innovations;
+- FLAIR-style soft-averaged Ridge with internal Box-Cox level centering;
 - expands through the learned shape and pushes a horizon forecast.
 
 `versatile_gb`
@@ -449,7 +446,7 @@ python -c "from graph_Time_series.grammar import Grammar; from graph_Time_series
 Current live registry:
 
 ```text
-Grammar(24 tokens, 124 edges)
+Grammar(23 tokens, 123 edges)
 ```
 
 In this Windows workspace, the `python` command may point to the WindowsApps
