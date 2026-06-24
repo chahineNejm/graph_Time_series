@@ -1,7 +1,7 @@
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
-
+pipeline_results/*
 TokenDataForExtraction/api_keys.py
 TokenDataForExtraction/api_keys*.py
 TokenDataForExtraction/api-keys*

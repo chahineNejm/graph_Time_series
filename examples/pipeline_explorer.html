@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline × Dataset Explorer</title>
+<style>
+  :root{
+    --bg:#0f172a;--panel:#111827;--fg:#e2e8f0;--muted:#94a3b8;--border:#334155;--accent:#38bdf8;--chip:#1e293b;
+    --cleaning:#1d4ed8;--transform:#92400e;--feature:#166534;--model:#9a3412;--other:#475569;--dark:1;
+  }
+  @media (prefers-color-scheme: light){
+    :root{--bg:#f8fafc;--panel:#fff;--fg:#0f172a;--muted:#64748b;--border:#cbd5e1;--chip:#e2e8f0;
+      --cleaning:#dbeafe;--transform:#fef3c7;--feature:#dcfce7;--model:#ffedd5;--other:#e2e8f0;--dark:0;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+  header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  h1{font-size:17px;margin:0}
+  .muted{color:var(--muted)}
+  button,select,input{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px 8px}
+  button{cursor:pointer}
+  #drop{padding:5px 10px;border:1px dashed var(--border);border-radius:6px;cursor:pointer}
+  #drop.drag{border-color:var(--accent);color:var(--accent)}
+  .wrap{display:grid;grid-template-columns:260px minmax(0,1fr);height:calc(100vh - 52px)}
+  aside{border-right:1px solid var(--border);padding:12px;overflow:auto}
+  main{overflow:auto;padding:12px}
+  .grp{margin-bottom:14px}
+  .grp h3{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+  label.ck{display:flex;gap:6px;align-items:center;cursor:pointer}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .tok{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:6px;border:1px solid var(--border);
+       font-family:ui-monospace,Consolas,monospace;font-size:11px;cursor:pointer;user-select:none;background:var(--chip)}
+  .tok.req{outline:2px solid #22c55e} .tok.block{outline:2px solid #ef4444;opacity:.55;text-decoration:line-through}
+  .cleaning{background:var(--cleaning)} .transform{background:var(--transform)} .feature{background:var(--feature)}
+  .model{background:var(--model)} .other{background:var(--other)}
+  .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+  /* matrix */
+  table.mx{border-collapse:separate;border-spacing:0;font-size:11px}
+  table.mx th,table.mx td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:3px 5px;white-space:nowrap}
+  table.mx thead th{position:sticky;top:0;z-index:3;background:var(--panel);cursor:pointer;font-weight:600}
+  table.mx thead th.ds{writing-mode:vertical-rl;transform:rotate(180deg);text-align:left;max-height:160px;vertical-align:bottom}
+  table.mx th.pipe,table.mx td.pipe{position:sticky;left:0;z-index:2;background:var(--panel);max-width:520px;overflow:hidden;text-overflow:ellipsis}
+  table.mx thead th.pipe,table.mx thead th.mean{z-index:4}
+  table.mx td.cell{text-align:center;font-variant-numeric:tabular-nums;cursor:default}
+  table.mx td.mean{text-align:center;font-variant-numeric:tabular-nums;position:sticky;left:0;background:var(--panel)}
+  .seqtok{display:inline-block;padding:0 5px;border-radius:4px;margin:1px;font-family:ui-monospace,Consolas,monospace;font-size:11px}
+  .cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 12px;min-width:110px}
+  .card .big{font-size:19px;font-weight:600}
+  details{margin-top:16px}
+  details summary{cursor:pointer;color:var(--muted)}
+  table.flat{border-collapse:collapse;width:100%;font-size:12px;margin-top:8px}
+  table.flat th,table.flat td{text-align:left;padding:5px 7px;border-bottom:1px solid var(--border)}
+  table.flat th{cursor:pointer}
+  .empty{color:var(--muted);padding:24px;text-align:center}
+  .legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+  .legend i{display:inline-block;width:90px;height:12px;border-radius:3px;background:linear-gradient(90deg,hsl(140 55% 35%),hsl(60 55% 40%),hsl(0 55% 38%))}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pipeline × Dataset</h1>
+  <span id="drop">⬇ Load CSV(s) <input id="file" type="file" accept=".csv" multiple style="display:none"></span>
+  <span class="muted" id="loaded">load pipeline_results/all_datasets_ranked.csv</span>
+</header>
+<div class="wrap">
+  <aside>
+    <div class="grp"><h3>Search sequence</h3><input id="search" placeholder="substring…" style="width:100%"></div>
+    <div class="grp"><h3>Constraints</h3>
+      <div class="row"><label class="ck"><input type="checkbox" id="okonly" checked> ok status only</label></div>
+      <div class="row">mean MASE ≤ <input id="masemax" type="number" step="0.1" style="width:80px" placeholder="any"></div>
+      <div class="row">length: <span id="lenboxes"></span></div>
+    </div>
+    <div class="grp"><h3>Datasets (columns)</h3>
+      <div class="row"><button id="dsall">all</button><button id="dsnone">none</button></div>
+      <div id="datasets" class="chips" style="max-height:150px;overflow:auto"></div>
+    </div>
+    <div class="grp"><h3>Tokens <span class="muted">(click: req→block→off)</span></h3>
+      <div id="tokens" class="chips"></div>
+    </div>
+  </aside>
+  <main>
+    <div class="cards" id="cards"></div>
+    <div class="controls">
+      <label>color <select id="scale">
+        <option value="col">per-dataset (column)</option>
+        <option value="global">global</option></select></label>
+      <label>sort rows <select id="sortmode">
+        <option value="mean">mean MASE</option>
+        <option value="coverage">coverage</option>
+        <option value="wins">datasets won</option></select></label>
+      <label>show top <input id="topn" type="number" value="80" style="width:70px"> pipelines</label>
+      <label class="ck"><input type="checkbox" id="collapse"> collapse identical performance → keep shortest</label>
+      <span class="legend">best <i></i> worst</span>
+      <span class="muted" id="mxinfo"></span>
+    </div>
+    <div id="matrixwrap"><div class="empty">Load a results CSV to see the matrix.</div></div>
+    <details>
+      <summary>Token leaderboard + flat table</summary>
+      <table class="flat" id="lb"><thead><tr><th>token</th><th>n</th><th>mean MASE</th><th>median</th><th>best</th></tr></thead><tbody></tbody></table>
+      <div id="flatwrap"></div>
+    </details>
+  </main>
+</div>
+<script>
+const DARK = getComputedStyle(document.documentElement).getPropertyValue('--dark').trim()==='1';
+const CLASS={
+  cleaning:new Set(["LinearFill","ForwardFill","FlairPreprocess"]),
+  transform:new Set(["ZNormalization","MeanAbsScaling"]),
+  feature:new Set(["FourierFeatures","PeriodDetect","PeriodDetectBIC","PeriodDetectSpectral","PeriodPhaseOneHot","SeasonalFeatures","SeasonalFold","affine_fold","LevelBoxCoxCenter","FlairSamplePaths"]),
+  model:new Set(["kernel_rbf","rf_tabular","lightgbm_tabular","parrot","parrot_dataset","window_kernel","step_regression","versatile_gb","gb_level_forecast","level_shape_ridge","FlairRidgeLevel","affine_forecast"]),
+};
+const cls=t=>CLASS.cleaning.has(t)?"cleaning":CLASS.transform.has(t)?"transform":CLASS.feature.has(t)?"feature":CLASS.model.has(t)?"model":"other";
+let DATA=[],tokenState={},dsState={},lenState={},rowSortDataset=null;
+
+function parseCSV(text){const rows=[];let f="",row=[],q=false;
+ for(let i=0;i<text.length;i++){const c=text[i];
+  if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+  else{if(c==='"')q=true;else if(c===','){row.push(f);f="";}else if(c==='\n'){row.push(f);rows.push(row);row=[];f="";}else if(c!=='\r')f+=c;}}
+ if(f.length||row.length){row.push(f);rows.push(row);}return rows;}
+function toObjects(rows,fb){const head=rows[0].map(h=>h.trim());const out=[];
+ for(let i=1;i<rows.length;i++){if(rows[i].length===1&&rows[i][0]==="")continue;const o={};head.forEach((h,j)=>o[h]=rows[i][j]);
+  o.dataset=o.dataset||fb||"(unknown)";o.tokens=(o.sequence||"").split("->").map(s=>s.trim()).filter(Boolean);
+  o.mase=o.mase===""||o.mase==null?null:parseFloat(o.mase);o.length=parseInt(o.length)||o.tokens.length;
+  o.seconds=parseFloat(o.seconds);out.push(o);}return out;}
+function loadFiles(files){let pending=files.length,acc=[];
+ [...files].forEach(file=>{const r=new FileReader();
+  r.onload=()=>{const ds=file.name.replace(/__ranked\.csv$|\.csv$/,"");acc=acc.concat(toObjects(parseCSV(r.result),ds));
+   if(--pending===0){DATA=acc;init();}};r.readAsText(file);});}
+
+function init(){
+  document.getElementById("loaded").textContent=`${DATA.length} rows · ${new Set(DATA.map(d=>d.dataset)).size} datasets · ${new Set(DATA.map(d=>d.sequence)).size} pipelines`;
+  const dss=[...new Set(DATA.map(d=>d.dataset))].sort();dsState={};dss.forEach(d=>dsState[d]=true);
+  const dc=document.getElementById("datasets");dc.innerHTML="";
+  dss.forEach(d=>{const l=document.createElement("label");l.className="ck";l.innerHTML=`<input type="checkbox" checked><span>${d}</span>`;
+    l.querySelector("input").onchange=e=>{dsState[d]=e.target.checked;render();};dc.appendChild(l);});
+  const lens=[...new Set(DATA.map(d=>d.length))].sort((a,b)=>a-b);lenState={};lens.forEach(l=>lenState[l]=true);
+  const lb=document.getElementById("lenboxes");lb.innerHTML="";
+  lens.forEach(l=>{const s=document.createElement("label");s.className="ck";s.style.display="inline-flex";s.innerHTML=`<input type="checkbox" checked>${l}`;
+    s.querySelector("input").onchange=e=>{lenState[l]=e.target.checked;render();};lb.appendChild(s);});
+  const toks=[...new Set(DATA.flatMap(d=>d.tokens))].sort();tokenState={};toks.forEach(t=>tokenState[t]="off");
+  const tc=document.getElementById("tokens");tc.innerHTML="";
+  toks.forEach(t=>{const el=document.createElement("span");el.className="tok "+cls(t);el.innerHTML=`${t} <span class="state"></span>`;
+    el.onclick=()=>{tokenState[t]=tokenState[t]==="off"?"req":tokenState[t]==="req"?"block":"off";
+      el.classList.toggle("req",tokenState[t]==="req");el.classList.toggle("block",tokenState[t]==="block");render();};
+    tc.appendChild(el);});
+  render();
+}
+function passFilters(d){
+  if(document.getElementById("okonly").checked&&d.status!=="ok")return false;
+  if(!lenState[d.length])return false;
+  const q=document.getElementById("search").value.trim().toLowerCase();
+  if(q&&!d.sequence.toLowerCase().includes(q))return false;
+  for(const t in tokenState){if(tokenState[t]==="req"&&!d.tokens.includes(t))return false;
+    if(tokenState[t]==="block"&&d.tokens.includes(t))return false;}
+  return true;
+}
+function median(a){if(!a.length)return null;const s=[...a].sort((x,y)=>x-y);const m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+function colorFor(v,lo,hi){if(v==null||isNaN(v))return "";let t=hi>lo?(v-lo)/(hi-lo):0;t=Math.max(0,Math.min(1,t));
+  const hue=(1-t)*140;const L=DARK?34:80;return `background:hsl(${hue} 55% ${L}%);color:${DARK?'#0b1220':'#111'}`;}
+
+function render(){
+  if(!DATA.length)return;
+  const cols=[...new Set(DATA.map(d=>d.dataset))].filter(d=>dsState[d]).sort();
+  const rowsAll=DATA.filter(passFilters).filter(d=>dsState[d.dataset]);
+  // pivot seq -> {dataset:mase}
+  const piv={};
+  rowsAll.forEach(d=>{(piv[d.sequence]=piv[d.sequence]||{seq:d.sequence,tokens:d.tokens,cells:{}});
+    if(d.mase!=null)piv[d.sequence].cells[d.dataset]=d.mase;});
+  let pipes=Object.values(piv);
+  pipes.forEach(p=>{const vs=cols.map(c=>p.cells[c]).filter(v=>v!=null);
+    p.mean=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;p.cov=vs.length;});
+  // collapse pipelines with identical performance across all shown datasets -> keep shortest
+  let nCollapsed=0;
+  if(document.getElementById("collapse").checked){
+    const groups={};
+    pipes.forEach(p=>{const key=cols.map(c=>p.cells[c]==null?"NA":p.cells[c].toFixed(6)).join("|");
+      (groups[key]=groups[key]||[]).push(p);});
+    const reps=[];
+    Object.values(groups).forEach(g=>{
+      g.sort((a,b)=>a.tokens.length-b.tokens.length || a.seq.length-b.seq.length || (a.seq<b.seq?-1:1));
+      reps.push(g[0]); nCollapsed+=g.length-1;});
+    pipes=reps;
+  }
+  // per-column min/best for win counting + color
+  const colStat={};cols.forEach(c=>{const vs=pipes.map(p=>p.cells[c]).filter(v=>v!=null);
+    colStat[c]={lo:vs.length?Math.min(...vs):0,hi:vs.length?Math.max(...vs):1,best:vs.length?Math.min(...vs):null};});
+  pipes.forEach(p=>{p.wins=cols.reduce((n,c)=>n+(p.cells[c]!=null&&colStat[c].best!=null&&Math.abs(p.cells[c]-colStat[c].best)<1e-9?1:0),0);});
+  // mase max on mean
+  const mmax=parseFloat(document.getElementById("masemax").value);
+  if(!isNaN(mmax))pipes=pipes.filter(p=>p.mean!=null&&p.mean<=mmax);
+  // sort
+  const sm=document.getElementById("sortmode").value;
+  if(rowSortDataset){pipes.sort((a,b)=>{const x=a.cells[rowSortDataset],y=b.cells[rowSortDataset];
+    if(x==null)return 1;if(y==null)return -1;return x-y;});}
+  else if(sm==="coverage")pipes.sort((a,b)=>b.cov-a.cov||(a.mean??9e9)-(b.mean??9e9));
+  else if(sm==="wins")pipes.sort((a,b)=>b.wins-a.wins||(a.mean??9e9)-(b.mean??9e9));
+  else pipes.sort((a,b)=>(a.mean??9e9)-(b.mean??9e9));
+  const topn=parseInt(document.getElementById("topn").value)||80;
+  const shown=pipes.slice(0,topn);
+  // cards
+  const allMeans=pipes.map(p=>p.mean).filter(v=>v!=null);
+  document.getElementById("cards").innerHTML=`
+    <div class="card"><div class="muted">pipelines</div><div class="big">${pipes.length}</div></div>
+    <div class="card"><div class="muted">datasets</div><div class="big">${cols.length}</div></div>
+    <div class="card"><div class="muted">best mean MASE</div><div class="big">${allMeans.length?Math.min(...allMeans).toFixed(3):"—"}</div></div>`;
+  document.getElementById("mxinfo").textContent=`showing ${shown.length} of ${pipes.length} pipelines`+
+    (nCollapsed?` · ${nCollapsed} collapsed`:"");
+  // scale mode
+  const globalLo=Math.min(...rowsAll.map(d=>d.mase).filter(v=>v!=null),Infinity);
+  const globalHi=Math.max(...rowsAll.map(d=>d.mase).filter(v=>v!=null),-Infinity);
+  const scaleMode=document.getElementById("scale").value;
+  // build matrix
+  if(!shown.length){document.getElementById("matrixwrap").innerHTML='<div class="empty">No pipelines match the filters.</div>';}
+  else{
+    let h='<table class="mx"><thead><tr><th class="pipe">pipeline</th><th class="mean" data-sort="mean">mean</th>';
+    cols.forEach(c=>h+=`<th class="ds" data-ds="${c}" title="${c} — click to sort rows">${c}</th>`);
+    h+='</tr></thead><tbody>';
+    shown.forEach(p=>{
+      const seq=p.tokens.map(t=>`<span class="seqtok ${cls(t)}">${t}</span>`).join("→");
+      h+=`<tr><td class="pipe" title="${p.seq}">${seq}</td><td class="mean">${p.mean==null?"—":p.mean.toFixed(3)}</td>`;
+      cols.forEach(c=>{const v=p.cells[c];
+        const lo=scaleMode==="global"?globalLo:colStat[c].lo, hi=scaleMode==="global"?globalHi:colStat[c].hi;
+        h+=`<td class="cell" style="${colorFor(v,lo,hi)}" title="${c}\n${p.seq}\nMASE ${v==null?'—':v.toFixed(3)}">${v==null?"":v.toFixed(2)}</td>`;});
+      h+='</tr>';
+    });
+    h+='</tbody></table>';
+    document.getElementById("matrixwrap").innerHTML=h;
+    document.querySelectorAll("th.ds").forEach(th=>th.onclick=()=>{rowSortDataset=rowSortDataset===th.dataset.ds?null:th.dataset.ds;render();});
+    const mh=document.querySelector('th.mean');if(mh)mh.onclick=()=>{rowSortDataset=null;render();};
+  }
+  // leaderboard
+  const byTok={};rowsAll.forEach(r=>r.tokens.forEach(t=>{(byTok[t]=byTok[t]||[]).push(r.mase);}));
+  const lbb=document.querySelector("#lb tbody");lbb.innerHTML="";
+  Object.entries(byTok).map(([t,arr])=>{const v=arr.filter(x=>x!=null);
+    return{t,n:arr.length,mean:v.length?v.reduce((a,b)=>a+b,0)/v.length:null,med:median(v),best:v.length?Math.min(...v):null};})
+    .sort((a,b)=>(a.mean??9e9)-(b.mean??9e9)).forEach(o=>{const tr=document.createElement("tr");
+      tr.innerHTML=`<td><span class="seqtok ${cls(o.t)}">${o.t}</span></td><td>${o.n}</td><td>${o.mean==null?"—":o.mean.toFixed(3)}</td><td>${o.med==null?"—":o.med.toFixed(3)}</td><td>${o.best==null?"—":o.best.toFixed(3)}</td>`;lbb.appendChild(tr);});
+}
+const fileInput=document.getElementById("file"),drop=document.getElementById("drop");
+drop.onclick=()=>fileInput.click();fileInput.onchange=e=>loadFiles(e.target.files);
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("drag");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("drag");}));
+drop.addEventListener("drop",e=>loadFiles(e.dataTransfer.files));
+["search","masemax","okonly","scale","sortmode","topn","collapse"].forEach(id=>document.getElementById(id).addEventListener("input",()=>DATA.length&&render()));
+document.getElementById("dsall").onclick=()=>{Object.keys(dsState).forEach(d=>dsState[d]=true);document.querySelectorAll("#datasets input").forEach(c=>c.checked=true);render();};
+document.getElementById("dsnone").onclick=()=>{Object.keys(dsState).forEach(d=>dsState[d]=false);document.querySelectorAll("#datasets input").forEach(c=>c.checked=false);render();};
+</script>
+</body>
+</html>

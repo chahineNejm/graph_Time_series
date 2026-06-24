@@ -100,7 +100,7 @@ class RandomForestTabularToken(_TabularRegressorToken):
         self,
         *,
         n_estimators: int = 120,
-        max_depth: int | None = 12,
+        max_depth: int | None = 6,
         min_samples_leaf: int = 2,
         seed: int = 0,
         n_jobs: int = -1,
